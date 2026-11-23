@@ -41,9 +41,17 @@ These were built from the example prompts with the offline parser (no API key), 
 
 ![Harbour King rooms selected, showing NZD 419 per night](docs/screenshots/05-zone-price.png)
 
-**4. Fly in** to see the view from a room, seat or desk, and upgrade to the next zone up.
+**Fly in** from any zone card to see the view from that seat, room, desk or balcony, then upgrade to the next zone up.
 
-![Window view from Room 713 with an upgrade button](docs/screenshots/06-window-view.png)
+**4. Apartment valuations.** In the apartment development, every apartment is coloured by its latest valuation rate. Select one to see its valuation history, placement confidence and floor plan, or switch to **Select floor** for a level summary. The 3D chart plots every valuation by quarter and floor against a fitted trend surface. The valuations are generated demo data.
+
+![Apartment development coloured by valuation rate, with the trend chart and apartment D · 203 selected](docs/screenshots/10-valuations.png)
+
+**5. Walk through a home.** **Walk a home** (top right) opens a furnished townhouse with real furniture, materials and sky photographs. Take the guided tour, walk room to room, switch to the dollhouse view, change the light and restyle the interior.
+
+| Welcome | Inside |
+|---|---|
+| ![Townhouse walkthrough welcome screen at golden hour](docs/screenshots/11-home-welcome.jpg) | ![Walking into the living room through the sliding doors, with the floor plan top right](docs/screenshots/12-home-walk.jpg) |
 
 ## Quick start
 
