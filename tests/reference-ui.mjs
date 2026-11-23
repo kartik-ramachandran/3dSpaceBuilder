@@ -18,7 +18,7 @@ try {
     requests.push(route.request().postDataJSON());
     await route.fulfill(fail ? { status: 400, json: { error: 'bad_reference', message: 'The PDF is password-protected. Upload an unlocked copy.' } } : { json: { ...PRESETS.office, name: 'Reference Studio', design: { woodColor: '#765432', upholsteryColor: '#204060' } } });
   });
-  await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`http://127.0.0.1:${server.address().port}/app.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('#statusText').textContent.includes('Claude is ready'), null, { timeout: 60000 });
   await page.locator('#referenceInput').setInputFiles(fixtures);
   await page.waitForFunction(() => document.querySelector('#referenceStatus').textContent.includes('3 references ready'));

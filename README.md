@@ -1,6 +1,6 @@
 # 3dSpaceBuilder
 
-**Live demo: https://kartik-ramachandran.github.io/3dSpaceBuilder/** · [Townhouse walkthrough](https://kartik-ramachandran.github.io/3dSpaceBuilder/home.html)
+**Live site: https://kartik-ramachandran.github.io/3dSpaceBuilder/** (overview) · [Builder](https://kartik-ramachandran.github.io/3dSpaceBuilder/app.html) · [Townhouse walkthrough](https://kartik-ramachandran.github.io/3dSpaceBuilder/home.html)
 
 The live demo is a static site: builds use the offline parser (illustrative prices), and the apartment valuation layer uses generated demo data. To build with Claude, run it locally with an API key (see [Using Claude locally](#using-claude-locally)).
 
@@ -57,8 +57,8 @@ These were built from the example prompts with the offline parser (no API key), 
 
 ```bash
 npm install          # esbuild + playwright (dev only)
-npm run dev          # http://localhost:5173/
-npm run build        # bundles src/ into dist/index.html (single file)
+npm run dev          # http://localhost:5173/ (overview), /app.html (builder), /home.html (walkthrough)
+npm run build        # bundles app.html + src/ into dist/index.html (single file)
 npm test             # smoke test + screenshots into docs/screenshots/
 ```
 
@@ -83,7 +83,7 @@ Limits: 6 files, 10 MB per file, 20 MB total, 50 PDF pages and 24 images (includ
 
 Run `npm run test:references` for extraction, API and browser upload checks (mocked Claude; no API usage).
 
-Opening `index.html` straight from disk won't work, because browsers block ES modules on `file://`. Use `npm run dev`.
+Opening `app.html` straight from disk won't work, because browsers block ES modules on `file://`. Use `npm run dev`.
 
 ## Tech stack
 
@@ -138,13 +138,15 @@ The prompt step uses the Claude artifact `sample` capability (`claude.use("sampl
 - **As an artifact:** publish `dist/index.html` and declare `capabilities: { sample: {} }`. The first Build asks the viewer to allow it, and calls run on the viewer's own Claude usage.
 - **Anywhere else** (local dev, any static host): Claude isn't available, so `src/spec/offline-parser.js` builds the layout from keywords in the prompt. Its prices are illustrative.
 
-Three.js 0.160.0 loads from jsDelivr through the import map in `index.html`. There is no other runtime dependency.
+Three.js 0.160.0 loads from jsDelivr through the import map in `app.html`. There is no other runtime dependency.
 
 ## Project structure
 
 ```
 3dspace/
-├── index.html                  page markup, import map, entry point (dev)
+├── index.html                  overview page (the GitHub Pages front door)
+├── app.html                    the builder: page markup, import map, entry point (dev)
+├── home.html                   furnished townhouse walkthrough (uses assets/)
 ├── src/
 │   ├── main.js                 app shell: renderer, camera, HUD, picking, window view, prompt flow, render loop
 │   ├── styles.css              HUD, zone card, prompt dock, window-view frames, phone layout

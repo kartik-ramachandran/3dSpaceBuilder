@@ -43,5 +43,5 @@ export function startServer(port = 5173, root = ROOT) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.argv[2]) || 5173;
   await startServer(port);
-  console.log(`3dSpaceBuilder dev server: http://localhost:${port}/   (single-file build: http://localhost:${port}/dist/)`);
+  console.log(`3dSpaceBuilder dev server: http://localhost:${port}/  (overview)  ·  builder: /app.html  ·  home walkthrough: /home.html  ·  single-file build: /dist/`);
 }

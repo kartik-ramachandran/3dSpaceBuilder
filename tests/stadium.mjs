@@ -39,7 +39,7 @@ try {
         eyes: [...world.zones.values()].map(z => ({ eye: z.seats[0].pos.toArray(), look: z.look.toArray() })) };
     };` }));
   await page.addInitScript((spec) => localStorage.setItem('p2s:last', JSON.stringify(spec)), PRESETS.stadium);
-  await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`http://127.0.0.1:${server.address().port}/app.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.stadiumTest && document.querySelectorAll('.zbtn').length === 4, null, { timeout: 60000 });
   await page.waitForTimeout(2500);
   for (const [sport, button, landmark] of [

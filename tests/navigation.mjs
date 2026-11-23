@@ -49,7 +49,7 @@ try {
         for (let i = 0; i < count; i++) navigation.update(1 / 60, true);
       }
     };` }));
-  await page.goto('http://localhost:5209/', { waitUntil: 'domcontentloaded' });
+  await page.goto('http://localhost:5209/app.html', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.navigationTest && document.querySelectorAll('.zbtn').length > 0, { timeout: 45000 });
   await page.selectOption('#examples', { label: 'Tech HQ' });
   await page.waitForFunction(() => document.querySelector('#spaceName').textContent === 'Northgate Tech Park');

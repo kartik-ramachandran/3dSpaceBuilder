@@ -42,7 +42,7 @@ try {
       }
     };` }));
   await page.addInitScript((spec) => localStorage.setItem('p2s:last', JSON.stringify(spec)), PRESETS.stadium);
-  await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`http://127.0.0.1:${server.address().port}/app.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.hoverProbe && hoverProbe.state().glass > 0.99, null, { timeout: 60000 });
   const state = () => page.evaluate(() => hoverProbe.state());
   const moveTo = async (point) => {

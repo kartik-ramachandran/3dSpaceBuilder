@@ -3,167 +3,369 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prompt-to-3D Space Builder</title>
+<title>3D Space Builder: see the whole offering, then zoom into any unit</title>
+<meta name="description" content="Describe a development, hotel, office, stadium or plane and explore it in 3D. Every zone is priced, and you can zoom from the whole site to a floor, an apartment, its valuation history and inside a furnished home.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/styles.css">
+<style>
+/* Landing page. Same palette and type as the app: night navy, warm amber accent, Instrument Serif display, Geist body. */
+:root {
+  --night: #070b18; --deep: #0b1124; --panel: #0f1630; --paper: #eef0f6; --muted: #a1abc3; --line: rgba(238,240,246,.12);
+  --accent: #ffc477; --accent-ink: #1e1505; --blue: #3d8bff;
+  --display: "Instrument Serif", Georgia, serif; --body: "Geist", "Segoe UI", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--night); color: var(--paper); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+.wrap { width: min(1180px, 100% - 48px); margin: 0 auto; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; letter-spacing: -.01em; }
+h2 { font-size: clamp(38px, 5vw, 62px); line-height: 1; text-wrap: balance; }
+.lede { font-size: 19px; color: #cfd5e3; max-width: 62ch; }
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 22px; border-radius: 14px; font-weight: 600; font-size: 15.5px; text-decoration: none; border: 1px solid var(--line); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost:hover { border-color: rgba(238,240,246,.35); }
+.btn svg { width: 18px; height: 18px; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); background: rgba(7,11,24,.72); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 16px; }
+.brand { font: italic 400 24px/1 var(--display); text-decoration: none; }
+.nav nav { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+.nav nav a { text-decoration: none; } .nav nav a:hover { color: var(--paper); }
+.nav .btn { height: 38px; padding: 0 14px; font-size: 14px; border-radius: 10px; }
+
+/* hero */
+.hero { padding: 78px 0 40px; }
+.hero h1 { font-size: clamp(48px, 7.4vw, 104px); line-height: .94; margin: 18px 0 22px; text-wrap: balance; }
+.hero h1 em { color: var(--accent); }
+.hero .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.hero-shot { margin-top: 54px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 40px 120px rgba(0,0,0,.55); }
+.hero-shot img { width: 100%; transform-origin: 46% 44%; transition: transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.hero-shot.in img { transform: scale(1.06); }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-top: 28px; }
+.stats div { background: var(--deep); padding: 18px 20px; }
+.stats b { display: block; font: 400 34px/1 var(--display); }
+.stats span { font-size: 13px; color: var(--muted); }
+
+/* zoom sequence */
+section { padding: 96px 0; }
+.zoom-head { display: grid; gap: 16px; margin-bottom: 40px; }
+.zoom { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+.frame { position: sticky; top: 92px; aspect-ratio: 16 / 9.6; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--deep); box-shadow: 0 30px 90px rgba(0,0,0,.5); }
+.frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.12); transition: opacity .7s ease, transform 1.4s cubic-bezier(.2,.7,.2,1); }
+.frame img.on { opacity: 1; transform: scale(1); }
+.frame img.contain { object-fit: contain; background: #0c1226; }
+.depth { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 6px; z-index: 2; }
+.depth i { width: 30px; height: 4px; border-radius: 2px; background: rgba(238,240,246,.25); transition: background .4s; }
+.depth i.on { background: var(--accent); }
+.steps { display: grid; gap: 0; }
+.step { min-height: 62vh; display: flex; flex-direction: column; justify-content: center; padding: 20px 0; opacity: .38; transition: opacity .5s; }
+.step.on { opacity: 1; }
+.step .n { font: 500 12px/1 var(--mono); color: var(--accent); letter-spacing: .14em; }
+.step h3 { font-size: 40px; line-height: 1.02; margin: 12px 0 12px; }
+.step p { margin: 0; color: #cfd5e3; }
+.step ul { margin: 14px 0 0; padding-left: 18px; color: #cfd5e3; font-size: 15.5px; }
+.step img { display: none; }
+
+/* insights */
+.insights { background: linear-gradient(180deg, var(--night), var(--deep)); }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.card .k { font: 500 11.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.card h3 { font-size: 30px; line-height: 1.05; }
+.card p { margin: 0; color: #cfd5e3; font-size: 15.5px; }
+.card .fig { font: 500 15px/1.3 var(--mono); color: var(--paper); border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto; }
+.card .fig small { display: block; color: var(--muted); font: 400 12px var(--body); margin-top: 3px; }
+.card.wide { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+.card.wide img { border-radius: 12px; border: 1px solid var(--line); }
+.questions { margin-top: 64px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
+.questions ol { margin: 0; padding: 0; list-style: none; counter-reset: q; display: grid; gap: 2px; }
+.questions li { counter-increment: q; display: grid; grid-template-columns: 44px 1fr; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 17px; }
+.questions li::before { content: counter(q, decimal-leading-zero); font: 500 13px/1.9 var(--mono); color: var(--accent); }
+.questions li span { color: var(--muted); display: block; font-size: 14.5px; }
+
+/* kinds */
+.kinds { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
+.kind { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--deep); text-decoration: none; }
+.kind img { aspect-ratio: 16 / 10; object-fit: cover; width: 100%; transition: transform .6s; }
+.kind:hover img { transform: scale(1.05); }
+.kind div { padding: 12px 14px 14px; }
+.kind b { font: italic 400 22px/1 var(--display); display: block; }
+.kind span { font-size: 13px; color: var(--muted); }
+
+/* how */
+.how { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; counter-reset: h; }
+.how div { border-top: 2px solid var(--accent); padding-top: 14px; }
+.how b { font: italic 400 26px/1.1 var(--display); display: block; margin-bottom: 6px; }
+.how p { margin: 0; font-size: 15px; color: #cfd5e3; }
+
+.cta { text-align: center; padding: 110px 0; }
+.cta h2 { margin: 0 auto; max-width: 16ch; }
+.cta .actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.note { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 26px auto 0; }
+footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 13px; color: var(--muted); }
+footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .nav nav { display: none; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .zoom { grid-template-columns: 1fr; }
+  .frame { display: none; }
+  .step { min-height: 0; opacity: 1; padding: 28px 0; }
+  .step img { display: block; border-radius: 14px; border: 1px solid var(--line); margin-top: 18px; }
+  .grid, .kinds, .how { grid-template-columns: 1fr 1fr; }
+  .card.wide { grid-column: span 2; grid-template-columns: 1fr; }
+  .questions { grid-template-columns: 1fr; gap: 20px; }
+}
+@media (max-width: 560px) {
+  .wrap { width: calc(100% - 32px); }
+  .grid, .kinds, .how { grid-template-columns: 1fr; }
+  .card.wide { grid-column: auto; }
+  section { padding: 70px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .frame img, .hero-shot img, .kind img, .step { transition: none; }
+  .hero-shot.in img { transform: none; }
+}
+</style>
 </head>
 <body>
-<canvas id="stage" tabindex="0" aria-label="3D model. Drag to rotate and change the angle. Right-drag, Shift-drag or use arrow keys to move. Scroll to zoom. Click a zone for its price."></canvas>
-<div id="fallback" hidden>This device can't show the 3D model (WebGL is off). The zones and prices are still listed.</div>
 
-<div class="hud" id="hud">
-  <div class="move-control">
-    <button id="movePad" type="button" aria-label="Move view. Drag the thumbstick or hold arrow keys to move up, down, left or right." aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" title="Drag to move. Release to stop.">
-      <span class="pad-arrow pad-up" aria-hidden="true">↑</span><span class="pad-arrow pad-down" aria-hidden="true">↓</span>
-      <span class="pad-arrow pad-left" aria-hidden="true">←</span><span class="pad-arrow pad-right" aria-hidden="true">→</span>
-      <span class="move-knob" aria-hidden="true"></span>
-    </button>
-    <span class="move-label">Move view</span>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">3D Space Builder</a>
+    <nav aria-label="Sections"><a href="#zoom">Zoom in</a><a href="#insights">Insights</a><a href="#spaces">Spaces</a><a href="#how">How it works</a></nav>
+    <a class="btn primary" href="app.html">Open the builder</a>
   </div>
-  <div class="titleblock">
-    <div class="eyebrow"><span>Prompt → Space</span><span class="kind" id="kindLabel">Plane</span></div>
-    <h1 id="spaceName">Long-haul Jet</h1>
-    <p id="spaceMeta">AKL → DXB · 6 cabins · 330 seats</p>
-  </div>
+</header>
 
-  <div class="tools">
-    <a class="pill" id="homeTourLink" href="home.html" title="Walk through a furnished townhouse" aria-label="Walk through a home">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2 7.5 8 2.5l6 5M3.5 6.5V14h9V6.5"/><path d="M6.5 14v-3.5h3V14"/></svg><span class="lbl">Walk a home</span>
-    </a>
-    <button class="pill" id="levelBtn" title="Level view: straighten the camera without changing your zoom" aria-label="Level view">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 8h4m6 0h4M8 1v3m0 8v3"/><circle cx="8" cy="8" r="2"/></svg><span class="lbl">Level view</span>
-    </button>
-    <button class="pill" id="glassBtn" aria-pressed="true" title="Toggle the glass roof"><span class="dot"></span><span class="lbl" id="glassLbl">Glass roof</span></button>
-    <button class="pill icon" id="resetBtn" title="Reset view" aria-label="Reset view">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>
-    </button>
+<main id="top">
+  <div class="wrap hero">
+    <p class="eyebrow">Prompt → priced 3D space</p>
+    <h1>See the whole offering. <em>Zoom into any unit.</em></h1>
+    <p class="lede">Describe a residential development, hotel, office, stadium or plane in plain English, or attach floor plans and brochures. It is built in 3D with every zone priced, so you can go from the whole site to a single floor, a single apartment, its valuation history, and inside a furnished home.</p>
+    <div class="actions">
+      <a class="btn primary" href="app.html"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>Open the builder</a>
+      <a class="btn ghost" href="home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>Walk through a home</a>
+    </div>
+    <figure class="hero-shot" id="heroShot" style="margin-left:0;margin-right:0;margin-bottom:0">
+      <img src="docs/site/z1-site.jpg" width="1600" height="960" alt="An apartment development of six buildings, each apartment coloured by its valuation rate, with valuation controls on the left and a 3D trend chart on the right">
+    </figure>
+    <div class="stats" role="list">
+      <div role="listitem"><b>6</b><span>space types, from planes to homes</span></div>
+      <div role="listitem"><b>5</b><span>levels of zoom: site, building, floor, unit, inside</span></div>
+      <div role="listitem"><b>Every</b><span>zone priced, with capacity and features</span></div>
+      <div role="listitem"><b>0</b><span>installs: it runs in the browser</span></div>
+    </div>
   </div>
 
-  <section id="valControls" hidden aria-label="Valuation layer">
-    <header><h2>Market valuations</h2><button type="button" class="x" id="valCollapse" aria-expanded="true" aria-label="Collapse valuation controls">−</button></header>
-    <div class="val-body">
-      <p id="valLede"></p>
-      <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
-      <div class="vseg" role="group" aria-label="Selection"><button type="button" data-pick="unit" aria-pressed="true">Select unit</button><button type="button" data-pick="floor" aria-pressed="false">Select floor</button></div>
-      <p class="val-hint">Click an apartment to select it. Esc clears.</p>
-      <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (streets, trees, skyline)</label>
-      <label class="val-field"><span>Colour by</span>
-        <select id="valColour"><option value="valuation">Market valuation</option><option value="zones">Building colours</option></select></label>
-      <div class="val-scale">
-        <div class="val-ramp"></div>
-        <div class="val-range"><span id="valMin"></span><span id="valMax"></span></div>
-        <p class="val-note" id="valUnitNote"></p>
-        <p id="valCount"></p>
-        <ul class="val-legend"><li><i class="lg-none"></i>No market valuation (faded)</li><li><i class="lg-hover"></i>Hover</li><li><i class="lg-sel"></i>Selected</li></ul>
+  <section id="zoom">
+    <div class="wrap">
+      <div class="zoom-head">
+        <p class="eyebrow">Zoom in</p>
+        <h2>One model, every level of detail</h2>
+        <p class="lede">Most offerings are shown as a site plan, a price list and a brochure, each in a different place. Here they are the same model. Scroll, scale and select to move between levels without losing context.</p>
       </div>
-      <p class="val-note">Demo data: valuations, placement confidence and floor plans are generated for illustration, not market data.</p>
-    </div>
-  </section>
-
-  <div id="rightCol">
-  <section id="valPanel" hidden aria-label="Valuation trend and apartment details">
-    <div class="vp-head"><div><h3>Market valuation trend</h3><p id="vpSub"></p></div><button type="button" class="vp-btn" id="vpExpand">Expand</button></div>
-    <div class="vp-row">
-      <div class="vseg" role="group" aria-label="Trend scope"><button type="button" data-scope="building" aria-pressed="false">By building</button><button type="button" data-scope="project" aria-pressed="true">Whole project</button></div>
-      <span id="vpStats"></span>
-    </div>
-    <div class="vp-chart"><canvas id="vpChart" aria-label="3D chart of valuation rate by quarter and floor, with a fitted trend surface"></canvas>
-      <ul class="vp-legend"><li><i class="sw-surf"></i>Trend surface</li><li><i class="sw-pt"></i>Valuations</li><li id="vpSelLegend" hidden><i class="sw-sel"></i><span></span></li></ul></div>
-    <p class="vp-note">Drag to rotate, scroll to zoom. Degree-2 polynomial in quarter and floor, fitted by least squares over the observed range: a smoothed trend, not a valuation.</p>
-    <div id="vpUnit"></div>
-  </section>
-  <section id="zonesPanel" aria-label="Zones and prices">
-    <header><span id="zonesTitle">Cabins</span><span id="zonesCount">6</span></header>
-    <ul id="zoneList"></ul>
-  </section>
-
-  <section id="zoneCard" hidden aria-live="polite">
-    <div class="card-top">
-      <div>
-        <div id="cardKicker"><span class="sw"></span><span id="cardType">Business</span></div>
-        <h2 id="cardName">Business Studio</h2>
+      <div class="zoom">
+        <div class="frame" aria-hidden="true">
+          <img class="on" data-i="0" src="docs/site/z1-site.jpg" alt="">
+          <img data-i="1" src="docs/site/z2-floor.jpg" alt="">
+          <img data-i="2" src="docs/site/z3-apartment.jpg" alt="">
+          <img data-i="3" class="contain" src="docs/site/z3-plan.jpg" alt="">
+          <img data-i="4" src="docs/site/z5-tour.jpg" alt="">
+          <img data-i="5" src="docs/site/z6-dollhouse.jpg" alt="">
+          <div class="depth"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="steps">
+          <article class="step on" data-i="0">
+            <span class="n">01 · The whole site</span>
+            <h3>Where the value sits, at a glance</h3>
+            <p>Every apartment is coloured by its latest valuation rate, from light to dark blue. Apartments without a valuation are faded, so gaps in the evidence are as visible as the prices.</p>
+            <img src="docs/site/z1-site.jpg" alt="The development coloured by valuation rate" loading="lazy">
+          </article>
+          <article class="step" data-i="1">
+            <span class="n">02 · One floor</span>
+            <h3>Compare a level side by side</h3>
+            <p>Switch to <b>Select floor</b> and the whole level lights up. The panel lists each apartment's size, rate and latest value, with the floor's average and range.</p>
+            <img src="docs/site/z2-floor.jpg" alt="Level 2 of Building D selected, with the floor's apartments listed" loading="lazy">
+          </article>
+          <article class="step" data-i="2">
+            <span class="n">03 · One apartment</span>
+            <h3>The evidence behind one number</h3>
+            <p>Select an apartment for its latest valuation and rate per m², every valuation on record with quarter and purpose, and a placement confidence rating.</p>
+            <ul><li>Hover any unit for its rate and quarter</li><li>Its valuations are highlighted on the trend chart</li></ul>
+            <img src="docs/site/z3-apartment.jpg" alt="Apartment D · 202 selected, with its valuation figures" loading="lazy">
+          </article>
+          <article class="step" data-i="3">
+            <span class="n">04 · The layout</span>
+            <h3>The floor plan, with room sizes</h3>
+            <p>Each apartment carries an indicative plan sized to its area: bedrooms, bath, kitchen, living and dining, and the balcony. Then <b>Stand on the balcony</b> to see its outlook.</p>
+            <img src="docs/site/z3-plan.jpg" alt="Indicative two-bedroom floor plan with room sizes" loading="lazy">
+          </article>
+          <article class="step" data-i="4">
+            <span class="n">05 · Step inside</span>
+            <h3>A guided tour, room by room</h3>
+            <p>Walk through a furnished home built from real materials, furniture and sky photographs. The tour stops in each room with its size and a highlight, and a live floor plan shows where you are.</p>
+            <img src="docs/site/z5-tour.jpg" alt="Guided tour stop in the living and dining room" loading="lazy">
+          </article>
+          <article class="step" data-i="5">
+            <span class="n">06 · Pull back</span>
+            <h3>The dollhouse view</h3>
+            <p>Lift the roof to see both levels at once, or one floor at a time. Change the light from day to twilight and restyle the interior to test how the home presents.</p>
+            <img src="docs/site/z6-dollhouse.jpg" alt="Dollhouse view of the two-level townhouse" loading="lazy">
+          </article>
+        </div>
       </div>
-      <button class="x" id="cardClose" aria-label="Close">×</button>
     </div>
-    <div class="price-row"><span id="cardPrice">NZD 8,400</span><span id="cardUnit">one-way</span></div>
-    <p id="cardCap">36 seats · 1-2-1</p>
-    <p id="cardBlurb"></p>
-    <ul id="cardFeatures"></ul>
-    <button class="primary" id="flyBtn">Sit in a window seat</button>
   </section>
+
+  <section class="insights" id="insights">
+    <div class="wrap">
+      <p class="eyebrow">Insights about the offering</p>
+      <h2>From a price list to a read on the market</h2>
+      <p class="lede" style="margin-top:16px">Seeing the offering in place shows patterns that a spreadsheet hides: which floors carry a premium, where the evidence is thin, and what the next tier up costs.</p>
+
+      <div class="grid">
+        <div class="card wide">
+          <div>
+            <span class="k">Trend</span>
+            <h3>A trend surface, not an anecdote</h3>
+            <p style="margin-top:10px">Every valuation is plotted by quarter and floor. A degree-2 surface fitted by least squares shows the overall direction, and R² says how much of the variation it explains. Rotate it, fit the whole project or one building, and see where a selected apartment sits against the trend.</p>
+            <p class="fig" style="margin-top:16px">n = 115 valuations · R² = 0.78<small>On the demo development: rates rise with floor and over time.</small></p>
+          </div>
+          <img src="docs/site/z-chart.jpg" alt="3D chart of valuation rate by quarter and floor with a fitted orange trend surface" loading="lazy">
+        </div>
+        <div class="card">
+          <span class="k">Coverage</span>
+          <h3>See the gaps in the evidence</h3>
+          <p>Unvalued apartments are faded, and the panel counts what is covered, so thin evidence is obvious before anyone relies on it.</p>
+          <p class="fig">73 of 96 apartments valued<small>Demo development, 2022 Q1 to 2025 Q4</small></p>
+        </div>
+        <div class="card">
+          <span class="k">Premiums</span>
+          <h3>Floor and position premiums</h3>
+          <p>Colour by rate and the step up between levels, corner units and buildings shows on the model itself, not in a pivot table.</p>
+          <p class="fig">NZD 9,810 to 14,080 per m²<small>Lowest to highest latest rate (demo)</small></p>
+        </div>
+        <div class="card">
+          <span class="k">Confidence</span>
+          <h3>Confidence you can see</h3>
+          <p>Each apartment carries a placement confidence of high, medium or low, next to its valuation history, so a number is never shown without its basis.</p>
+          <p class="fig">H · M · L<small>Shown on every apartment</small></p>
+        </div>
+        <div class="card">
+          <span class="k">Pricing</span>
+          <h3>Every zone priced</h3>
+          <p>Cabins, room types, desks, stands and apartments each show a price, unit and capacity on hover, in the list and on their card, in the currency the brief implies.</p>
+          <p class="fig">Per seat · night · desk · match · m²<small>Price units follow the space type</small></p>
+        </div>
+        <div class="card">
+          <span class="k">Upgrades</span>
+          <h3>The cost of the next tier</h3>
+          <p>Fly in to see the view from a seat, room or balcony, then upgrade to the next zone up and see the price difference as you go.</p>
+          <p class="fig">+ the difference, in one tap<small>From economy to first, or level 2 to level 3</small></p>
+        </div>
+        <div class="card">
+          <span class="k">From documents</span>
+          <h3>Read straight from the brochure</h3>
+          <p>Attach floor plans, PDFs, Word documents or photos. Claude reads the requirements and images and lays out the closest matching space, using colours from the references.</p>
+          <p class="fig">Up to 6 files · images, PDF, DOCX<small>Typed instructions take precedence</small></p>
+        </div>
+        <div class="card">
+          <span class="k">Sharing</span>
+          <h3>One link for everyone</h3>
+          <p>It runs in any modern browser, on desktop or phone, with nothing to install. Send the link and everyone explores the same model.</p>
+          <p class="fig">Desktop · tablet · phone<small>Touch controls and a joystick on phones</small></p>
+        </div>
+      </div>
+
+      <div class="questions">
+        <div>
+          <p class="eyebrow">Questions it answers</p>
+          <h2 style="font-size:clamp(34px,4vw,48px);margin-top:14px">What a buyer, valuer or developer asks first</h2>
+        </div>
+        <ol>
+          <li><div>Which floors and positions carry a premium?<span>Colour by rate, then compare a level with Select floor.</span></div></li>
+          <li><div>How has the rate moved since the first valuation?<span>The trend surface across quarters, for the project or one building.</span></div></li>
+          <li><div>Which apartments have no recent evidence?<span>Faded units and the valued count in the legend.</span></div></li>
+          <li><div>Is this unit above or below the trend?<span>Select it: its valuations are highlighted against the surface.</span></div></li>
+          <li><div>What does the buyer actually see?<span>The view from the balcony, and a walk through a furnished home.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="spaces">
+    <div class="wrap">
+      <p class="eyebrow">Not just apartments</p>
+      <h2>Any space you can describe</h2>
+      <p class="lede" style="margin-top:16px">The same approach works for anything sold by zone. The shell turns to glass so the zones show through, and every zone lights up with its price.</p>
+      <div class="kinds">
+        <a class="kind" href="app.html"><img src="docs/screenshots/02-plane.png" alt="Long-haul jet with five cabins" loading="lazy"><div><b>Planes</b><span>Cabins and seat maps, priced one-way</span></div></a>
+        <a class="kind" href="app.html"><img src="docs/screenshots/03-hotel.png" alt="Harbour hotel tower" loading="lazy"><div><b>Hotels</b><span>Room types floor by floor, per night</span></div></a>
+        <a class="kind" href="app.html"><img src="docs/screenshots/04-office.png" alt="Office building with desks on every level" loading="lazy"><div><b>Offices</b><span>Desks, offices and meeting rooms</span></div></a>
+        <a class="kind" href="app.html"><img src="docs/screenshots/stadium-football.png" alt="Football stadium with tiered stands" loading="lazy"><div><b>Stadiums</b><span>Stands and tickets, per match</span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" style="padding-top:20px">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>From a brief to a model in seconds</h2>
+      <div class="how">
+        <div><b>Describe it</b><p>Type a brief, or attach floor plans, PDFs, Word documents and photos.</p></div>
+        <div><b>Claude lays it out</b><p>Claude turns the brief into a layout: zones, capacities, seat layouts and prices.</p></div>
+        <div><b>It is built in 3D</b><p>The browser builds the space from that layout, priced zone by zone.</p></div>
+        <div><b>Explore and share</b><p>Zoom, select, fly in and walk through. It runs in any modern browser.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <h2>Try it on the demo development</h2>
+      <div class="actions">
+        <a class="btn primary" href="app.html">Open the builder</a>
+        <a class="btn ghost" href="home.html">Walk through a home</a>
+      </div>
+      <p class="note">In the builder, choose <b>Apartment development</b> from “Try an example…” to see the valuation layer. This hosted demo builds spaces with a keyword parser, so its prices are illustrative; valuations, confidence ratings and floor plans are generated demo data, not market data. Building with Claude needs a local run with an API key.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>3D Space Builder · <a href="https://github.com/kartik-ramachandran/3dSpaceBuilder">Source on GitHub</a></span>
+    <span>Furniture, materials and skies: Poly Haven (CC0). 3D: three.js.</span>
   </div>
+</footer>
 
-  <form id="dock" autocomplete="off">
-    <ul id="referenceList" aria-label="Attached references" hidden></ul>
-    <div class="prow">
-      <input id="referenceInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx" multiple hidden>
-      <button id="attachBtn" type="button" title="Attach images, PDF or Word documents" aria-label="Attach images, PDF or DOCX">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9a7 7 0 0 1 10 10l-9 9"/></svg>
-      </button>
-      <label for="prompt" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Describe a plane, hotel, office or stadium</label>
-      <textarea id="prompt" rows="1" maxlength="4000" placeholder="Describe a space, or attach reference files…" aria-describedby="referenceHelp"></textarea>
-      <button class="primary" id="buildBtn" type="submit">Build</button>
-    </div>
-    <p id="referenceHelp">Images, PDF or DOCX · up to 6 files · 10 MB each</p>
-    <p id="referenceStatus" role="status" aria-live="polite"></p>
-    <p id="navigationHelp"><span class="mouse-help">Drag to rotate · Joystick, right-drag or Shift-drag to move · Scroll to zoom</span><span class="touch-help">One finger to rotate · Two fingers to move or pinch to zoom</span></p>
-    <div class="meta-row">
-      <label class="examples">
-        <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Build an example</span>
-        <select id="examples">
-          <option value="" selected disabled>Try an example…</option>
-          <optgroup label="Planes">
-            <option value="A long-haul A380-style jet from Auckland to Dubai with The Residence, first suites, lie-flat business, premium economy and economy">Flagship jet</option>
-            <option value="Regional narrowbody from Auckland to Queenstown, 12 business seats in 2-2 and 150 economy seats in 3-3, prices in NZD">Regional jet</option>
-          </optgroup>
-          <optgroup label="Hotels">
-            <option value="Boutique harbour hotel on Auckland's waterfront, 14 floors, rooftop pool, suites near the top and a penthouse">Harbour hotel</option>
-            <option value="Beach resort in Dubai, 22 floors, sea-view rooms, family suites, sky bar and a royal penthouse, prices in AED">Dubai resort</option>
-          </optgroup>
-          <optgroup label="Offices">
-            <option value="Waterfront co-working building in Auckland, 4 levels, hot desks, dedicated desks, private offices, meeting rooms, café and event space">Co-working</option>
-            <option value="Bengaluru tech office, 6 floors, 400 desks, 20 meeting rooms, private cabins for leadership and a cafeteria, prices in INR">Tech HQ</option>
-          </optgroup>
-          <optgroup label="Residential">
-            <option value="@home">Townhouse walkthrough</option>
-            <option value="Residential development with 6 apartment buildings in 2 rows, 4 floors, 4 apartments per floor, base price NZD 650,000">Apartment development</option>
-          </optgroup>
-          <optgroup label="Stadiums">
-            <option value="Cricket stadium with 20000 seats, 2 tiers, covered grandstands, a central wicket, boundary rope, floodlights and a premium pavilion">Cricket stadium</option>
-            <option value="City football stadium with 30000 seats, 2 tiers, a striped pitch, goals, covered stands, supporters sections and VIP seating">Football stadium</option>
-            <option value="Rugby stadium with 18000 seats, 2 tiers, H-shaped goalposts, marked try lines, covered stands and club seating">Rugby stadium</option>
-          </optgroup>
-        </select>
-      </label>
-      <div id="status"><span class="led"></span><span id="statusText">Connecting to Claude…</span></div>
-    </div>
-  </form>
-</div>
-
-<div id="valLabels" hidden aria-hidden="true"></div>
-<div id="tag" style="opacity:0"><div class="tn" id="tagName"></div><div class="tp" id="tagPrice"></div></div>
-
-<div id="view" data-kind="plane" aria-hidden="true">
-  <div id="viewHint">Drag to look around</div>
-  <div class="frame"></div>
-  <div class="caption">
-    <h2 id="viewTitle">Seat 12A</h2>
-    <p id="viewSub"></p>
-    <div class="view-actions">
-      <button class="ghost" id="backBtn" type="button">Back to overview</button>
-      <button class="primary" id="upgradeBtn" type="button">Upgrade</button>
-    </div>
-  </div>
-</div>
-
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-} }
+<script>
+// Scroll-driven zoom: the step nearest the middle of the screen picks the image in the sticky frame.
+(() => {
+  const steps = [...document.querySelectorAll('.step')];
+  const imgs = [...document.querySelectorAll('.frame img')];
+  const ticks = [...document.querySelectorAll('.depth i')];
+  const show = (i) => {
+    steps.forEach((s) => s.classList.toggle('on', +s.dataset.i === i));
+    imgs.forEach((im) => im.classList.toggle('on', +im.dataset.i === i));
+    ticks.forEach((t, k) => t.classList.toggle('on', k <= i));
+  };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) show(+e.target.dataset.i); });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  steps.forEach((s) => io.observe(s));
+  const hero = document.getElementById('heroShot');
+  new IntersectionObserver(([e]) => hero.classList.toggle('in', e.isIntersecting), { threshold: 0.35 }).observe(hero);
+})();
 </script>
-<script type="module" src="src/main.js"></script>
 </body>
 </html>

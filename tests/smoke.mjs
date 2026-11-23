@@ -16,7 +16,7 @@ import { startServer } from '../scripts/serve.mjs';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const SHOTS = join(ROOT, 'docs/screenshots');
 const PORT = Number(process.env.PORT) || 5199;
-const PAGE = `http://localhost:${PORT}/${process.argv.includes('--dist') ? 'dist/' : ''}`;
+const PAGE = `http://localhost:${PORT}/${process.argv.includes('--dist') ? 'dist/' : 'app.html'}`;
 
 const MOCK_SPEC = {
   kind: 'plane', name: 'Tasman Hopper', subtitle: 'Auckland → Queenstown · A321neo', currency: 'NZD',

@@ -1,4 +1,4 @@
-// Bundles src/ into one self-contained page at dist/index.html: the form that is published as a
+// Bundles app.html and src/ into one self-contained page at dist/index.html: the form that is published as a
 // Claude artifact. Three.js stays external and loads from jsDelivr through the import map.
 // Usage: npm run build
 import { build } from 'esbuild';
@@ -21,10 +21,10 @@ const result = await build({
 });
 const js = result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const css = await readFile(join(ROOT, 'src/styles.css'), 'utf8');
-let html = await readFile(join(ROOT, 'index.html'), 'utf8');
+let html = await readFile(join(ROOT, 'app.html'), 'utf8');
 
 for (const tag of [CSS_TAG, JS_TAG]) {
-  if (!html.includes(tag)) throw new Error(`index.html no longer contains ${tag}; update scripts/build.mjs`);
+  if (!html.includes(tag)) throw new Error(`app.html no longer contains ${tag}; update scripts/build.mjs`);
 }
 html = html
   .replace(CSS_TAG, () => `<style>\n${css}</style>`)
