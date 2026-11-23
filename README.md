@@ -1,5 +1,9 @@
 # 3dSpaceBuilder
 
+**Live demo: https://kartik-ramachandran.github.io/3dSpaceBuilder/** · [Townhouse walkthrough](https://kartik-ramachandran.github.io/3dSpaceBuilder/home.html)
+
+The live demo is a static site: builds use the offline parser (illustrative prices), and the apartment valuation layer uses generated demo data. To build with Claude, run it locally with an API key (see [Using Claude locally](#using-claude-locally)).
+
 Describe a plane, hotel, office, stadium or apartment development in plain English. Claude turns the prompt into a layout spec (zones, capacities, seat layouts, prices), and a Three.js scene renders it in the browser.
 
 - The shell (fuselage roof, hotel facade, office glass skin) turns to glass so the zones show through.
