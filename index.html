@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt-to-3D Space Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<canvas id="stage" tabindex="0" aria-label="3D model. Drag to rotate and change the angle. Right-drag, Shift-drag or use arrow keys to move. Scroll to zoom. Click a zone for its price."></canvas>
+<div id="fallback" hidden>This device can't show the 3D model (WebGL is off). The zones and prices are still listed.</div>
+
+<div class="hud" id="hud">
+  <div class="move-control">
+    <button id="movePad" type="button" aria-label="Move view. Drag the thumbstick or hold arrow keys to move up, down, left or right." aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" title="Drag to move. Release to stop.">
+      <span class="pad-arrow pad-up" aria-hidden="true">↑</span><span class="pad-arrow pad-down" aria-hidden="true">↓</span>
+      <span class="pad-arrow pad-left" aria-hidden="true">←</span><span class="pad-arrow pad-right" aria-hidden="true">→</span>
+      <span class="move-knob" aria-hidden="true"></span>
+    </button>
+    <span class="move-label">Move view</span>
+  </div>
+  <div class="titleblock">
+    <div class="eyebrow"><span>Prompt → Space</span><span class="kind" id="kindLabel">Plane</span></div>
+    <h1 id="spaceName">Long-haul Jet</h1>
+    <p id="spaceMeta">AKL → DXB · 6 cabins · 330 seats</p>
+  </div>
+
+  <div class="tools">
+    <a class="pill" id="homeTourLink" href="home.html" title="Walk through a furnished townhouse" aria-label="Walk through a home">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2 7.5 8 2.5l6 5M3.5 6.5V14h9V6.5"/><path d="M6.5 14v-3.5h3V14"/></svg><span class="lbl">Walk a home</span>
+    </a>
+    <button class="pill" id="levelBtn" title="Level view: straighten the camera without changing your zoom" aria-label="Level view">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 8h4m6 0h4M8 1v3m0 8v3"/><circle cx="8" cy="8" r="2"/></svg><span class="lbl">Level view</span>
+    </button>
+    <button class="pill" id="glassBtn" aria-pressed="true" title="Toggle the glass roof"><span class="dot"></span><span class="lbl" id="glassLbl">Glass roof</span></button>
+    <button class="pill icon" id="resetBtn" title="Reset view" aria-label="Reset view">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>
+    </button>
+  </div>
+
+  <section id="valControls" hidden aria-label="Valuation layer">
+    <header><h2>Market valuations</h2><button type="button" class="x" id="valCollapse" aria-expanded="true" aria-label="Collapse valuation controls">−</button></header>
+    <div class="val-body">
+      <p id="valLede"></p>
+      <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
+      <div class="vseg" role="group" aria-label="Selection"><button type="button" data-pick="unit" aria-pressed="true">Select unit</button><button type="button" data-pick="floor" aria-pressed="false">Select floor</button></div>
+      <p class="val-hint">Click an apartment to select it. Esc clears.</p>
+      <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (streets, trees, skyline)</label>
+      <label class="val-field"><span>Colour by</span>
+        <select id="valColour"><option value="valuation">Market valuation</option><option value="zones">Building colours</option></select></label>
+      <div class="val-scale">
+        <div class="val-ramp"></div>
+        <div class="val-range"><span id="valMin"></span><span id="valMax"></span></div>
+        <p class="val-note" id="valUnitNote"></p>
+        <p id="valCount"></p>
+        <ul class="val-legend"><li><i class="lg-none"></i>No market valuation (faded)</li><li><i class="lg-hover"></i>Hover</li><li><i class="lg-sel"></i>Selected</li></ul>
+      </div>
+      <p class="val-note">Demo data: valuations, placement confidence and floor plans are generated for illustration, not market data.</p>
+    </div>
+  </section>
+
+  <div id="rightCol">
+  <section id="valPanel" hidden aria-label="Valuation trend and apartment details">
+    <div class="vp-head"><div><h3>Market valuation trend</h3><p id="vpSub"></p></div><button type="button" class="vp-btn" id="vpExpand">Expand</button></div>
+    <div class="vp-row">
+      <div class="vseg" role="group" aria-label="Trend scope"><button type="button" data-scope="building" aria-pressed="false">By building</button><button type="button" data-scope="project" aria-pressed="true">Whole project</button></div>
+      <span id="vpStats"></span>
+    </div>
+    <div class="vp-chart"><canvas id="vpChart" aria-label="3D chart of valuation rate by quarter and floor, with a fitted trend surface"></canvas>
+      <ul class="vp-legend"><li><i class="sw-surf"></i>Trend surface</li><li><i class="sw-pt"></i>Valuations</li><li id="vpSelLegend" hidden><i class="sw-sel"></i><span></span></li></ul></div>
+    <p class="vp-note">Drag to rotate, scroll to zoom. Degree-2 polynomial in quarter and floor, fitted by least squares over the observed range: a smoothed trend, not a valuation.</p>
+    <div id="vpUnit"></div>
+  </section>
+  <section id="zonesPanel" aria-label="Zones and prices">
+    <header><span id="zonesTitle">Cabins</span><span id="zonesCount">6</span></header>
+    <ul id="zoneList"></ul>
+  </section>
+
+  <section id="zoneCard" hidden aria-live="polite">
+    <div class="card-top">
+      <div>
+        <div id="cardKicker"><span class="sw"></span><span id="cardType">Business</span></div>
+        <h2 id="cardName">Business Studio</h2>
+      </div>
+      <button class="x" id="cardClose" aria-label="Close">×</button>
+    </div>
+    <div class="price-row"><span id="cardPrice">NZD 8,400</span><span id="cardUnit">one-way</span></div>
+    <p id="cardCap">36 seats · 1-2-1</p>
+    <p id="cardBlurb"></p>
+    <ul id="cardFeatures"></ul>
+    <button class="primary" id="flyBtn">Sit in a window seat</button>
+  </section>
+  </div>
+
+  <form id="dock" autocomplete="off">
+    <ul id="referenceList" aria-label="Attached references" hidden></ul>
+    <div class="prow">
+      <input id="referenceInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx" multiple hidden>
+      <button id="attachBtn" type="button" title="Attach images, PDF or Word documents" aria-label="Attach images, PDF or DOCX">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9a7 7 0 0 1 10 10l-9 9"/></svg>
+      </button>
+      <label for="prompt" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Describe a plane, hotel, office or stadium</label>
+      <textarea id="prompt" rows="1" maxlength="4000" placeholder="Describe a space, or attach reference files…" aria-describedby="referenceHelp"></textarea>
+      <button class="primary" id="buildBtn" type="submit">Build</button>
+    </div>
+    <p id="referenceHelp">Images, PDF or DOCX · up to 6 files · 10 MB each</p>
+    <p id="referenceStatus" role="status" aria-live="polite"></p>
+    <p id="navigationHelp"><span class="mouse-help">Drag to rotate · Joystick, right-drag or Shift-drag to move · Scroll to zoom</span><span class="touch-help">One finger to rotate · Two fingers to move or pinch to zoom</span></p>
+    <div class="meta-row">
+      <label class="examples">
+        <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Build an example</span>
+        <select id="examples">
+          <option value="" selected disabled>Try an example…</option>
+          <optgroup label="Planes">
+            <option value="A long-haul A380-style jet from Auckland to Dubai with The Residence, first suites, lie-flat business, premium economy and economy">Flagship jet</option>
+            <option value="Regional narrowbody from Auckland to Queenstown, 12 business seats in 2-2 and 150 economy seats in 3-3, prices in NZD">Regional jet</option>
+          </optgroup>
+          <optgroup label="Hotels">
+            <option value="Boutique harbour hotel on Auckland's waterfront, 14 floors, rooftop pool, suites near the top and a penthouse">Harbour hotel</option>
+            <option value="Beach resort in Dubai, 22 floors, sea-view rooms, family suites, sky bar and a royal penthouse, prices in AED">Dubai resort</option>
+          </optgroup>
+          <optgroup label="Offices">
+            <option value="Waterfront co-working building in Auckland, 4 levels, hot desks, dedicated desks, private offices, meeting rooms, café and event space">Co-working</option>
+            <option value="Bengaluru tech office, 6 floors, 400 desks, 20 meeting rooms, private cabins for leadership and a cafeteria, prices in INR">Tech HQ</option>
+          </optgroup>
+          <optgroup label="Residential">
+            <option value="@home">Townhouse walkthrough</option>
+            <option value="Residential development with 6 apartment buildings in 2 rows, 4 floors, 4 apartments per floor, base price NZD 650,000">Apartment development</option>
+          </optgroup>
+          <optgroup label="Stadiums">
+            <option value="Cricket stadium with 20000 seats, 2 tiers, covered grandstands, a central wicket, boundary rope, floodlights and a premium pavilion">Cricket stadium</option>
+            <option value="City football stadium with 30000 seats, 2 tiers, a striped pitch, goals, covered stands, supporters sections and VIP seating">Football stadium</option>
+            <option value="Rugby stadium with 18000 seats, 2 tiers, H-shaped goalposts, marked try lines, covered stands and club seating">Rugby stadium</option>
+          </optgroup>
+        </select>
+      </label>
+      <div id="status"><span class="led"></span><span id="statusText">Connecting to Claude…</span></div>
+    </div>
+  </form>
+</div>
+
+<div id="valLabels" hidden aria-hidden="true"></div>
+<div id="tag" style="opacity:0"><div class="tn" id="tagName"></div><div class="tp" id="tagPrice"></div></div>
+
+<div id="view" data-kind="plane" aria-hidden="true">
+  <div id="viewHint">Drag to look around</div>
+  <div class="frame"></div>
+  <div class="caption">
+    <h2 id="viewTitle">Seat 12A</h2>
+    <p id="viewSub"></p>
+    <div class="view-actions">
+      <button class="ghost" id="backBtn" type="button">Back to overview</button>
+      <button class="primary" id="upgradeBtn" type="button">Upgrade</button>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
