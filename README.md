@@ -53,6 +53,20 @@ These were built from the example prompts with the offline parser (no API key), 
 |---|---|
 | ![Townhouse walkthrough welcome screen at golden hour](docs/screenshots/11-home-welcome.jpg) | ![Walking into the living room through the sliding doors, with the floor plan top right](docs/screenshots/12-home-walk.jpg) |
 
+**6. Hand mode.** [hand.html](https://kartik-ramachandran.github.io/3dSpaceBuilder/hand.html) (the **Hand mode** button in the builder) shows the development as a hologram over your webcam and lets you control it with your hands:
+
+| Gesture | Action |
+|---|---|
+| Pinch an apartment | Select it and show its valuation |
+| Fist and move | Rotate the model |
+| Two pinches apart or together | Zoom |
+| Two fists pulling apart | Explode the buildings into floors |
+| Pinch a floor and pull (when exploded) | Pull that floor out |
+| Clap | Reassemble |
+| Point and flick | Spin |
+
+Hand tracking uses Google's [MediaPipe Hand Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker) and runs on the viewer's device; camera frames are never uploaded. Everything also works with the mouse and keys (E explode, A assemble, M mirror, B black and white, C camera, D debug). Gesture logic is in `src/hand/gestures.js` and tested with `npm run test:gestures`.
+
 ## Quick start
 
 ```bash

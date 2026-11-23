@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hand mode · 3D Space Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Hologram HUD over the webcam. Cyan line-work panels, mono caps, glow. */
+:root { --holo: #7fe6ff; --holo-dim: rgba(127,230,255,.45); --ink: #dff9ff; --panel: rgba(4,18,30,.62); --mono: "Share Tech Mono", ui-monospace, Consolas, monospace; --pick: #ff5fd2; --hover: #ffd23f; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #03070d; color: var(--ink); font: 14px/1.4 var(--mono); overflow: hidden; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#handDebug { position: fixed; inset: 0; pointer-events: none; }
+video { display: none; }
+.panel { position: fixed; background: var(--panel); border: 1px solid var(--holo-dim); box-shadow: 0 0 18px rgba(127,230,255,.18), inset 0 0 12px rgba(127,230,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-transform: uppercase; letter-spacing: .14em; }
+.panel::before, .panel::after { content: ''; position: absolute; width: 10px; height: 10px; border: 2px solid var(--holo); }
+.panel::before { left: -2px; top: -2px; border-right: 0; border-bottom: 0; }
+.panel::after { right: -2px; bottom: -2px; border-left: 0; border-top: 0; }
+/* toggles, top right */
+#toggles { position: fixed; top: 16px; right: 16px; display: grid; gap: 8px; justify-items: end; z-index: 3; }
+.tog { position: static; padding: 9px 16px; font: 15px/1 var(--mono); color: var(--ink); cursor: pointer; letter-spacing: .16em; }
+.tog:hover { border-color: var(--holo); }
+.tog b { color: var(--holo); font-weight: 400; }
+.dim { display: flex; align-items: center; gap: 12px; }
+.dim input { width: 120px; accent-color: var(--holo); }
+/* title, top left */
+#title { left: 16px; top: 16px; padding: 12px 16px; max-width: 360px; z-index: 3; }
+#title h1 { margin: 0; font: italic 400 30px/1 "Instrument Serif", Georgia, serif; letter-spacing: 0; text-transform: none; color: #fff; }
+#title p { margin: 6px 0 0; font-size: 12px; color: var(--holo); }
+#title .ramp { height: 8px; margin-top: 10px; background: linear-gradient(90deg, #1b5d8c, #bff6ff); }
+#title .rng { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; color: #a8dcec; letter-spacing: .06em; }
+#title a { color: var(--holo); font-size: 11px; display: inline-block; margin-top: 10px; }
+/* status */
+#status { left: 16px; top: 172px; padding: 10px 14px; font-size: 12px; z-index: 3; min-width: 230px; }
+#status div { display: flex; justify-content: space-between; gap: 18px; }
+#status span { color: var(--holo); }
+/* info card */
+#card { left: 16px; bottom: 96px; width: 340px; padding: 14px 16px; z-index: 3; text-transform: none; letter-spacing: .02em; transition: opacity .25s, transform .25s; }
+#card.off { opacity: 0; transform: translateY(8px); pointer-events: none; }
+#card .k { font-size: 11px; color: var(--pick); letter-spacing: .18em; text-transform: uppercase; }
+#card h2 { margin: 4px 0 2px; font: italic 400 34px/1 "Instrument Serif", Georgia, serif; color: #fff; }
+#card .sub { color: #a8dcec; font-size: 12.5px; }
+#card .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+#card .figs div { border: 1px solid var(--holo-dim); padding: 7px 9px; }
+#card .figs b { display: block; font-weight: 400; font-size: 16px; color: #fff; }
+#card .figs small { color: #8fc6d6; font-size: 11px; }
+#card table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+#card td { padding: 3px 0; border-bottom: 1px solid rgba(127,230,255,.15); }
+#card td:last-child { text-align: right; }
+/* hints */
+#help { left: 50%; bottom: 16px; transform: translateX(-50%); width: min(1100px, calc(100% - 32px)); padding: 9px 14px; font-size: 12px; text-align: center; color: #bfeefb; z-index: 3; line-height: 1.6; }
+#help em { font-style: normal; color: var(--holo); }
+#toast { position: fixed; left: 50%; top: 24px; transform: translateX(-50%); padding: 8px 16px; font-size: 13px; z-index: 4; transition: opacity .3s; }
+#toast.off { opacity: 0; }
+/* reticles */
+.reticle { position: fixed; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; border: 2px solid var(--holo); box-shadow: 0 0 14px var(--holo), inset 0 0 10px rgba(127,230,255,.5); pointer-events: none; z-index: 2; transition: width .12s, height .12s, margin .12s, background .12s, border-radius .12s; opacity: 0; }
+.reticle::after { content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--holo); }
+.reticle.on { opacity: 1; }
+.reticle[data-pose="pinch"] { width: 26px; height: 26px; margin: -13px 0 0 -13px; background: rgba(127,230,255,.35); }
+.reticle[data-pose="fist"] { border-radius: 8px; }
+.reticle[data-pose="open"] { width: 64px; height: 64px; margin: -32px 0 0 -32px; border-style: dashed; }
+.reticle .lbl { position: absolute; left: 54px; top: 12px; font-size: 11px; letter-spacing: .14em; white-space: nowrap; color: var(--holo); text-transform: uppercase; }
+/* start screen */
+#start { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: radial-gradient(80% 80% at 50% 40%, rgba(6,30,48,.86), rgba(2,6,12,.97)); }
+#start .in { width: min(620px, calc(100% - 32px)); padding: 30px 32px; position: relative; }
+#start h2 { margin: 0; font: italic 400 54px/1 "Instrument Serif", Georgia, serif; text-transform: none; letter-spacing: 0; color: #fff; }
+#start p { text-transform: none; letter-spacing: .02em; color: #bfeefb; font-size: 14.5px; line-height: 1.6; }
+#start ul { padding-left: 18px; color: #bfeefb; text-transform: none; letter-spacing: .02em; font-size: 13.5px; }
+#start .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+#start button { font: 15px var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 12px 18px; cursor: pointer; color: #03131d; background: var(--holo); border: 0; box-shadow: 0 0 20px rgba(127,230,255,.5); }
+#start button.ghost { background: transparent; color: var(--holo); border: 1px solid var(--holo-dim); box-shadow: none; }
+#start .err { color: #ffb4a2; }
+#start small { display: block; margin-top: 14px; color: #8fc6d6; text-transform: none; letter-spacing: .02em; font-size: 12px; }
+[hidden] { display: none !important; }
+@media (max-width: 760px) { #status, #help { display: none; } #card { width: auto; right: 16px; bottom: 16px; } #title { max-width: 60vw; } .dim input { width: 80px; } }
+</style>
+</head>
+<body>
+<video id="cam" playsinline muted></video>
+<canvas id="gl" tabindex="0" aria-label="Hologram of the apartment development. Use hand gestures, or drag to rotate, scroll to zoom and click an apartment."></canvas>
+<canvas id="handDebug" aria-hidden="true"></canvas>
+<div class="reticle" id="ret0"><span class="lbl"></span></div>
+<div class="reticle" id="ret1"><span class="lbl"></span></div>
+
+<section class="panel" id="title">
+  <h1 id="name">Parkside Residences</h1>
+  <p id="meta">96 apartments · 6 buildings</p>
+  <div class="ramp"></div>
+  <div class="rng"><span id="lo"></span><span id="hi"></span></div>
+  <a href="app.html">← Space builder</a> &nbsp; <a href="./">Overview</a>
+</section>
+
+<section class="panel" id="status" aria-live="polite">
+  <div>Tracking <span id="stTrack">Off</span></div>
+  <div>Hands <span id="stHands">0</span></div>
+  <div>Gesture <span id="stGesture">—</span></div>
+  <div>Explode <span id="stExplode">0%</span></div>
+</section>
+
+<nav id="toggles" aria-label="View options">
+  <button class="panel tog" id="tMirror">Mirror <b>On</b></button>
+  <button class="panel tog" id="tBW">B&amp;W <b>Off</b></button>
+  <button class="panel tog" id="tCam">Camera <b>—</b></button>
+  <label class="panel tog dim">Dim <input id="tDim" type="range" min="0" max="90" value="40"><b id="tDimV">40%</b></label>
+</nav>
+
+<section class="panel off" id="card" aria-live="polite">
+  <div class="k" id="cKind">Apartment</div>
+  <h2 id="cName"></h2>
+  <div class="sub" id="cSub"></div>
+  <div class="figs" id="cFigs"></div>
+  <table id="cHist"></table>
+</section>
+
+<div class="panel" id="help">
+  <em>Pinch</em> an apartment: select · <em>Fist</em> and move: rotate · <em>Two pinches</em> apart or together: zoom · <em>Two fists</em> pull apart: explode floors ·
+  Exploded: <em>pinch a floor and pull</em> it out · <em>Clap</em>: assemble · <em>Point and flick</em>: spin<br>
+  Keys: E explode · A assemble · M mirror · B black &amp; white · C camera · D debug · Esc clear · Mouse: drag rotate · scroll zoom · click select
+</div>
+<div class="panel off" id="toast" role="status"></div>
+
+<section id="start">
+  <div class="panel in">
+    <h2>Hand mode</h2>
+    <p>Explore the development as a hologram over your camera, using your hands. Pinch to select an apartment, make a fist to turn the model, and pull two fists apart to lift the floors away from each other.</p>
+    <ul>
+      <li>The camera image is processed on this device and never uploaded.</li>
+      <li>Works best on a laptop in Chrome or Edge, with your hands well lit and about an arm's length away.</li>
+    </ul>
+    <div class="row"><button id="goCam">Start camera</button><button class="ghost" id="goMouse">Use mouse instead</button></div>
+    <p class="err" id="startErr" hidden></p>
+    <small>Valuations are generated demo data, not market data.</small>
+  </div>
+</section>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="src/hand/main.js"></script>
+</body>
+</html>
