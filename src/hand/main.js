@@ -30,7 +30,7 @@ $('#lo').textContent = `${fmt(data.min)} /m²`; $('#hi').textContent = `${fmt(da
 /* ---------- renderer, background video pass, hologram scene, bloom ---------- */
 const canvas = $('#gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));   // lighter: the hologram doesn't need retina resolution
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
 
@@ -70,6 +70,7 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(bgScene, bgCam));
 const main = new RenderPass(scene, camera); main.clear = false; composer.addPass(main);
 const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.45, 0.62); composer.addPass(bloom);
+{ const setSize = bloom.setSize.bind(bloom); bloom.setSize = (w, h) => setSize(w / 2, h / 2); }   // glow at half resolution
 composer.addPass(new OutputPass());
 
 function resize() {
@@ -82,7 +83,7 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 /* ---------- view state ---------- */
-const view = { rotY: -0.5, rotX: 0.32, zoom: 1, spin: 0, explode: 0, explodeTarget: null, mirror: true, gray: false, dim: 0.4, debug: false };
+const view = { driveUntil: 0, rotY: -0.5, rotX: 0.32, zoom: 1, spin: 0, explode: 0, explodeTarget: null, mirror: true, gray: false, dim: 0.4, debug: false };
 let hovered = null, selected = null;
 function paint() {
   for (const [id] of holo.units) {
@@ -203,7 +204,9 @@ let landmarker = null, stream = null, cameras = [], camIndex = 0, lastVideoTime 
 const tracker = createHandTracker(), interaction = createInteraction();
 async function openCamera(deviceId) {
   stream?.getTracks().forEach((t) => t.stop());
-  stream = await navigator.mediaDevices.getUserMedia({ video: deviceId ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } } : { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+  // 640x480 is plenty for hand tracking and lets most webcams deliver 60 fps
+  const size = { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 60 } };
+  stream = await navigator.mediaDevices.getUserMedia({ video: deviceId ? { deviceId: { exact: deviceId }, ...size } : { facingMode: 'user', ...size }, audio: false });
   video.srcObject = stream; await video.play();
   const aspect = (video.videoWidth || 16) / (video.videoHeight || 9);
   bgMat.uniforms.videoAspect.value = aspect; bgMat.uniforms.hasVideo.value = 1;
@@ -212,6 +215,7 @@ async function openCamera(deviceId) {
   const track = stream.getVideoTracks()[0];
   camIndex = Math.max(0, cameras.findIndex((c) => c.deviceId === track.getSettings().deviceId));
   $('#tCam b').textContent = (track.label || 'Camera').replace(/\s*\(.*\)$/, '').slice(0, 22);
+  scheduleTracking();
 }
 async function nextCamera() {
   if (cameras.length < 2) { toast(cameras.length ? 'Only one camera found' : 'Camera is off'); return; }
@@ -223,8 +227,17 @@ async function startTracking() {
   const { FilesetResolver, HandLandmarker } = await import(`${MP_URL}/vision_bundle.mjs`);
   const files = await FilesetResolver.forVisionTasks(`${MP_URL}/wasm`);
   const opts = (delegate) => ({ baseOptions: { modelAssetPath: HAND_MODEL, delegate }, runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: 0.6, minHandPresenceConfidence: 0.6, minTrackingConfidence: 0.5 });
-  try { landmarker = await HandLandmarker.createFromOptions(files, opts('GPU')); }
-  catch (e) { landmarker = await HandLandmarker.createFromOptions(files, opts('CPU')); }
+  let lm;
+  try { lm = await HandLandmarker.createFromOptions(files, opts('GPU')); }
+  catch (e) { lm = await HandLandmarker.createFromOptions(files, opts('CPU')); }
+  // The first detection compiles GPU shaders and can stall for seconds. Do it now, on a blank frame,
+  // while the status still says "Warming up", rather than freezing the page on the user's first gesture.
+  $('#stTrack').textContent = 'Warming up';
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 30)));
+  const blank = document.createElement('canvas'); blank.width = 64; blank.height = 48;
+  blank.getContext('2d').fillRect(0, 0, 64, 48);
+  lm.detectForVideo(blank, performance.now());
+  landmarker = lm;
   $('#stTrack').textContent = 'On';
 }
 $('#goCam').addEventListener('click', async () => {
@@ -243,13 +256,35 @@ $('#goCam').addEventListener('click', async () => {
 });
 $('#goMouse').addEventListener('click', () => { $('#start').hidden = true; $('#stTrack').textContent = 'Mouse'; canvas.focus(); });
 
+/* ---------- tracking loop: runs on every new camera frame, not tied to rendering ---------- */
+const perf = { calls: 0, camFrames: 0, camFps: 0, trackMs: 0, renderFps: 0, since: performance.now() };
+let trackLoop = 0, polling = false;
+function scheduleTracking() {
+  const gen = ++trackLoop;
+  if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype)) { polling = true; return; }   // fallback: poll from the render loop
+  const onFrame = () => { if (gen !== trackLoop) return; perf.camFrames++; handleHands(performance.now() / 1000); video.requestVideoFrameCallback(onFrame); };
+  video.requestVideoFrameCallback(onFrame);
+}
+function updatePerf(now) {
+  if (now - perf.since < 500) return;
+  perf.camFps = perf.camFrames * 1000 / (now - perf.since); perf.camFrames = 0; perf.since = now;
+  $('#stCam').textContent = stream ? `${Math.round(perf.camFps)} fps` : '—';
+  $('#stTrackMs').textContent = landmarker ? `${perf.trackMs.toFixed(1)} ms` : '—';
+  $('#stRender').textContent = `${Math.round(perf.renderFps)} fps`;
+  const slow = stream && perf.camFps < 24 ? 'Camera is slow: add light' : perf.trackMs > 30 ? 'Tracking is slow' : perf.renderFps && perf.renderFps < 40 ? 'Rendering is slow' : '';
+  $('#stHint').textContent = slow; $('#stHint').hidden = !slow;
+}
+
 /* ---------- applying gestures ---------- */
 const rets = [$('#ret0'), $('#ret1')];
 const POSE_LABEL = { pinch: 'Pinch', fist: 'Fist', point: 'Point', open: 'Open', other: '' };
 function handleHands(t) {
   if (!landmarker || video.readyState < 2 || video.currentTime === lastVideoTime) return;
   lastVideoTime = video.currentTime;
-  const res = landmarker.detectForVideo(video, performance.now());
+  const t0 = performance.now();
+  const res = landmarker.detectForVideo(video, t0);
+  if (++perf.calls > 5) perf.trackMs += (performance.now() - t0 - perf.trackMs) * 0.15;   // skip the first calls: model warm-up
+  else perf.trackMs = performance.now() - t0;
   const raw = (res.landmarks || []).map((lm, i) => ({ side: res.handedness?.[i]?.[0]?.categoryName || `H${i}`, landmarks: lm }));
   const tracked = tracker.update(raw, t);
   // mirror to match what the user sees
@@ -269,8 +304,9 @@ function handleHands(t) {
     const p = ev.x !== undefined ? toScreen(ev) : null;
     if (ev.type === 'hover' && !grab) setHovered(unitAt(p.x, p.y));
     if (ev.type === 'pinchStart') startPress(p.x, p.y);
-    if (ev.type === 'pinchMove') movePress(p.x, p.y);
+    if (ev.type === 'pinchMove') { movePress(p.x, p.y); if (grab?.moved) view.driveUntil = t + 0.25; }
     if (ev.type === 'pinchEnd') { if (ev.cancelled) grab = null; else endPress(); }
+    if (ev.type === 'rotate' || ev.type === 'zoom' || ev.type === 'explode') view.driveUntil = t + 0.25;
     if (ev.type === 'rotate') { view.rotY += ev.dx * 5.5; view.rotX = clamp(view.rotX + ev.dy * 3, -0.1, 1.2); }
     if (ev.type === 'zoom') view.zoom = clamp(view.zoom * ev.factor, 0.5, 3);
     if (ev.type === 'explode') { view.explodeTarget = null; view.explode = clamp(view.explode + ev.delta, 0, 1); }
@@ -294,13 +330,15 @@ function drawDebug(hands) {
 /* ---------- loop ---------- */
 const clock = new THREE.Clock();
 function frame() {
-  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
-  handleHands(t);
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime, now = performance.now();
+  if (polling) handleHands(now / 1000);
+  if (dt > 0) perf.renderFps += (1 / dt - perf.renderFps) * 0.1;
+  updatePerf(now);
   if (view.explodeTarget !== null) { view.explode += (view.explodeTarget - view.explode) * (1 - Math.exp(-dt * (reduceMotion ? 30 : 5))); if (Math.abs(view.explode - view.explodeTarget) < 0.002) { view.explode = view.explodeTarget; view.explodeTarget = null; } }
   view.rotY += view.spin * dt; view.spin *= Math.exp(-dt * 1.8);
   turntable.rotation.set(view.rotX, view.rotY, 0, 'XYZ');
   turntable.scale.setScalar(view.zoom);
-  holo.setExplode(view.explode); holo.update(dt, t);
+  holo.setExplode(view.explode); holo.update(dt, t, now / 1000 < view.driveUntil);   // 1:1 while hands drive, eased otherwise
   $('#stExplode').textContent = `${Math.round(view.explode * 100)}%`;
   bgMat.uniforms.time.value = t;
   composer.render(dt);

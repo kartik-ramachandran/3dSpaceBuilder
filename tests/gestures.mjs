@@ -21,16 +21,38 @@ function hand(cx, cy, pose) {
 
 for (const pose of ['open', 'fist', 'point', 'pinch']) assert.equal(classify(hand(0.5, 0.5, pose)), pose, `classifies ${pose}`);
 
-// Tracker: pose changes need two frames, except entering or leaving a pinch, which is immediate.
+// Tracker: poses are accepted on their first frame (hysteresis in classify prevents flicker).
 {
   const tr = createHandTracker({ aspect: 1 });
   const f = (pose, t) => tr.update([{ side: 'Right', landmarks: hand(0.5, 0.5, pose) }], t)[0].pose;
-  assert.equal(f('open', 0), 'other', 'first frame starts as other until confirmed');
-  assert.equal(f('open', 0.03), 'open');
-  assert.equal(f('fist', 0.06), 'open', 'a one-frame fist is ignored');
-  assert.equal(f('fist', 0.09), 'fist', 'a held fist is accepted');
-  assert.equal(f('pinch', 0.12), 'pinch', 'pinch starts immediately');
-  assert.equal(f('open', 0.15), 'open', 'pinch releases immediately');
+  assert.equal(f('open', 0), 'open', 'first frame is accepted');
+  assert.equal(f('fist', 0.033), 'fist', 'a fist is accepted immediately');
+  assert.equal(f('pinch', 0.066), 'pinch', 'pinch starts immediately');
+  assert.equal(f('open', 0.1), 'open', 'pinch releases immediately');
+}
+// Hysteresis: a half-curled hand stays in whichever pose it was already in.
+{
+  const half = hand(0.5, 0.5, 'fist');
+  for (let f = 0; f < 4; f++) { const x = 0.47 + f * 0.02, b = 5 + f * 4; half[b + 1] = { x, y: 0.49, z: 0 }; half[b + 3] = { x, y: 0.465, z: 0 }; }   // tips just past the middle joints
+  assert.equal(classify(half, 1, 'fist'), 'fist', 'a loosening fist stays a fist');
+  assert.equal(classify(half, 1, 'open'), 'open', 'a relaxing open hand stays open');
+}
+// Smoothing follows fast moves closely and predicts slightly ahead.
+{
+  const tr = createHandTracker({ aspect: 1, lead: 0 }), tp = createHandTracker({ aspect: 1 });
+  let lagged, unpredicted, predicted;
+  for (let i = 0; i <= 15; i++) {   // index tip sweeping right at 1.5 units/s, 30 fps; each frame shows where the tip was ~40 ms ago
+    const t = i / 30, x = 0.2 + 1.5 * t, tipNow = (x - 0.03) + 1.5 * 0.04;
+    const a = tr.update([{ side: 'Right', landmarks: hand(x, 0.5, 'point') }], t)[0].cursor.x;
+    const b = tp.update([{ side: 'Right', landmarks: hand(x, 0.5, 'point') }], t)[0].cursor.x;
+    lagged = a - (x - 0.03); unpredicted = a - tipNow; predicted = b - tipNow;
+  }
+  assert.ok(Math.abs(lagged) < 0.03, `filter lag on a fast sweep is small (${lagged.toFixed(3)})`);
+  assert.ok(Math.abs(predicted) < Math.abs(unpredicted), `prediction gets closer to where the hand is now (${predicted.toFixed(3)} vs ${unpredicted.toFixed(3)})`);
+  const still = createHandTracker({ aspect: 1 }); let spread = [];
+  for (let i = 0; i < 30; i++) spread.push(still.update([{ side: 'Right', landmarks: hand(0.5 + (i % 2 ? 0.004 : -0.004), 0.5, 'point') }], i / 30)[0].cursor.x);
+  spread = spread.slice(10);
+  assert.ok(Math.max(...spread) - Math.min(...spread) < 0.006, 'jitter on a still hand is damped');
 }
 
 // Interaction events from already-tracked hands.

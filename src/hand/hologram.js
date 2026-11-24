@@ -88,13 +88,15 @@ export function buildHologram(spec, data) {
     get explode() { return explode; },
     setUnitColor(id, color) { const u = units.get(id); if (!u) return; u.fill.material.color.copy(color); u.edge.material.color.copy(color).lerp(new THREE.Color('#ffffff'), 0.35); },
     resetColor(id) { const u = units.get(id); if (u) this.setUnitColor(id, u.base); },
-    update(dt, t) {
+    /** follow: true while the user's hands are driving the model, so floors track them 1:1 instead of easing. */
+    update(dt, t, follow = false) {
       tickRing.rotation.y = t * 0.08;
+      const ease = (rate) => follow ? 1 : 1 - Math.exp(-dt * rate);
       for (const g of floorGroups.values()) {
         const ud = g.userData;
-        ud.pull.lerp(ud.pullTarget, 1 - Math.exp(-dt * 10));
+        ud.pull.lerp(ud.pullTarget, ease(10));
         const targetY = ud.baseY + (ud.floor - 1) * explode * FH * 1.9;
-        g.position.y += (targetY - g.position.y) * (1 - Math.exp(-dt * 9));
+        g.position.y += (targetY - g.position.y) * ease(9);
         const o = origin(ud.building);
         g.position.x = o.x + ud.pull.x; g.position.z = o.z + ud.pull.z;
       }

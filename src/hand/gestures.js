@@ -14,12 +14,19 @@ const TIPS = [8, 12, 16, 20], PIPS = [6, 10, 14, 18];
 
 const d2 = (a, b, aspect = 1) => Math.hypot((a.x - b.x) * aspect, a.y - b.y);
 
-/** Hand pose from one hand's landmarks. `aspect` is video width / height (landmarks are normalized per axis). */
-export function classify(lm, aspect = 1, wasPinching = false) {
+/**
+ * Hand pose from one hand's landmarks. `aspect` is video width / height (landmarks are normalized per axis).
+ * `prev` is the hand's current pose: each pose is harder to enter than to stay in (hysteresis), so a pose
+ * can be accepted on the first frame without flickering at the boundary.
+ */
+export function classify(lm, aspect = 1, prev = null) {
   const palm = d2(lm[WRIST], lm[MIDDLE_MCP], aspect) || 1e-6;
   const pinch = d2(lm[THUMB_TIP], lm[INDEX_TIP], aspect) / palm;
-  if (pinch < (wasPinching ? 0.5 : 0.33)) return 'pinch';            // hysteresis: harder to start than to keep
-  const extended = TIPS.map((t, i) => d2(lm[t], lm[WRIST], aspect) > d2(lm[PIPS[i]], lm[WRIST], aspect) * 1.12);
+  if (pinch < (prev === 'pinch' ? 0.5 : 0.33)) return 'pinch';
+  // a finger counts as extended when its tip is clearly further from the wrist than its middle joint;
+  // in a fist the bar is higher (stay a fist), in an open hand lower (stay open)
+  const bar = prev === 'fist' ? 1.25 : prev === 'open' || prev === 'point' ? 1.04 : 1.12;
+  const extended = TIPS.map((t, i) => d2(lm[t], lm[WRIST], aspect) > d2(lm[PIPS[i]], lm[WRIST], aspect) * bar);
   const n = extended.filter(Boolean).length;
   if (n === 0) return 'fist';
   if (extended[0] && n === 1) return 'point';
@@ -27,11 +34,15 @@ export function classify(lm, aspect = 1, wasPinching = false) {
   return 'other';
 }
 
-/* One Euro filter: smooth when still, responsive when moving fast (Casiez et al. 2012). */
-export function oneEuro({ minCutoff = 1.4, beta = 0.02, dCutoff = 1 } = {}) {
+/*
+ * One Euro filter: heavy smoothing when the hand is still (no jitter), almost none when it moves fast (no lag).
+ * Tuned for normalized 0..1 coordinates: a hand sweeping across the frame moves at roughly 1–3 units/s, and
+ * beta lifts the cutoff to ~10–25 Hz at those speeds. Also exposes the smoothed velocity, used for prediction.
+ */
+export function oneEuro({ minCutoff = 1.2, beta = 8, dCutoff = 2 } = {}) {
   let x = null, dx = 0, t0 = 0;
   const alpha = (cutoff, dt) => 1 / (1 + 1 / (2 * Math.PI * cutoff * dt));
-  return (value, t) => {
+  const f = (value, t) => {
     if (x === null) { x = value; t0 = t; return x; }
     const dt = Math.max(1e-3, t - t0); t0 = t;
     const rawDx = (value - x) / dt;
@@ -39,12 +50,18 @@ export function oneEuro({ minCutoff = 1.4, beta = 0.02, dCutoff = 1 } = {}) {
     x += alpha(minCutoff + beta * Math.abs(dx), dt) * (value - x);
     return x;
   };
+  f.velocity = () => dx;
+  return f;
 }
 
-/** Smooths the points we steer with and debounces pose changes, per hand (keyed by handedness). */
-export function createHandTracker({ aspect = 16 / 9, stableFrames = 2 } = {}) {
+/**
+ * Smooths the points we steer with and confirms pose changes, per hand (keyed by handedness).
+ * stableFrames = 1 accepts a new pose on its first frame (classify's hysteresis prevents flicker).
+ * lead (seconds) predicts the cursor ahead along its current velocity to hide part of the camera latency.
+ */
+export function createHandTracker({ aspect = 16 / 9, stableFrames = 1, lead = 0.04 } = {}) {
   const hands = new Map();
-  const make = () => ({ pose: 'other', candidate: null, count: 0, f: Array.from({ length: 6 }, () => oneEuro()), lastSeen: 0 });
+  const make = () => ({ pose: 'other', candidate: null, count: 0, f: Array.from({ length: 4 }, () => oneEuro()), lastSeen: 0 });
   return {
     setAspect(a) { aspect = a; },
     /** results: [{ side: 'Left'|'Right', landmarks }] → [{ side, pose, cursor, palm }] in normalized video coords (unmirrored) */
@@ -54,17 +71,22 @@ export function createHandTracker({ aspect = 16 / 9, stableFrames = 2 } = {}) {
       for (const r of results) {
         let h = hands.get(r.side); if (!h) { h = make(); hands.set(r.side, h); }
         seen.add(r.side); h.lastSeen = t;
-        const raw = classify(r.landmarks, aspect, h.pose === 'pinch');
+        const raw = classify(r.landmarks, aspect, h.pose);
         if (raw === h.pose) { h.candidate = null; h.count = 0; }
-        else if (raw === h.candidate) { if (++h.count >= (raw === 'pinch' || h.pose === 'pinch' ? 1 : stableFrames)) { h.pose = raw; h.candidate = null; h.count = 0; } }
-        else { h.candidate = raw; h.count = 1; if (raw === 'pinch' || h.pose === 'pinch') { h.pose = raw; h.candidate = null; h.count = 0; } }
+        else {
+          if (raw === h.candidate) h.count++; else { h.candidate = raw; h.count = 1; }
+          if (h.count >= stableFrames || raw === 'pinch' || h.pose === 'pinch') { h.pose = raw; h.candidate = null; h.count = 0; }
+        }
         const lm = r.landmarks;
         // pinching: steer with the point between thumb and index, otherwise with the index tip
         const tip = h.pose === 'pinch' ? { x: (lm[THUMB_TIP].x + lm[INDEX_TIP].x) / 2, y: (lm[THUMB_TIP].y + lm[INDEX_TIP].y) / 2 } : lm[INDEX_TIP];
         const palmPt = { x: (lm[WRIST].x + lm[INDEX_MCP].x + lm[MIDDLE_MCP].x) / 3, y: (lm[WRIST].y + lm[INDEX_MCP].y + lm[MIDDLE_MCP].y) / 3 };
+        const cx = h.f[0](tip.x, t), cy = h.f[1](tip.y, t);
+        // predict slightly ahead; clamp so a sudden jump can't throw the cursor far
+        const px = Math.max(-0.05, Math.min(0.05, h.f[0].velocity() * lead)), py = Math.max(-0.05, Math.min(0.05, h.f[1].velocity() * lead));
         out.push({
           side: r.side, pose: h.pose, landmarks: lm,
-          cursor: { x: h.f[0](tip.x, t), y: h.f[1](tip.y, t) },
+          cursor: { x: cx + px, y: cy + py },
           palm: { x: h.f[2](palmPt.x, t), y: h.f[3](palmPt.y, t) },
           size: d2(lm[WRIST], lm[MIDDLE_MCP], aspect),
         });
@@ -102,10 +124,10 @@ export function createInteraction({ aspect = 16 / 9 } = {}) {
         const [a, b] = two, pa = prev?.[a.side], pb = prev?.[b.side];
         const dNow = dist(a.palm, b.palm);
         if (a.pose === 'fist' && b.pose === 'fist' && pa && pb && pa.pose === 'fist' && pb.pose === 'fist') {
-          events.push({ type: 'explode', delta: (dNow - dist(pa.palm, pb.palm)) * 2.2 }); twoHanded = true;
+          events.push({ type: 'explode', delta: (dNow - dist(pa.palm, pb.palm)) * 3.6 }); twoHanded = true;
         } else if (a.pose === 'pinch' && b.pose === 'pinch' && pa && pb && pa.pose === 'pinch' && pb.pose === 'pinch') {
           const before = dist(pa.cursor, pb.cursor), now = dist(a.cursor, b.cursor);
-          if (before > 0.02) events.push({ type: 'zoom', factor: now / before });
+          if (before > 0.02) events.push({ type: 'zoom', factor: Math.pow(now / before, 1.5) });   // a little stronger than 1:1
           twoHanded = true;
         }
         if (a.pose === 'pinch' && b.pose === 'pinch') twoHanded = true;

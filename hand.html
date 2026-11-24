@@ -14,7 +14,8 @@
 html, body { margin: 0; height: 100%; background: #03070d; color: var(--ink); font: 14px/1.4 var(--mono); overflow: hidden; }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 #handDebug { position: fixed; inset: 0; pointer-events: none; }
-video { display: none; }
+/* not display:none: a hidden video gets few or no frame callbacks, which would starve hand tracking */
+video { position: fixed; left: 0; top: 0; width: 2px; height: 2px; opacity: 0.01; pointer-events: none; }
 .panel { position: fixed; background: var(--panel); border: 1px solid var(--holo-dim); box-shadow: 0 0 18px rgba(127,230,255,.18), inset 0 0 12px rgba(127,230,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); text-transform: uppercase; letter-spacing: .14em; }
 .panel::before, .panel::after { content: ''; position: absolute; width: 10px; height: 10px; border: 2px solid var(--holo); }
 .panel::before { left: -2px; top: -2px; border-right: 0; border-bottom: 0; }
@@ -37,6 +38,9 @@ video { display: none; }
 #status { left: 16px; top: 172px; padding: 10px 14px; font-size: 12px; z-index: 3; min-width: 230px; }
 #status div { display: flex; justify-content: space-between; gap: 18px; }
 #status span { color: var(--holo); }
+#status .perf { color: #8fc6d6; }
+#status div.perf:nth-of-type(5) { border-top: 1px solid rgba(127,230,255,.2); margin-top: 6px; padding-top: 6px; }
+#status .warn { margin: 6px 0 0; color: #ffd23f; font-size: 11px; }
 /* info card */
 #card { left: 16px; bottom: 96px; width: 340px; padding: 14px 16px; z-index: 3; text-transform: none; letter-spacing: .02em; transition: opacity .25s, transform .25s; }
 #card.off { opacity: 0; transform: translateY(8px); pointer-events: none; }
@@ -98,6 +102,10 @@ video { display: none; }
   <div>Hands <span id="stHands">0</span></div>
   <div>Gesture <span id="stGesture">—</span></div>
   <div>Explode <span id="stExplode">0%</span></div>
+  <div class="perf">Camera <span id="stCam">—</span></div>
+  <div class="perf">Tracking <span id="stTrackMs">—</span></div>
+  <div class="perf">Render <span id="stRender">—</span></div>
+  <p class="warn" id="stHint" hidden></p>
 </section>
 
 <nav id="toggles" aria-label="View options">
