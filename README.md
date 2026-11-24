@@ -47,6 +47,18 @@ These were built from the example prompts with the offline parser (no API key), 
 
 ![Apartment development coloured by valuation rate, with the trend chart and apartment D · 203 selected](docs/screenshots/10-valuations.png)
 
+**Site layers.** The development sits between a river (north, in front) and a motorway (south, behind), with local roads, a modelled flood area and solar. Each layer can be switched off, removed and added back from **Site layers** in the left panel, and each one moves apartment values through location factors:
+
+| Layer | Shown as | Effect on values (demo assumptions) |
+|---|---|---|
+| River | Flowing water with banks | Front row: +3% rising with floor, up to +8%; behind it, top floor +1.5% |
+| Local roads | Roads with traffic | Street access +1.5%; front-row ground floors −1% street noise |
+| Motorway | Six lanes with moving cars and trucks | Noise up to −9%, falling off over ~110 m, a little worse higher up |
+| Flood area | Hatched sheet at flood level; 1-in-20, 1-in-100 or 1-in-500 year | Ground floors inside the extent −8% to −16%; first floors −4% in a 1-in-500; −1.5% for the building |
+| Solar | Rooftop panels and the winter sun path | Winter sun from −5% (shaded by the row in front) to +4% (full sun); rooftop solar +1.2% |
+
+Colours, hover tags, the trend chart and the apartment card all use the adjusted values, and the card lists each location factor with the net effect. The model is in `src/spec/site-layers.js` (`npm run test:site-layers`); the figures are illustrative, not valuation methodology.
+
 **5. Walk through a home.** **Walk a home** (top right) opens a furnished townhouse with real furniture, materials and sky photographs. Take the guided tour, walk room to room, switch to the dollhouse view, change the light and restyle the interior.
 
 | Welcome | Inside |

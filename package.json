@@ -14,7 +14,8 @@
     "test:hover": "node tests/hover.mjs",
     "test:development": "node tests/development.mjs",
     "test:valuations": "node tests/valuations.mjs",
-    "test:gestures": "node tests/gestures.mjs"
+    "test:gestures": "node tests/gestures.mjs",
+    "test:site-layers": "node tests/site-layers.mjs"
   },
   "devDependencies": {
     "esbuild": "0.24.2",

@@ -3,8 +3,10 @@ import * as THREE from 'three';
 import { rng } from '../util.js';
 import { box, cyl, merge, std, surface, m4, instanced, gridTexture } from './helpers.js';
 
-export function buildSurroundings(kind, setting, X, Z) {
+/** clear: optional [[zMin, zMax], …] bands kept free of skyline and trees (for example a river or motorway). */
+export function buildSurroundings(kind, setting, X, Z, clear = []) {
   const g = new THREE.Group();
+  const blocked = (z, pad = 0) => clear.some(([a, b]) => z > a - pad && z < b + pad);
   const night = false;
   const water = ['harbour', 'beach', 'waterfront'].includes(setting);
   const shoreZ = Z / 2 + 34;
@@ -33,6 +35,7 @@ export function buildSurroundings(kind, setting, X, Z) {
     const px = Math.cos(a) * d, pz = Math.sin(a) * d;
     if (water && pz > shoreZ - 30) continue;
     if (Math.abs(px) < X / 2 + 40 && Math.abs(pz) < Z / 2 + 40) continue;
+    if (blocked(pz, 18)) continue;
     const h = 8 + Math.pow(r(), 1.6) * hMax;
     pos.push(new THREE.Vector3(px, h / 2, pz)); scl.push([12 + r() * 18, h, 12 + r() * 18]);
   }
@@ -55,7 +58,7 @@ export function buildSurroundings(kind, setting, X, Z) {
   }
   if (setting === 'park' || setting === 'beach' || setting === 'mountain') {
     const tp = [];
-    for (let i = 0; i < 70; i++) { const a = r() * Math.PI * 2, d = X / 2 + 14 + r() * 70; const p = new THREE.Vector3(Math.cos(a) * d, 0, Math.sin(a) * d * 0.8); if (water && p.z > shoreZ - 8) continue; tp.push(p); }
+    for (let i = 0; i < 70; i++) { const a = r() * Math.PI * 2, d = X / 2 + 14 + r() * 70; const p = new THREE.Vector3(Math.cos(a) * d, 0, Math.sin(a) * d * 0.8); if (water && p.z > shoreZ - 8) continue; if (blocked(p.z, 4)) continue; tp.push(p); }
     g.add(instanced(cyl(0.16, 0.27, 3.5, 0, 1.75, 0), surface('wood', '#64513f'), tp));
     const foliage = [];
     for (let i = 0; i < 12; i++) { const a = i * 2.399; foliage.push(new THREE.SphereGeometry(1.0, 12, 8).scale(1, 1.35, 1).translate(Math.cos(a) * (i % 3) * 0.5, 3.6 + (i % 4) * 0.45, Math.sin(a) * (i % 3) * 0.5)); }

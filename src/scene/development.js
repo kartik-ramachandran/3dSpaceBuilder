@@ -8,26 +8,19 @@ import { lerp } from '../util.js';
 import { box, merge, std, surface, hitMat, instanced, gridTexture, repeatTex, zoneMats, m4 } from './helpers.js';
 import { buildSurroundings } from './surroundings.js';
 import { addFurniture, furniturePalette } from './furniture.js';
+import { DEV, developmentLayout } from '../spec/site-layout.js';
+import { buildSiteLayers } from './site-layers.js';
 
-const UW = 7.5, D = 11, FH = 3.2, BASE = 0.6, GAP_X = 16, GAP_Z = 26, BALCONY = 1.6;
+const { UW, D, FH, BASE, GAP_Z, BALCONY } = DEV;
 
 export function buildDevelopment(sp) {
   const group = new THREE.Group();
   const zones = new Map();
   const palette = furniturePalette(sp.design);
   const { buildings, rows, floors, unitsPerFloor } = sp.shell;
-  const cols = Math.ceil(buildings / rows);
-  const BX = unitsPerFloor * UW;                      // building width along x
-  const siteX = cols * BX + (cols - 1) * GAP_X, siteZ = rows * D + (rows - 1) * GAP_Z;
-  const H = BASE + floors * FH;
-
-  // Building origins: row 0 at the front (+z), columns left to right; letters run A, B, C… in that order.
-  const origin = (b) => {
-    const i = b - 1, r = Math.floor(i / cols), c = i % cols;
-    const inRow = Math.min(cols, buildings - r * cols);      // centre a short last row
-    const rowW = inRow * BX + (inRow - 1) * GAP_X;
-    return new THREE.Vector3(-rowW / 2 + BX / 2 + c * (BX + GAP_X), 0, siteZ / 2 - D / 2 - r * (D + GAP_Z));
-  };
+  const layout = developmentLayout(sp.shell);         // shared with the valuation model's location effects
+  const { BX, siteX, siteZ, H } = layout;              // BX: building width along x
+  const origin = (b) => layout.origin(b);              // { x, z, row, col }; row 0 at the front (+z)
 
   // shared shell pieces
   const slabMat = std('#d4cec3'), roofMat = std('#b9b2a6'), wallMat = std(sp.design?.wallColor || '#e2ddd4', { roughness: 0.85 });
@@ -116,10 +109,13 @@ export function buildDevelopment(sp) {
   const labels = [];
   for (let b = 1; b <= buildings; b++) { const o = origin(b); labels.push({ text: `Building ${String.fromCharCode(64 + b)}`, pos: new THREE.Vector3(o.x, H + 2.4, o.z) }); }
 
-  const env = buildSurroundings('office', 'park', siteX, siteZ);
-  const root = new THREE.Group(); root.add(env, group);
+  // Site layers (river, roads, motorway, flood, solar): toggled from the valuation panel
+  const site = buildSiteLayers(layout);
+  labels.push(...site.labels);
+  const env = buildSurroundings('office', 'park', siteX, siteZ, site.clearBands);
+  const root = new THREE.Group(); root.add(env, group, site.group);
   return {
-    labels,
+    labels, layout, siteLayers: site,
     valuationLayer: {
       setVisible(on) { blocks.visible = on; },
       setColor(id, color) { const i = unitIndex.get(id); if (i === undefined) return; blocks.setColorAt(i, color); blocks.instanceColor.needsUpdate = true; },
@@ -132,11 +128,12 @@ export function buildDevelopment(sp) {
     },
     setContext(on) { env.visible = on; },
     kind: 'development', group: root, zones, glassLabel: 'Glass facades', levels: floors,
-    fitBox: new THREE.Box3(new THREE.Vector3(-siteX / 2 - 6, 0, -siteZ / 2 - 6), new THREE.Vector3(siteX / 2 + 6, H + 2, siteZ / 2 + 8)),
+    // frame the site plus the river in front and the motorway behind
+    fitBox: new THREE.Box3(new THREE.Vector3(-siteX / 2 - 6, 0, site.extent.zMin), new THREE.Vector3(siteX / 2 + 6, H + 2, site.extent.zMax)),
     target: new THREE.Vector3(0, H * 0.35, 0),
     dirs: { wide: new THREE.Vector3(0.55, 0.62, 1), tall: new THREE.Vector3(0.45, 0.7, 1) },
     applyGlass(g) { [fSide, fFront].forEach((m) => { m.opacity = lerp(0.97, 0.06, g); m.emissiveIntensity = lerp(0.12, 0.01, g); m.depthWrite = g < 0.02; }); },
     setView(on) { facades.forEach((f) => { f.visible = !on; }); },
-    update() {},
+    update(dt, t) { site.update(dt, t); },
   };
 }

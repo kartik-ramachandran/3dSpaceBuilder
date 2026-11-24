@@ -51,7 +51,12 @@
       <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
       <div class="vseg" role="group" aria-label="Selection"><button type="button" data-pick="unit" aria-pressed="true">Select unit</button><button type="button" data-pick="floor" aria-pressed="false">Select floor</button></div>
       <p class="val-hint">Click an apartment to select it. Esc clears.</p>
-      <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (streets, trees, skyline)</label>
+      <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (trees, skyline)</label>
+      <div class="val-layers">
+        <div class="vl-head"><span>Site layers</span><select id="valAddLayer" aria-label="Add a site layer"></select></div>
+        <ul id="valLayerList" aria-label="Site layers and their effect on values"></ul>
+        <p class="val-note" id="valLayerNet"></p>
+      </div>
       <label class="val-field"><span>Colour by</span>
         <select id="valColour"><option value="valuation">Market valuation</option><option value="zones">Building colours</option></select></label>
       <div class="val-scale">

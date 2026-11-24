@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { $ } from './util.js';
 import { buildValuations, fitTrend, quarterLabel, QUARTERS } from './spec/valuations.js';
+import { LAYER_TYPES, FLOOD_EVENTS, applyLayers, layerSummary } from './spec/site-layers.js';
 
 const LOW = new THREE.Color('#dbe8ff'), HIGH = new THREE.Color('#0b3fa8');
 const NONE = new THREE.Color('#3b4252'), HOVER = new THREE.Color('#ffd23f'), PICK = new THREE.Color('#ff5fd2');
@@ -17,7 +18,10 @@ const letter = (b) => String.fromCharCode(64 + b);
 
 export function createValuationPanel({ onSelect, onFly, onLayout }) {
   const controls = $('#valControls'), panel = $('#valPanel'), labelsEl = $('#valLabels');
-  let world = null, spec = null, data = null, chart = null;
+  let world = null, spec = null, data = null, base = null, chart = null;
+  // Site layers on the map: id → { on, event? }. A layer missing from here has been removed (it can be added back).
+  const layers = { river: { on: true }, roads: { on: true }, motorway: { on: true }, flood: { on: true, event: 100 }, solar: { on: true } };
+  const pctText = (p) => `${p > 0 ? '+' : p < 0 ? '−' : ''}${Math.abs(p * 100).toFixed(1)}%`;
   let colourBy = 'valuation', pick = 'unit', scope = 'project', hovered = null, selected = null;
   const fmt = (v) => {
     try { return new Intl.NumberFormat('en-NZ', { style: 'currency', currency: spec.currency, currencyDisplay: 'code', maximumFractionDigits: 0 }).format(v).replace(/ /g, ' '); }
@@ -39,6 +43,50 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
     }
   });
   $('#valContext').addEventListener('change', (e) => world?.setContext(e.target.checked));
+
+  /* ---------- site layers: toggle, remove, add back, flood event ---------- */
+  const layerList = $('#valLayerList'), addLayer = $('#valAddLayer');
+  layerList.addEventListener('change', (e) => {
+    const id = e.target.closest('[data-layer]')?.dataset.layer; if (!id || !layers[id]) return;
+    if (e.target.matches('input[type="checkbox"]')) layers[id].on = e.target.checked;
+    if (e.target.matches('select')) { layers.flood.event = Number(e.target.value); world?.siteLayers.setFloodEvent(layers.flood.event); }
+    recompute();
+  });
+  layerList.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-remove]'); if (!b) return;
+    delete layers[b.dataset.remove]; recompute();
+  });
+  addLayer.addEventListener('change', () => {
+    const id = addLayer.value; if (!id) return;
+    layers[id] = id === 'flood' ? { on: true, event: 100 } : { on: true };
+    if (id === 'flood') world?.siteLayers.setFloodEvent(100);
+    recompute();
+  });
+  function renderLayers() {
+    layerList.innerHTML = LAYER_TYPES.filter((t) => layers[t.id]).map((t) => {
+      const L = layers[t.id], s = layerSummary(data, t.id);
+      const effect = !L.on ? 'Off: no effect on values' : s.count ? `${s.count} apartment${s.count > 1 ? 's' : ''} · ${s.min === s.max ? pctText(s.min) : `${pctText(s.min)} to ${pctText(s.max)}`}` : 'No apartments affected';
+      const flood = t.id === 'flood' ? `<select aria-label="Flood event">${Object.entries(FLOOD_EVENTS).map(([k, v]) => `<option value="${k}"${Number(k) === L.event ? ' selected' : ''}>${v.label}</option>`).join('')}</select>` : '';
+      return `<li data-layer="${t.id}"><label><input type="checkbox"${L.on ? ' checked' : ''}><i style="background:${t.color}"></i><b>${t.name}</b></label>${flood}
+        <button type="button" class="vl-x" data-remove="${t.id}" aria-label="Remove ${t.name} layer" title="Remove layer">×</button>
+        <span class="vl-sub">${t.blurb}</span><span class="vl-eff">${effect}</span></li>`;
+    }).join('');
+    const missing = LAYER_TYPES.filter((t) => !layers[t.id]);
+    addLayer.innerHTML = `<option value="">${missing.length ? '+ Add layer' : 'All layers added'}</option>` + missing.map((t) => `<option value="${t.id}">${t.name}</option>`).join('');
+    addLayer.disabled = !missing.length;
+    // net movement across the development
+    const f = [...data.byZone.values()].map((e) => e.factor - 1);
+    $('#valLayerNet').textContent = f.some((x) => Math.abs(x) > 1e-4) ? `Location factors move apartment values by ${pctText(Math.min(...f))} to ${pctText(Math.max(...f))}.` : 'No location factors applied.';
+  }
+  /** Re-applies the layers to the base valuations and refreshes everything that shows them. */
+  function recompute() {
+    if (!world) return;
+    data = applyLayers(base, spec, world.layout, layers);
+    for (const t of LAYER_TYPES) world.siteLayers.setActive(t.id, !!layers[t.id]?.on);
+    $('#valMin').textContent = `${fmt(data.min)} · lowest`;
+    $('#valMax').textContent = `highest · ${fmt(data.max)}`;
+    renderLayers(); paint(); renderDetails(); updateChart();
+  }
   $('#valColour').addEventListener('change', (e) => { colourBy = e.target.value; world?.valuationLayer.setVisible(colourBy === 'valuation'); controls.dataset.colour = colourBy; paint(); });
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
@@ -79,6 +127,8 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
       <table class="vu-hist"><thead><tr><th>Quarter</th><th>Purpose</th><th>Rate /m²</th><th>Value</th></tr></thead><tbody>
         ${e.valuations.slice().reverse().map((v) => `<tr><td>${v.quarter}</td><td>${v.purpose}</td><td>${fmt(v.rate)}</td><td>${fmt(v.value)}</td></tr>`).join('')}
       </tbody></table>` : `<p class="vu-empty">No market valuation for this apartment yet. Its example value is ${fmt(z.price)} (illustrative).</p>`}
+      ${e.effects.length ? `<div class="vu-loc"><h4>Location factors</h4><ul>${e.effects.map((x) => `<li><span>${x.label}</span><b class="${x.pct > 0 ? 'up' : 'down'}">${pctText(x.pct)}</b></li>`).join('')}
+        <li class="net"><span>Net${e.baseLatest ? ` · before factors ${fmt(e.baseLatest.value)}` : ''}</span><b class="${e.factor >= 1 ? 'up' : 'down'}">${pctText(e.factor - 1)}</b></li></ul></div>` : ''}
       <canvas class="vu-plan" aria-label="Floor plan of apartment ${z.name}"></canvas>
       <button class="primary" data-act="fly">Stand on the balcony</button>`;
     drawPlan(box.querySelector('.vu-plan'), z);
@@ -166,7 +216,10 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
   let labelEls = [];
   function buildLabels() {
     labelsEl.textContent = '';
-    labelEls = (world?.labels || []).map((l) => { const d = document.createElement('div'); d.className = 'val-label'; d.textContent = l.text; labelsEl.appendChild(d); return { el: d, pos: l.pos }; });
+    labelEls = (world?.labels || []).map((l) => {
+      const d = document.createElement('div'); d.className = l.layer ? `val-label layer-${l.layer}` : 'val-label'; d.textContent = l.text;
+      labelsEl.appendChild(d); return { el: d, src: l };
+    });
   }
   const tmp = new THREE.Vector3();
 
@@ -177,7 +230,11 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
       controls.hidden = panel.hidden = !on; labelsEl.hidden = !on;
       document.body.classList.toggle('has-valuations', on);
       if (!on) { labelsEl.textContent = ''; labelEls = []; data = null; return; }
-      data = buildValuations(sp);
+      base = buildValuations(sp);
+      data = applyLayers(base, sp, world.layout, layers);
+      for (const t of LAYER_TYPES) world.siteLayers.setActive(t.id, !!layers[t.id]?.on);
+      if (layers.flood) world.siteLayers.setFloodEvent(layers.flood.event);
+      renderLayers();
       $('#valLede').textContent = `${sp.zones.length} apartments across ${sp.shell.buildings} building${sp.shell.buildings > 1 ? 's' : ''}.`;
       $('#valMin').textContent = `${fmt(data.min)} · lowest`;
       $('#valMax').textContent = `highest · ${fmt(data.max)}`;
@@ -204,8 +261,10 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
     frame(camera, visible) {
       if (!world) return;
       for (const l of labelEls) {
-        tmp.copy(l.pos).project(camera);
-        const show = visible && tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
+        if (l.src.layer && l.el.textContent !== l.src.text) l.el.textContent = l.src.text;   // the flood label changes with the event
+        tmp.copy(l.src.pos).project(camera);
+        const layerOn = !l.src.layer || layers[l.src.layer]?.on;
+        const show = visible && layerOn && tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
         l.el.style.opacity = show ? 1 : 0;
         if (show) l.el.style.transform = `translate(${(tmp.x + 1) / 2 * innerWidth}px, ${(1 - tmp.y) / 2 * innerHeight}px) translate(-50%, -100%)`;
       }
