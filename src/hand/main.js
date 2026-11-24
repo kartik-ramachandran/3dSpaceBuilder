@@ -24,7 +24,6 @@ const spec = normalize(PRESETS.development);
 const data = buildValuations(spec);
 const fmt = (v) => { try { return new Intl.NumberFormat('en-NZ', { style: 'currency', currency: spec.currency, currencyDisplay: 'code', maximumFractionDigits: 0 }).format(v).replace(/ /g, ' '); } catch (e) { return `${spec.currency} ${Math.round(v)}`; } };
 $('#name').textContent = spec.name;
-$('#meta').textContent = `${spec.zones.length} apartments · ${spec.shell.buildings} buildings · ${spec.shell.floors} floors`;
 $('#lo').textContent = `${fmt(data.min)} /m²`; $('#hi').textContent = `${fmt(data.max)} /m²`;
 
 /* ---------- renderer, background video pass, hologram scene, bloom ---------- */
@@ -63,6 +62,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
 camera.position.set(0, 1.55, 3.3); camera.lookAt(0, 0.35, 0);
 const holo = buildHologram(spec, data);
+$('#meta').textContent = `${holo.units.size} apartments · ${spec.shell.buildings} buildings · ${spec.shell.floors} floors`;   // the low-rise buildings shown in the hologram
 const turntable = new THREE.Group(); turntable.add(holo.root); scene.add(turntable);
 turntable.position.y = 0.05;
 

@@ -43,7 +43,9 @@ export function buildHologram(spec, data) {
     }
   }
   for (const z of spec.zones) {
+    // The hologram shows the low-rise buildings; the 100-storey tower flats (z.tower) have no floor group here.
     const g = floorGroups.get(`${z.building}-${z.floor}`);
+    if (!g) continue;
     const x = -BX / 2 + (z.unit - 0.5) * UW;
     const color = baseColor(z.id);
     const fill = new THREE.Mesh(unitGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3, depthWrite: false }));   // normal blending keeps the valuation colours readable
