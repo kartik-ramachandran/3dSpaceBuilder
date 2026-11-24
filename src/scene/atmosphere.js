@@ -52,7 +52,12 @@ export function createAtmosphere(renderer, scene) {
     office: { top: '#3f74bd', horizon: '#e9dfcc', bottom: '#8a9bab', sun: [0.5, 0.3, 0.8], sunColor: '#fff1d6', fog: '#d4dbe2', fogNear: 220, fogFar: 1500, hemi: ['#d6e6ff', '#8e8a7e', 0.45], dir: ['#fff3e0', 2.2, [250, 300, 380]], exposure: 0.95 },
   };
   function setAtmosphere(kind) {
-    const a = kind === 'stadium' ? { ...ATMOS.office, fogNear: 650, fogFar: 2600, exposure: 0.9 } : kind === 'development' ? { ...ATMOS.hotel, fogNear: 400, fogFar: 2200 } : ATMOS[kind] || ATMOS.office;
+    const a = kind === 'stadium' ? { ...ATMOS.office, fogNear: 650, fogFar: 2600, exposure: 0.9 } : kind === 'development' ? { ...ATMOS.office, fogNear: 650, fogFar: 2600, exposure: 0.9 } : ATMOS[kind] || ATMOS.office;
+    const shadowSize = kind === 'development' ? 4096 : 2048;
+    if (sun.shadow.mapSize.x !== shadowSize) {
+      sun.shadow.mapSize.set(shadowSize, shadowSize);
+      sun.shadow.map?.dispose(); sun.shadow.map = null;
+    }
     const u = sky.material.uniforms;
     u.top.value = rgb(a.top); u.horizon.value = rgb(a.horizon); u.bottom.value = rgb(a.bottom);
     u.sunDir.value.set(...a.sun).normalize(); u.sunColor.value = rgb(a.sunColor);

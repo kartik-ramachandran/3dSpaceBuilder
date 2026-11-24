@@ -174,14 +174,14 @@ function applySpec(sp, statusMsg, statusKind) {
   navigation.reset();
   controls.autoRotate = false;
   // signature moment: shell turns to glass, then each zone lights in turn
-  glass = 0; glassTarget = 1; world.applyGlass(0);
-  $('#glassBtn').setAttribute('aria-pressed', 'true');
+  glass = 0; glassTarget = sp.kind === 'development' ? 0 : 1; world.applyGlass(0);
+  $('#glassBtn').setAttribute('aria-pressed', String(glassTarget === 1));
   $('#glassBtn').disabled = world.hasRoof === false;
   const ids = [...world.zones.keys()];
   const flashStep = Math.min(170, 2400 / Math.max(1, ids.length));  // a 96-apartment site still lights up in ~2.4 s
   setTimeout(() => {
     if (token !== buildToken) return;
-    tween(1500, (k) => { glass = k; world.applyGlass(k); }).then(() => {
+    tween(1500, (k) => { glass = sp.kind === 'development' ? 0 : k; world.applyGlass(glass); }).then(() => {
       ids.forEach((id, i) => setTimeout(() => { if (token === buildToken && zoneLevels.get(id)) zoneLevels.get(id).flash = 1; }, reduceMotion ? 0 : i * flashStep));
     });
   }, reduceMotion ? 0 : 700);
@@ -221,7 +221,7 @@ function renderHud() {
     if (spec.kind === 'plane') meta = [spec.shell.route, `${zs.length} cabins`, `${sum(zs.filter((z) => !['bar'].includes(z.type)).map((z) => z.type === 'residence' ? z.capacity * 2 : z.capacity))} seats`].filter(Boolean).join(' · ');
     if (spec.kind === 'hotel') meta = `${sum(zs.filter((z) => z.type !== 'amenity').map((z) => z.capacity))} keys · ${world.levels} floors · ${spec.shell.setting}`;
     if (spec.kind === 'office') meta = `${sum(zs.filter((z) => z.type === 'desks').map((z) => z.capacity))} desks · ${world.levels} levels · ${spec.shell.setting}`;
-    if (spec.kind === 'development') meta = `${spec.shell.buildings} building${spec.shell.buildings > 1 ? 's' : ''} · ${zs.length} apartments · ${spec.shell.floors} floors`;
+    if (spec.kind === 'development') meta = `${world.layout.totalBuildings} building${world.layout.totalBuildings > 1 ? 's' : ''} · ${zs.length} apartments · up to ${world.layout.maxFloors} floors`;
     if (spec.kind === 'stadium') meta = `${spec.shell.sport[0].toUpperCase() + spec.shell.sport.slice(1)} · ${sum(zs.map((z) => z.capacity)).toLocaleString('en-NZ')} seats · ${spec.shell.tiers} tiers`;
   }
   $('#spaceMeta').textContent = meta;

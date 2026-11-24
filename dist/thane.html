@@ -1,0 +1,2694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23182e30'/%3E%3Ctext x='10' y='30' font-size='30' fill='%23d3eac5'%3ET%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#0c171d"><title>Thane Atlas | Vrindavan Residences</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<style>:root{color-scheme:dark;font-family:Inter,"Segoe UI",sans-serif;color:#f1f4ef;background:#0c171d;font-synthesis:none}*{box-sizing:border-box}body{margin:0;overflow:hidden}button,a,input,select{-webkit-tap-highlight-color:transparent}button,input,select{font:inherit}button,a{touch-action:manipulation}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #c9edbc;outline-offset:4px}[hidden]{display:none!important}#map{position:fixed;inset:0;background:#162a32}.vignette{position:fixed;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(7,20,26,.8),transparent 42%),linear-gradient(0deg,rgba(7,20,26,.9),transparent 23%,transparent 75%,rgba(7,20,26,.68))}header{position:fixed;top:30px;left:38px;right:38px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}header a{pointer-events:auto;text-decoration:none;color:inherit}.brand{display:flex;gap:12px;align-items:center;font-size:18px;letter-spacing:5px;font-weight:700}.brand-mark{font-family:Georgia,serif;font-size:36px;border:1px solid #a8baae;padding:0 9px;line-height:44px;letter-spacing:0;font-weight:400}.brand-sub{display:block;font-size:9px;letter-spacing:3px;font-weight:400;margin-top:5px}.header-right{display:flex;gap:30px;align-items:center;font-size:14px}.live-label{font-size:11px;letter-spacing:2px;color:#bdd0c5}.header-right a{border-bottom:1px solid #758e87;padding:8px 0}.intro{position:fixed;top:23%;left:48px;max-width:370px;pointer-events:none}.eyebrow{font-size:11px;letter-spacing:2.1px;color:#c7ddbe;font-weight:600}h1{font-size:clamp(38px,4.6vw,70px);line-height:1.04;font-weight:350;letter-spacing:-2.8px;margin:22px 0}p{line-height:1.6}.intro p{max-width:280px;font-size:15px;color:#cad3d2}.intro-rule{width:50px;height:1px;background:#a7c09e;margin:28px 0 18px}.coordinate{font-size:11px;letter-spacing:1.5px;color:#afc4c3}.glass{background:rgba(12,28,34,.9);border:1px solid rgba(213,232,225,.18);backdrop-filter:blur(22px);box-shadow:0 18px 60px #0003}.destination{position:fixed;right:38px;top:27%;width:310px;padding:25px;border-radius:5px}h2{font-size:28px;font-weight:400;letter-spacing:-.6px;margin:12px 0}.destination p{font-size:14px;color:#becbc9;margin:0 0 25px}.destination-meta{display:flex;justify-content:space-between;border-top:1px solid #ffffff21;padding-top:18px;font-size:12px;color:#c6d1cc;margin-bottom:24px}.primary,.secondary{width:100%;min-height:46px;border-radius:3px;border:0;font-size:14px}.primary{color:#1a3029;background:#d3eac5;font-weight:600}.primary:hover{background:#e4f5da}.secondary{border:1px solid #92ad9c;background:transparent;color:#d4e7d3;margin-top:16px}.destination small{display:block;font-size:11px;color:#9fb4b3;margin-top:14px;text-align:center}.map-tools{position:fixed;left:48px;bottom:153px;display:flex;border-radius:4px;padding:4px;gap:3px}.map-tools button{font-size:12px;color:#d2deda;background:transparent;border:0;padding:10px 13px;border-radius:2px}.map-tools button[aria-pressed=true]{background:#e1f0d720;color:#def3cf}.journey{position:fixed;bottom:54px;left:50%;transform:translateX(-50%);display:flex;align-items:center;padding:17px 25px;gap:22px;border-radius:5px}.journey button{display:flex;gap:13px;align-items:center;background:none;color:#a3b7ba;border:0;padding:3px;text-align:left;font-size:15px;white-space:nowrap}.journey button small{display:block;font-size:10px;margin-top:5px;color:#8ca5a9;letter-spacing:.3px}.journey button[aria-current=step]{color:#d5efc5}.step-icon{display:flex;align-items:center;justify-content:center;border:1px solid #456062;border-radius:50%;width:33px;height:33px;font-size:10px}.journey button[aria-current] .step-icon{background:#d5efc5;color:#1b342e;border-color:#d5efc5}.journey-line{width:40px;height:1px;background:#456062}.map-hint{position:fixed;bottom:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#a6bcbf;white-space:nowrap}.source-note{position:fixed;bottom:12px;left:14px;font-size:9px;line-height:1.5;color:#bbcece;max-width:300px}.status{position:fixed;left:48px;bottom:207px;font-size:12px;color:#d9e5dd;max-width:330px}.status:empty{display:none}.maplibregl-ctrl-top-right{top:100px;right:28px}.maplibregl-ctrl-attrib{font-size:9px!important;background:#11242adb!important;color:#afc4c5!important}.maplibregl-ctrl-attrib a{color:#d0dcd9!important}.pin{border:0;background:#d7edc9;color:#183b31;border-radius:5px;padding:12px 17px;box-shadow:0 4px 35px #0007;font-size:13px;font-weight:600;cursor:pointer}.pin:after{content:"";position:absolute;bottom:-8px;left:calc(50% - 8px);border-width:8px 8px 0;border-style:solid;border-color:#d7edc9 transparent transparent}.pin small{display:block;font-size:9px;font-weight:400;margin-top:4px}.valuation{position:fixed;top:114px;right:38px;bottom:155px;width:340px;padding:22px;overflow:auto;border-radius:5px;scrollbar-width:thin}.panel-heading{display:flex;align-items:start;gap:8px}.panel-heading h2{font-size:22px;margin:10px 0}.demo{font-size:8px;letter-spacing:1px;border:1px solid #b5ac7c;color:#e5d9a8;white-space:nowrap;padding:5px;margin-top:2px}.panel-note,.panel-foot{font-size:11px;color:#abc0be;line-height:1.5}.selectors{display:grid;grid-template-columns:1fr 85px;gap:12px;margin:23px 0 15px}.selectors label{font-size:11px;color:#b3c6c2}.selectors select,.selectors input{display:block;margin-top:8px;width:100%;padding:10px 9px;background:#21383c;border:1px solid #526c6d;border-radius:3px;color:#fff;font-size:14px}#floorRange{width:100%;accent-color:#d0eac3}.floor-scale{display:flex;justify-content:space-between;font-size:9px;color:#92adad;margin:4px 0 20px}.units{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.unit{padding:11px 9px;color:#c0d3ce;border:1px solid #48615f;background:transparent;border-radius:3px;text-align:left;font-size:12px}.unit small{display:block;font-size:10px;color:#a3b8b2;margin-top:5px}.unit[aria-pressed=true]{background:#d0eac3;color:#1c3931;border-color:#d0eac3}.unit[aria-pressed=true] small{color:#456b5a}.value-label{font-size:10px;letter-spacing:1px;color:#a9c5b5;margin-top:23px}.price{font-size:38px;letter-spacing:-1.3px;margin:7px 0 13px}.unit-facts{display:flex;justify-content:space-between;padding:12px 0;border-block:1px solid #ffffff24;font-size:12px;color:#bbceca}.history{margin-top:16px}.history header{position:static;display:flex;font-size:10px;color:#b5c8c4;pointer-events:auto}.history svg{width:100%;height:65px;margin-top:7px}.scene-note{position:fixed;top:100px;left:48px}.development .intro{top:120px}.development h1{font-size:34px;letter-spacing:-1px}.development .intro p{max-width:240px;font-size:13px}.development .intro-rule,.development .coordinate{display:none}.neighbourhood h1{font-size:58px}.maplibregl-canvas:focus{outline:none}@media(max-width:1000px){.intro{left:28px;max-width:250px}.intro h1{font-size:46px}.destination{right:25px;width:270px}.valuation{right:20px;width:310px}.development .intro{max-width:190px}.development h1{font-size:27px}.map-tools{left:28px}.status{left:28px}}@media(max-width:650px){header{top:18px;left:18px;right:18px}.header-right .live-label{display:none}.brand{font-size:14px}.brand-mark{font-size:28px;line-height:36px}.brand-sub{font-size:8px}.header-right a{font-size:12px}.intro{top:100px;left:22px;max-width:240px}.intro h1,.neighbourhood h1{font-size:38px;letter-spacing:-1.5px;margin:14px 0}.intro p{font-size:12px;max-width:205px}.intro-rule,.coordinate{display:none}.destination{top:auto;bottom:140px;right:18px;width:235px;padding:18px}.destination h2{font-size:23px}.destination p,.destination-meta{display:none}.destination .primary{margin-top:10px}.destination small{font-size:9px}.journey{bottom:42px;padding:12px;gap:10px;width:calc(100% - 28px);justify-content:space-between}.journey button{font-size:12px;gap:7px}.journey button small{font-size:8px}.journey-line{width:10px}.step-icon{width:24px;height:24px;font-size:8px}.map-hint{bottom:22px;font-size:8px}.map-tools{left:18px;bottom:113px;padding:2px}.map-tools button{font-size:10px;padding:7px 9px}.source-note{display:none}.status{left:22px;top:83px;bottom:auto;font-size:10px;max-width:75%}.maplibregl-ctrl-top-right{top:82px;right:8px}.valuation{top:auto;bottom:148px;right:14px;left:14px;width:auto;max-height:43vh;padding:16px}.development .intro{top:95px;left:22px}.development .intro h1{font-size:24px}.development .intro p{display:none}.valuation h2{font-size:20px}.selectors{margin:12px 0}.panel-note{margin:4px 0}.units{grid-template-columns:repeat(4,1fr)}.unit{font-size:10px;padding:9px 5px}.unit small{font-size:9px}.price{font-size:30px}.panel-foot{margin-bottom:0}.development .map-tools{bottom:112px}.maplibregl-ctrl-attrib{max-width:80vw}.maplibregl-ctrl-bottom-left{bottom:0}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+#streetView{display:none}.development #streetView{display:block}
+
+@media(max-width:650px){.valuation{display:flex;flex-direction:column}.panel-heading{order:0}.panel-note{order:1}#unitDetail{display:contents}.value-label{order:2;margin-top:8px}.price{order:3;margin:4px 0 10px}.selectors{order:4}#floorRange{order:5}.floor-scale{order:6}.units{order:7}.unit-facts{order:8;margin-top:12px}.history{order:9}#focusFlat{order:10}.panel-foot{order:11}}
+
+/* values on every flat, hover tag, location factors, real street view link */
+.unit .unit-price{display:block;margin-top:4px;font-size:12.5px;font-weight:600;color:#d3eab9;font-variant-numeric:tabular-nums}
+.flat-tip{position:fixed;left:0;top:0;z-index:30;pointer-events:none;padding:9px 12px;border-radius:10px;display:grid;gap:2px;min-width:180px}
+.flat-tip b{font-size:13.5px}.flat-tip span{font-size:13px;color:#d3eab9;font-variant-numeric:tabular-nums}.flat-tip small{font-size:11px;opacity:.7}
+.value-key{position:fixed;left:16px;bottom:96px;z-index:5;padding:9px 12px;border-radius:10px;width:220px;font-size:11px;letter-spacing:.06em}
+.value-key i{display:block;height:8px;border-radius:3px;margin:6px 0 4px;background:linear-gradient(90deg,rgb(219,232,255),rgb(11,63,168))}
+.value-key div{display:flex;justify-content:space-between}.value-key small{font-variant-numeric:tabular-nums}
+.factors{margin-top:12px;border:1px solid rgba(211,234,185,.22);border-radius:10px;padding:9px 11px;font-size:12.5px}
+.factors header{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+.factors ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}.factors li{display:flex;justify-content:space-between;gap:10px}
+.factors li.net{border-top:1px solid rgba(211,234,185,.22);padding-top:5px;margin-top:2px}.factors b{font-variant-numeric:tabular-nums}
+.factors .up{color:#a9e8b8}.factors .down{color:#ffab95}.factors p{margin:0;opacity:.8}
+.map-tools a{display:inline-flex;align-items:center;text-decoration:none;font-size:12px;color:#d2deda;padding:10px 13px;border-radius:2px;white-space:nowrap}.map-tools a:hover{background:#e1f0d714}
+</style>
+</head>
+<body>
+<div id="map" aria-label="Interactive 3D map of Thane"></div>
+<div class="vignette" aria-hidden="true"></div>
+<header><a class="brand" href="index.html"><span class="brand-mark">T</span><span>THANE<span class="brand-sub">SPATIAL ATLAS</span></span></a><div class="header-right"><span class="live-label">CITY EXPLORER</span><a href="index.html">Space builder</a></div></header>
+<main>
+<section class="intro" aria-labelledby="chapterTitle"><div class="eyebrow" id="chapterLabel">MAHARASHTRA, INDIA</div><h1 id="chapterTitle">A city.<br>A thousand<br>perspectives.</h1><p id="chapterText">From the skyline of Thane to the streets of Vrindavan. Find your place in the bigger picture.</p><div class="intro-rule"></div><div class="coordinate">19.2090&deg; N &nbsp; 72.9833&deg; E</div></section>
+<section class="destination glass" id="destination"><div class="eyebrow">YOUR DESTINATION</div><h2>Vrindavan</h2><p>A neighbourhood within the city.</p><div class="destination-meta"><span>Thane West</span><span>3D exploration</span></div><button class="primary" id="nextStep">Explore Vrindavan</button><small>Real geography. Illustrative development.</small></section>
+<section class="valuation glass" id="valuation" hidden aria-label="Apartment valuations"><div class="panel-heading"><div><div class="eyebrow">VRINDAVAN RESIDENCES</div><h2>Find your apartment</h2></div><span class="demo">DUMMY DATA</span></div><p class="panel-note">Illustrative 100-storey development, not an existing project or market appraisal.</p><div class="selectors"><label>Building<select id="buildingSelect"></select></label><label>Floor<input id="floorNumber" type="number" value="50" min="1" max="100"></label></div><input id="floorRange" type="range" min="1" max="100" value="50" aria-label="Select floor"><div class="floor-scale"><span>Ground level</span><span id="maxFloorLabel">Level 100</span></div><div id="unitList" class="units" aria-label="Apartments on this floor"></div><div id="unitDetail" aria-live="polite"></div><button id="focusFlat" class="secondary">Focus on this flat</button><p class="panel-foot">Each flat has its own generated value. All amounts are INR.</p></section>
+</main>
+<div class="map-tools glass"><button id="satellite" aria-pressed="true">Satellite</button><button id="buildings" aria-pressed="true">3D buildings</button><button id="activity" aria-pressed="true">Street life</button><button id="values" aria-pressed="true" title="Colour every flat by its value">Values</button><button id="streetView">Street view</button><a id="realStreetView" href="https://www.google.com/maps/@?api=1&amp;map_action=pano&amp;viewpoint=19.209007,72.983287" target="_blank" rel="noopener" title="Real street-level photos in Google Street View (opens a new tab)">Real Street View &#8599;</a><button id="orbit" aria-pressed="false">Orbit</button></div>
+<div class="flat-tip glass" id="flatTip" hidden></div><div class="value-key glass" id="valueKey" hidden><span>Value per m&sup2;</span><i></i><div><small id="valueKeyLow"></small><small id="valueKeyHigh"></small></div></div><div class="status" role="status" id="status">Loading the Thane map...</div>
+<nav class="journey glass" aria-label="Exploration stages"><button data-stage="city" aria-current="step"><span class="step-icon">01</span><span>Thane<small>The city</small></span></button><span class="journey-line"></span><button data-stage="neighbourhood"><span class="step-icon">02</span><span>Vrindavan<small>The neighbourhood</small></span></button><span class="journey-line"></span><button data-stage="development"><span class="step-icon">03</span><span>Residences<small>Your apartment</small></span></button></nav>
+<div class="map-hint">Drag to explore &middot; Scroll to zoom &middot; Right-drag to tilt</div>
+<div class="source-note">Map: OpenStreetMap / OpenFreeMap. Imagery: Esri and contributors.<br>Building heights may be estimated. People and traffic are simulated.</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","maplibre-gl":"./vendor/maplibre-gl.js"}}</script>
+<script src="vendor/maplibre-gl.js"></script>
+<script type="module">// src/thane/main.js
+import { Color as Color8 } from "three";
+
+// src/util.js
+var reduceMotion = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+var sum = (a) => a.reduce((x, y) => x + y, 0);
+var lerp = (a, b, k) => a + (b - a) * k;
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = a + 1831565813 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+var slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "zone";
+
+// src/spec/development.js
+var integer = (v, fallback, min, max) => Number.isFinite(Number(v)) && v !== null ? Math.max(min, Math.min(max, Math.round(Number(v)))) : fallback;
+function normalizeDevelopment(s, colors) {
+  const raw = s.shell || {};
+  const shell = {
+    buildings: integer(raw.buildings, 6, 1, 8),
+    rows: integer(raw.rows, 2, 1, 4),
+    floors: integer(raw.floors, 4, 1, 8),
+    unitsPerFloor: integer(raw.unitsPerFloor, 4, 2, 6),
+    basePrice: integer(raw.basePrice, 65e4, 0, 1e9),
+    setting: "park"
+  };
+  shell.rows = Math.min(shell.rows, shell.buildings);
+  const overrides = /* @__PURE__ */ new Map();
+  for (const z of Array.isArray(s.zones) ? s.zones : []) {
+    if (z && typeof z === "object") overrides.set(`${z.building}-${z.floor}-${z.unit}`, z);
+  }
+  const zones = [];
+  const towerCount = Math.ceil(shell.buildings / shell.rows);
+  for (let b = 1; b <= shell.buildings + towerCount; b++) for (let f = 1; f <= (b > shell.buildings ? 100 : shell.floors); f++) for (let u = 1; u <= shell.unitsPerFloor; u++) {
+    const z = overrides.get(`${b}-${f}-${u}`) || {};
+    const letter = String.fromCharCode(64 + b), number = `${f}${String(u).padStart(2, "0")}`;
+    const bedrooms = integer(z.bedrooms, u % 2 ? 1 : 2, 1, 4);
+    const area = integer(z.area, u % 2 ? 64 : 80, 25, 400);
+    const tower = b > shell.buildings;
+    const example = Math.round(shell.basePrice * (area / 64) * (1 + (f - 1) * (tower ? 8e-3 : 0.035) + (b - 1) * 0.018 + (u - 1) * 3e-3) / 1e3) * 1e3;
+    const supplied = z.price !== void 0 && Number.isFinite(Number(z.price));
+    const price = integer(z.price, example, 0, 1e9);
+    const valueSource = supplied && z.valueSource !== "illustrative" ? "provided" : "illustrative";
+    zones.push({
+      id: `apartment-${letter.toLowerCase()}-${number}`,
+      type: "apartment",
+      name: `${letter} \xB7 ${number}`,
+      building: b,
+      tower,
+      floor: f,
+      unit: u,
+      bedrooms,
+      area,
+      capacity: 1,
+      price,
+      valueSource,
+      priceUnit: valueSource === "provided" ? "provided value" : "example value",
+      color: colors[(b - 1) % colors.length],
+      features: [`${bedrooms} bedroom${bedrooms > 1 ? "s" : ""}`, `${area} m\xB2 interior`, "Private balcony"],
+      blurb: `Building ${letter}, level ${f}. ${valueSource === "provided" ? "Value supplied in the project brief." : "Illustrative concept value based on apartment size, floor and building; not a market appraisal."}`
+    });
+  }
+  return {
+    kind: "development",
+    name: String(s.name || "Parkside Residences").slice(0, 40),
+    subtitle: String(s.subtitle || "").slice(0, 70),
+    currency: /^[A-Z]{3}$/.test(s.currency || "") ? s.currency : "NZD",
+    shell,
+    zones,
+    design: Object.fromEntries(["woodColor", "upholsteryColor", "floorColor", "wallColor"].filter((k) => /^#[0-9a-f]{6}$/i.test(s.design?.[k] || "")).map((k) => [k, s.design[k]]))
+  };
+}
+
+// src/spec/schema.js
+var TYPES = {
+  development: ["apartment"],
+  plane: ["residence", "first", "business", "bar", "premium", "economy"],
+  hotel: ["room", "suite", "penthouse", "amenity"],
+  office: ["desks", "offices", "meeting", "lounge", "event"],
+  stadium: ["general", "supporters", "club", "vip"]
+};
+var TYPE_LABEL = {
+  apartment: "Apartment",
+  residence: "Residence",
+  first: "First",
+  business: "Business",
+  bar: "Lounge",
+  premium: "Premium economy",
+  economy: "Economy",
+  room: "Rooms",
+  suite: "Suites",
+  penthouse: "Penthouse",
+  amenity: "Amenity",
+  desks: "Desks",
+  offices: "Private offices",
+  meeting: "Meeting rooms",
+  lounge: "Lounge",
+  event: "Event space",
+  general: "Grandstand",
+  supporters: "Supporters",
+  club: "Club seating",
+  vip: "Hospitality"
+};
+var PALETTE = ["#ffc477", "#ff8f7d", "#7fd6c2", "#ab9dff", "#7fb6ff", "#d9e47a", "#ff9fd0"];
+var PLANE_LAYOUT = { residence: [1], first: [1, 1, 1], business: [1, 2, 1], bar: [1], premium: [2, 4, 2], economy: [3, 4, 3] };
+var PRESETS = {
+  development: {
+    kind: "development",
+    name: "Parkside Residences",
+    currency: "NZD",
+    shell: { buildings: 6, rows: 2, floors: 4, unitsPerFloor: 4, basePrice: 65e4 },
+    zones: []
+  },
+  stadium: {
+    kind: "stadium",
+    name: "Boundary Park",
+    subtitle: "",
+    currency: "NZD",
+    shell: { sport: "cricket", tiers: 2, roof: true, setting: "park" },
+    zones: [
+      { name: "East Grandstand", type: "general", capacity: 8e3, price: 45, priceUnit: "/match", features: ["Reserved seating", "Full field view"], blurb: "Tiered seating overlooking the playing field." },
+      { name: "South Supporters", type: "supporters", capacity: 6e3, price: 35, priceUnit: "/match", features: ["Supporters section", "Food concourse"], blurb: "A lively end stand close to the action." },
+      { name: "West Club Stand", type: "club", capacity: 5e3, price: 110, priceUnit: "/match", features: ["Padded seats", "Club lounge"], blurb: "An elevated view with access to the club concourse." },
+      { name: "North Pavilion", type: "vip", capacity: 1e3, price: 260, priceUnit: "/match", features: ["Hospitality seating", "Premium sightlines"], blurb: "Premium pavilion seating looking back across the field." }
+    ]
+  },
+  plane: {
+    kind: "plane",
+    name: "Long-haul Jet",
+    subtitle: "",
+    currency: "NZD",
+    shell: { engines: 4, route: "AKL \u2192 DXB", livery: "#1e4e79" },
+    zones: [
+      { name: "The Residence", type: "residence", capacity: 1, price: 38500, priceUnit: "one-way", features: ["Living room", "Double bedroom", "En-suite shower"], blurb: "A three-room apartment for two, behind its own door." },
+      { name: "First Apartment", type: "first", capacity: 9, layout: "1-1-1", price: 16900, priceUnit: "one-way", features: ["Sliding door", "Separate bed", "Vanity unit"], blurb: "Private suites with a lounge chair and a separate bed." },
+      { name: "Business Studio", type: "business", capacity: 36, layout: "1-2-1", price: 8400, priceUnit: "one-way", features: ["Lie-flat bed", "Direct aisle access", "24-inch screen"], blurb: "Every seat opens onto the aisle and folds into a 2 m bed." },
+      { name: "Onboard Lounge", type: "bar", capacity: 12, price: 0, priceUnit: "included", features: ["Bar", "Sofa seating"], blurb: "Open to First and Business guests for the whole flight." },
+      { name: "Premium Economy", type: "premium", capacity: 40, layout: "2-4-2", price: 3900, priceUnit: "one-way", features: ["38-inch pitch", "Leg rest", "Priority boarding"], blurb: "A wider seat and more legroom in a quieter cabin." },
+      { name: "Economy", type: "economy", capacity: 200, layout: "3-4-3", price: 1490, priceUnit: "one-way", features: ["31-inch pitch", "USB-C power", "Two meals"], blurb: "Seat-back screens and two hot meals on the 17-hour sector." }
+    ]
+  },
+  hotel: {
+    kind: "hotel",
+    name: "Harbourline Hotel",
+    subtitle: "",
+    currency: "NZD",
+    shell: { setting: "harbour", amenities: ["rooftop pool"] },
+    zones: [
+      { name: "City Queen", type: "room", capacity: 96, floors: 6, price: 289, priceUnit: "/night", features: ["Queen bed", "Rain shower", "City outlook"], blurb: "Compact rooms on the lower floors, facing the harbour or the city." },
+      { name: "Harbour King", type: "room", capacity: 96, floors: 6, price: 419, priceUnit: "/night", features: ["King bed", "Window seat", "Harbour view"], blurb: "Mid-tower rooms with a window seat over the water." },
+      { name: "Executive Suite", type: "suite", capacity: 32, floors: 4, price: 790, priceUnit: "/night", features: ["Separate lounge", "Club access", "Soaking tub"], blurb: "A bedroom and lounge across two bays, with club lounge access." },
+      { name: "Penthouse", type: "penthouse", capacity: 2, floors: 1, price: 3900, priceUnit: "/night", features: ["Wraparound glass", "Private terrace", "Butler"], blurb: "Half a floor each, one level below the rooftop pool." }
+    ]
+  },
+  office: {
+    kind: "office",
+    name: "Harbourside Works",
+    subtitle: "",
+    currency: "NZD",
+    shell: { floors: 4, setting: "waterfront", amenities: ["rooftop terrace"] },
+    zones: [
+      { name: "Caf\xE9 & Lounge", type: "lounge", capacity: 60, price: 0, priceUnit: "included", features: ["Barista coffee", "Booths"], blurb: "Ground-floor caf\xE9 open to every member." },
+      { name: "Event Space", type: "event", capacity: 120, price: 1500, priceUnit: "/day", features: ["Stage", "AV kit", "120 seats"], blurb: "Theatre-style hall that turns into a networking floor." },
+      { name: "Hot Desk", type: "desks", capacity: 96, price: 450, priceUnit: "/desk/mo", features: ["Any free desk", "Lockers"], blurb: "Turn up and take any free desk on level 2." },
+      { name: "Dedicated Desk", type: "desks", capacity: 64, price: 690, priceUnit: "/desk/mo", features: ["Your own desk", "Monitor", "24/7 access"], blurb: "A desk that stays set up the way you left it." },
+      { name: "Meeting Rooms", type: "meeting", capacity: 8, price: 60, priceUnit: "/hr", features: ["Screens", "Whiteboards"], blurb: "Bookable glass rooms for 6 to 14 people." },
+      { name: "Private Office", type: "offices", capacity: 12, price: 3200, priceUnit: "/office/mo", features: ["4 desks", "Lockable", "Top floor"], blurb: "Lockable glass offices for teams of four on the top level." }
+    ]
+  }
+};
+function guessType(kind, name) {
+  const n = String(name || "").toLowerCase();
+  if (kind === "stadium") return /vip|hospital|pavilion|box/.test(n) ? "vip" : /club|premium/.test(n) ? "club" : /support|fan/.test(n) ? "supporters" : "general";
+  if (kind === "plane") {
+    if (/resid|apartment|villa/.test(n)) return "residence";
+    if (/first/.test(n)) return "first";
+    if (/business|club|upper/.test(n)) return "business";
+    if (/bar|lounge/.test(n)) return "bar";
+    if (/premium|plus|comfort/.test(n)) return "premium";
+    return "economy";
+  }
+  if (kind === "hotel") {
+    if (/penthouse|royal|presidential/.test(n)) return "penthouse";
+    if (/suite/.test(n)) return "suite";
+    if (/bar|spa|pool|gym|restaurant|club lounge/.test(n)) return "amenity";
+    return "room";
+  }
+  if (/office|cabin|suite/.test(n)) return "offices";
+  if (/meet|board|conference/.test(n)) return "meeting";
+  if (/caf|lounge|kitchen|cafeteria/.test(n)) return "lounge";
+  if (/event|hall|auditorium/.test(n)) return "event";
+  return "desks";
+}
+function defaultUnit(kind, type) {
+  if (kind === "plane") return "one-way";
+  if (kind === "hotel") return "/night";
+  if (kind === "stadium") return "/match";
+  return { desks: "/desk/mo", offices: "/office/mo", meeting: "/hr", lounge: "included", event: "/day" }[type];
+}
+function parseLayout(s, type) {
+  const groups = String(s || "").split(/[^0-9]+/).filter(Boolean).map(Number).filter((n) => n > 0 && n <= 5);
+  if (!groups.length || groups.length > 4 || sum(groups) > 10) return PLANE_LAYOUT[type].slice();
+  if (type === "residence" || type === "bar") return [1];
+  return groups;
+}
+var num = (v, d) => Number.isFinite(Number(v)) ? Number(v) : d;
+function normalize(raw) {
+  const s = raw && typeof raw === "object" ? raw : {};
+  let kind = String(s.kind || "").toLowerCase();
+  if (kind === "development") return normalizeDevelopment(s, PALETTE);
+  if (!TYPES[kind]) kind = "plane";
+  const cur = String(s.currency || "").toUpperCase();
+  const currency = /^[A-Z]{3}$/.test(cur) ? cur : "NZD";
+  const shell = s.shell && typeof s.shell === "object" ? { ...s.shell } : {};
+  let zones = (Array.isArray(s.zones) ? s.zones : []).filter((z) => z && typeof z === "object").slice(0, 7);
+  if (!zones.length) return normalize({ ...PRESETS[kind], ...s, kind, zones: PRESETS[kind].zones });
+  const seen = /* @__PURE__ */ new Set();
+  zones = zones.map((z, i) => {
+    const t = String(z.type || "").toLowerCase();
+    const type = TYPES[kind].includes(t) ? t : guessType(kind, z.name);
+    let id = slug(z.id || z.name || type);
+    while (seen.has(id)) id += "-" + i;
+    seen.add(id);
+    const capMax = kind === "stadium" ? 1e5 : kind === "plane" ? type === "residence" ? 3 : 520 : kind === "hotel" ? 1200 : 1500;
+    const price = Math.max(0, Math.round(num(z.price, 0)));
+    return {
+      id,
+      type,
+      name: String(z.name || TYPE_LABEL[type]).slice(0, 36),
+      capacity: clamp(Math.round(num(z.capacity, type === "residence" ? 1 : 24)), 1, capMax),
+      price,
+      priceUnit: price === 0 ? "included" : String(z.priceUnit || defaultUnit(kind, type)).slice(0, 14),
+      layout: kind === "plane" ? parseLayout(z.layout, type) : null,
+      floors: kind === "hotel" ? clamp(Math.round(num(z.floors, 0)), 0, 40) : 0,
+      features: (Array.isArray(z.features) ? z.features : []).slice(0, 4).map((f) => String(f).slice(0, 34)),
+      blurb: z.blurb ? String(z.blurb).slice(0, 140) : ""
+    };
+  });
+  if (kind === "plane") {
+    const order = TYPES.plane;
+    zones.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || b.price - a.price);
+  }
+  if (kind === "hotel") {
+    const order = ["room", "amenity", "suite", "penthouse"];
+    zones.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || a.price - b.price);
+  }
+  zones.forEach((z, i) => {
+    z.color = PALETTE[i % PALETTE.length];
+  });
+  const out = {
+    kind,
+    currency,
+    zones,
+    name: String(s.name || PRESETS[kind].name).slice(0, 40),
+    subtitle: String(s.subtitle || "").slice(0, 70),
+    shell: {},
+    design: Object.fromEntries(["woodColor", "upholsteryColor", "floorColor", "wallColor"].filter((key) => /^#[0-9a-f]{6}$/i.test(s.design?.[key] || "")).map((key) => [key, s.design[key]]))
+  };
+  if (kind === "plane") {
+    out.shell.engines = num(shell.engines, 2) >= 4 ? 4 : 2;
+    out.shell.route = String(shell.route || "").slice(0, 24);
+    out.shell.livery = /^#[0-9a-f]{6}$/i.test(shell.livery || "") ? shell.livery : "#1e4e79";
+  } else if (kind === "stadium") {
+    const sport = String(shell.sport || "").toLowerCase();
+    out.shell.sport = sport === "soccer" ? "football" : ["cricket", "football", "rugby"].includes(sport) ? sport : "cricket";
+    out.shell.tiers = clamp(Math.round(num(shell.tiers, 2)), 1, 3);
+    out.shell.roof = shell.roof !== false;
+    out.shell.setting = shell.setting === "city" ? "city" : "park";
+  } else {
+    const settings = kind === "hotel" ? ["harbour", "city", "beach", "mountain"] : ["waterfront", "city", "park"];
+    const st = String(shell.setting || "").toLowerCase();
+    out.shell.setting = settings.includes(st) ? st : settings[0];
+    out.shell.amenities = (Array.isArray(shell.amenities) ? shell.amenities : []).map((a) => String(a).toLowerCase()).slice(0, 5);
+    if (kind === "office") out.shell.floors = clamp(Math.round(num(shell.floors, 0)), 0, 10);
+  }
+  return out;
+}
+
+// src/spec/valuations.js
+var QUARTERS = 16;
+var FIRST_YEAR = 2022;
+var quarterLabel = (q) => `${FIRST_YEAR + Math.floor(q / 4)} Q${q % 4 + 1}`;
+var PURPOSES = ["Mortgage", "Pre-sale", "Refinance", "Insurance"];
+var VALUERS = ["Panel valuer A", "Panel valuer B", "Panel valuer C"];
+function buildValuations(spec2) {
+  const { basePrice, unitsPerFloor } = spec2.shell;
+  const base = Math.max(1, basePrice) / 64;
+  const byZone = /* @__PURE__ */ new Map();
+  const all = [];
+  for (const z of spec2.zones) {
+    const r = rng(z.building * 1009 + z.floor * 97 + z.unit * 13 + 7);
+    const confidence = r() < 0.5 ? "H" : r() < 0.72 ? "M" : "L";
+    r();
+    const count = 1 + (r() < 0.45 ? 1 : 0) + (r() < 0.15 ? 1 : 0);
+    const quarters = /* @__PURE__ */ new Set();
+    while (quarters.size < count) quarters.add(Math.floor(r() * QUARTERS));
+    const valuations = [...quarters].sort((a, b) => a - b).map((q) => {
+      const time = 1 + 0.011 * q + 35e-5 * q * q;
+      const floor = z.tower ? 1.12 + 8e-3 * (z.floor - 1) : 1 + 0.028 * (z.floor - 1) - 18e-4 * (z.floor - 1) ** 2;
+      const building = 1 + (z.building * 37 % 7 - 3) * 0.012;
+      const corner = z.unit === 1 || z.unit === unitsPerFloor ? 1.03 : 1;
+      const size = z.bedrooms >= 2 ? 0.98 : 1;
+      const noise = 1 + (r() + r() + r() - 1.5) * 0.06;
+      const rate = Math.round(base * time * floor * building * corner * size * noise / 10) * 10;
+      const v = {
+        zone: z.id,
+        q,
+        quarter: quarterLabel(q),
+        floor: z.floor,
+        building: z.building,
+        rate,
+        value: Math.round(rate * z.area / 1e3) * 1e3,
+        purpose: PURPOSES[Math.floor(r() * PURPOSES.length)],
+        valuer: VALUERS[Math.floor(r() * VALUERS.length)]
+      };
+      all.push(v);
+      return v;
+    });
+    byZone.set(z.id, { valuations, latest: valuations[valuations.length - 1], confidence });
+  }
+  const latestRates = [...byZone.values()].filter((e) => e.latest).map((e) => e.latest.rate);
+  return {
+    byZone,
+    all,
+    min: latestRates.length ? Math.min(...latestRates) : 0,
+    max: latestRates.length ? Math.max(...latestRates) : 1,
+    valuedCount: latestRates.length
+  };
+}
+
+// src/thane/development-layer.js
+import * as THREE13 from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+// src/scene/development.js
+import * as THREE6 from "three";
+
+// src/scene/helpers.js
+import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+var box = (w, h, d, x = 0, y = 0, z = 0) => new THREE.BoxGeometry(w, h, d).translate(x, y, z);
+var rounded = (w, h, d, x = 0, y = 0, z = 0, radius = 0.035) => new RoundedBoxGeometry(w, h, d, 2, Math.min(radius, Math.min(w, h, d) * 0.45)).translate(x, y, z);
+var cyl = (rt, rb, h, x = 0, y = 0, z = 0, seg = 32) => new THREE.CylinderGeometry(rt, rb, h, seg).translate(x, y, z);
+var merge = (parts) => {
+  const normalized = parts.map((p) => p.index ? p.toNonIndexed() : p);
+  const g = mergeGeometries(normalized);
+  (/* @__PURE__ */ new Set([...parts, ...normalized])).forEach((p) => p.dispose());
+  return g;
+};
+var std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.05, ...o });
+var hitMat = new THREE.MeshBasicMaterial({ visible: false });
+var m4 = new THREE.Matrix4();
+function instanced(geo2, mat, positions, rotY = null) {
+  const mesh2 = new THREE.InstancedMesh(geo2, mat, Math.max(1, positions.length));
+  const q = new THREE.Quaternion();
+  const s = new THREE.Vector3(1, 1, 1);
+  const up = new THREE.Vector3(0, 1, 0);
+  positions.forEach((p, i) => {
+    q.setFromAxisAngle(up, rotY ? rotY[i] : 0);
+    m4.compose(p, q, s);
+    mesh2.setMatrixAt(i, m4);
+  });
+  mesh2.count = positions.length;
+  mesh2.instanceMatrix.needsUpdate = true;
+  mesh2.castShadow = mesh2.receiveShadow = true;
+  return mesh2;
+}
+function puffTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const x = c.getContext("2d");
+  const g = x.createRadialGradient(64, 64, 4, 64, 64, 62);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.45, "rgba(255,255,255,.75)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = g;
+  x.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+var PUFF = puffTexture();
+function gridTexture({ cols = 4, rows = 4, frame: frame2 = "#0d1422", lit = "#ffcf8a", dark = "#24365a", litP = 0.45, seed = 3, w = 512, h = 512, pad = [6, 10] }) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const x = c.getContext("2d");
+  const r = rng(seed);
+  x.fillStyle = frame2;
+  x.fillRect(0, 0, w, h);
+  const cw = w / cols, rh = h / rows;
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const on = r() < litP;
+    x.fillStyle = on ? lit : dark;
+    x.globalAlpha = on ? 0.75 + r() * 0.25 : 0.85 + r() * 0.15;
+    x.fillRect(i * cw + pad[0], j * rh + pad[1], cw - pad[0] * 2, rh - pad[1] * 2);
+  }
+  x.globalAlpha = 1;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = 4;
+  return t;
+}
+var repeatTex = (t, rx, ry) => {
+  const c = t.clone();
+  c.needsUpdate = true;
+  c.repeat.set(rx, ry);
+  return c;
+};
+function disposeTree(o) {
+  const geometries = /* @__PURE__ */ new Set(), materials = /* @__PURE__ */ new Set(), textures = /* @__PURE__ */ new Set();
+  o.traverse((c) => {
+    if (c.geometry) geometries.add(c.geometry);
+    const ms = Array.isArray(c.material) ? c.material : c.material ? [c.material] : [];
+    ms.forEach((m) => {
+      if (m === hitMat) return;
+      materials.add(m);
+      for (const v of Object.values(m)) if (v?.isTexture && v !== PUFF) textures.add(v);
+    });
+  });
+  geometries.forEach((g) => g.dispose());
+  textures.forEach((t) => t.dispose());
+  materials.forEach((m) => m.dispose());
+}
+function zoneMats(z, design = {}) {
+  const c = new THREE.Color(z.color);
+  const floor = surface("carpet", design.floorColor || new THREE.Color("#a49d91").lerp(c, 0.1), { emissive: c, emissiveIntensity: 0 });
+  const furn = surface("fabric", design.upholsteryColor || new THREE.Color("#8c9293").lerp(c, 0.18), { emissive: c, emissiveIntensity: 0 });
+  return { floor, furn };
+}
+function surface(kind, color, options = {}) {
+  const size = 256, c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d"), data = ctx.createImageData(size, size), random = rng(83);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const n = random() - 0.5;
+    let v = 0.5 + n * 0.15;
+    if (kind === "wood") v = 0.55 + 0.12 * Math.sin(x * 0.48 + Math.sin(y * Math.PI / 128) * 2 + Math.sin(x * 0.08) * 3) + n * 0.07;
+    if (kind === "fabric" || kind === "carpet") v = 0.5 + (x % 4 < 2 !== y % 4 < 2 ? 0.11 : -0.11) + n * 0.12;
+    if (kind === "stone") v = 0.55 + n * 0.16 + Math.sin(x * 0.03 + Math.sin(y * 0.02) * 4) * 0.035;
+    if (kind === "water") v = 0.5 + Math.sin(x * Math.PI / 16 + Math.sin(y * Math.PI / 32) * 3) * 0.16 + Math.sin(y * Math.PI / 8) * 0.07;
+    const i = (y * size + x) * 4;
+    data.data[i] = data.data[i + 1] = data.data[i + 2] = Math.round(v * 255);
+    data.data[i + 3] = 255;
+  }
+  ctx.putImageData(data, 0, 0);
+  const bump = new THREE.CanvasTexture(c);
+  bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
+  bump.anisotropy = 8;
+  bump.repeat.set(kind === "wood" ? 2 : kind === "carpet" ? 12 : 3, kind === "wood" ? 1 : kind === "carpet" ? 12 : 3);
+  const roughness = { wood: 0.38, fabric: 0.94, carpet: 0.98, stone: 0.7, water: 0.13 }[kind] ?? 0.6;
+  return new THREE.MeshPhysicalMaterial({
+    color,
+    roughness,
+    metalness: 0,
+    bumpMap: bump,
+    bumpScale: kind === "water" ? 0.13 : kind === "wood" ? 0.012 : 0.018,
+    ...kind === "wood" ? { clearcoat: 0.22, clearcoatRoughness: 0.35 } : {},
+    ...kind === "fabric" ? { sheen: 0.45, sheenRoughness: 0.85, sheenColor: new THREE.Color("#d8d5d0") } : {},
+    ...options
+  });
+}
+function prepareShadows(root) {
+  root.traverse((obj) => {
+    if (!obj.isMesh || obj.material === hitMat || obj.userData.noShadow) return;
+    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+    obj.castShadow = materials.some((m) => m.visible && !m.transparent);
+    obj.receiveShadow = true;
+  });
+}
+
+// src/scene/surroundings.js
+import * as THREE2 from "three";
+function buildSurroundings(kind, setting, X, Z, clear = []) {
+  const g = new THREE2.Group();
+  const blocked = (z, pad = 0) => clear.some(([a, b]) => z > a - pad && z < b + pad);
+  const night = false;
+  const water = ["harbour", "beach", "waterfront"].includes(setting);
+  const shoreZ = Z / 2 + 34;
+  const ground = new THREE2.Mesh(new THREE2.PlaneGeometry(6e3, 6e3), std(night ? "#1b1f2a" : setting === "park" ? "#86a06c" : "#a3a596", { roughness: 1 }));
+  ground.rotation.x = -Math.PI / 2;
+  g.add(ground);
+  const plaza = new THREE2.Mesh(box(X + 40, 0.4, Z + 44, 0, 0.2, 4), surface("stone", "#c4beb2"));
+  g.add(plaza);
+  const joints = [];
+  for (let x = -(X + 40) / 2; x <= (X + 40) / 2; x += 3) joints.push(box(0.022, 5e-3, Z + 44, x, 0.403, 4));
+  for (let z = -(Z + 44) / 2 + 4; z <= (Z + 44) / 2 + 4; z += 3) joints.push(box(X + 40, 5e-3, 0.022, 0, 0.403, z));
+  const paving = new THREE2.Mesh(merge(joints), std("#8d8980"));
+  paving.userData.noShadow = true;
+  g.add(paving);
+  if (water) {
+    const waterMat = surface("water", "#557c88", { metalness: 0.24, clearcoat: 0.75 });
+    waterMat.bumpMap.repeat.set(1200, 600);
+    const w = new THREE2.Mesh(new THREE2.PlaneGeometry(6e3, 3e3), waterMat);
+    w.rotation.x = -Math.PI / 2;
+    w.position.set(0, 0.08, shoreZ + 1500);
+    g.add(w);
+    if (setting === "beach") {
+      const sand = new THREE2.Mesh(box(6e3, 0.3, 26, 0, 0.12, shoreZ - 6), std(night ? "#6f6556" : "#e6d6b4", { roughness: 1 }));
+      g.add(sand);
+    } else {
+      const edge = new THREE2.Mesh(box(6e3, 0.9, 3, 0, 0.45, shoreZ), std(night ? "#4a4a50" : "#bdb8ad"));
+      g.add(edge);
+    }
+  }
+  const r = rng(kind === "hotel" ? 21 : 37);
+  const pos = [], scl = [];
+  const hMax = setting === "city" ? 120 : setting === "harbour" || setting === "waterfront" ? 70 : setting === "beach" ? 45 : setting === "park" ? 28 : 20;
+  for (let i = 0; i < 170; i++) {
+    const a = r() * Math.PI * 2, d = 170 + Math.pow(r(), 0.7) * 750;
+    const px = Math.cos(a) * d, pz = Math.sin(a) * d;
+    if (water && pz > shoreZ - 30) continue;
+    if (Math.abs(px) < X / 2 + 40 && Math.abs(pz) < Z / 2 + 40) continue;
+    if (blocked(pz, 18)) continue;
+    const h = 8 + Math.pow(r(), 1.6) * hMax;
+    pos.push(new THREE2.Vector3(px, h / 2, pz));
+    scl.push([12 + r() * 18, h, 12 + r() * 18]);
+  }
+  const skyTex = night ? gridTexture({ cols: 6, rows: 10, frame: "#121826", lit: "#ffd59a", dark: "#1b2436", litP: 0.32, seed: 5 }) : gridTexture({ cols: 6, rows: 10, frame: "#d9d4c9", lit: "#a9bccc", dark: "#8fa3b5", litP: 0.5, seed: 5, pad: [8, 12] });
+  const skyMat = std(night ? "#9aa0b8" : "#f2eee6", { map: skyTex, ...night ? { emissive: "#ffffff", emissiveMap: skyTex, emissiveIntensity: 0.32 } : {}, roughness: 0.8 });
+  const sk = new THREE2.InstancedMesh(new THREE2.BoxGeometry(1, 1, 1), skyMat, pos.length);
+  const q = new THREE2.Quaternion();
+  pos.forEach((p, i) => {
+    m4.compose(p, q, new THREE2.Vector3(...scl[i]));
+    sk.setMatrixAt(i, m4);
+  });
+  g.add(sk);
+  if (water || setting === "mountain") {
+    const hillMat = std(night ? "#1d2438" : "#6f8a8f", { roughness: 1, flatShading: true });
+    for (let i = 0; i < 9; i++) {
+      const h = setting === "mountain" ? 160 + r() * 200 : 40 + r() * 70;
+      const rad = setting === "mountain" ? 220 + r() * 180 : 160 + r() * 140;
+      const m = new THREE2.Mesh(new THREE2.ConeGeometry(rad, h, 7), hillMat);
+      m.position.set(-900 + i * 230 + r() * 80, h / 2 - 2, setting === "mountain" ? 700 + r() * 300 : 1100 + r() * 250);
+      g.add(m);
+    }
+  }
+  if (setting === "park" || setting === "beach" || setting === "mountain") {
+    const tp = [];
+    for (let i = 0; i < 70; i++) {
+      const a = r() * Math.PI * 2, d = X / 2 + 14 + r() * 70;
+      const p = new THREE2.Vector3(Math.cos(a) * d, 0, Math.sin(a) * d * 0.8);
+      if (water && p.z > shoreZ - 8) continue;
+      if (blocked(p.z, 4)) continue;
+      tp.push(p);
+    }
+    g.add(instanced(cyl(0.16, 0.27, 3.5, 0, 1.75, 0), surface("wood", "#64513f"), tp));
+    const foliage = [];
+    for (let i = 0; i < 12; i++) {
+      const a = i * 2.399;
+      foliage.push(new THREE2.SphereGeometry(1, 12, 8).scale(1, 1.35, 1).translate(Math.cos(a) * (i % 3) * 0.5, 3.6 + i % 4 * 0.45, Math.sin(a) * (i % 3) * 0.5));
+    }
+    g.add(instanced(merge(foliage), std("#49683d", { roughness: 0.95 }), tp));
+  }
+  return g;
+}
+
+// src/scene/furniture.js
+import * as THREE3 from "three";
+function furniturePalette(design = {}) {
+  return {
+    wood: surface("wood", design.woodColor || "#9e724a"),
+    metal: std("#adb4b8", { metalness: 0.92, roughness: 0.26 }),
+    dark: std("#282c30", { metalness: 0.3, roughness: 0.4 }),
+    shell: new THREE3.MeshPhysicalMaterial({ color: design.wallColor || "#e6e2d9", roughness: 0.34, clearcoat: 0.3 }),
+    linen: surface("fabric", "#eee9df"),
+    screen: std("#172b3b", { roughness: 0.18, metalness: 0.15, emissive: "#52798e", emissiveIntensity: 0.16 }),
+    light: std("#fff1d6", { emissive: "#ffe0b1", emissiveIntensity: 0.8, roughness: 0.7 })
+  };
+}
+function model() {
+  const parts = {};
+  return { parts, add: (material, ...geometries) => (parts[material] ?? (parts[material] = [])).push(...geometries) };
+}
+function leg(x, z, h = 0.7) {
+  return cyl(0.024, 0.032, h, x, h / 2, z);
+}
+function chairParts(m, ox = 0, oz = 0, rotation = 0, office = true) {
+  const local = model();
+  local.add("fabric", rounded(0.49, 0.105, 0.49, 0, 0.48, 0, 0.05), rounded(0.47, 0.5, 0.085, 0, 0.79, -0.23, 0.04));
+  local.add("dark", rounded(0.49, 0.46, 0.045, 0, 0.78, -0.285), box(0.055, 0.3, 0.06, 0, 0.56, -0.24));
+  if (office) {
+    local.add("metal", cyl(0.035, 0.04, 0.32, 0, 0.26, 0));
+    for (let i = 0; i < 5; i++) {
+      const a = i * Math.PI * 2 / 5;
+      local.add("metal", rounded(0.035, 0.035, 0.29, 0, 0.1, 0.13, 0.014).rotateY(a));
+      local.add("dark", cyl(0.042, 0.042, 0.055).rotateZ(Math.PI / 2).translate(Math.sin(a) * 0.27, 0.065, Math.cos(a) * 0.27));
+    }
+    for (const s of [-1, 1]) {
+      local.add("metal", box(0.025, 0.18, 0.025, s * 0.28, 0.59, -0.02));
+      local.add("dark", rounded(0.065, 0.035, 0.28, s * 0.28, 0.69, 0.01, 0.015));
+    }
+  } else {
+    for (const x of [-0.2, 0.2]) for (const z of [-0.18, 0.18]) local.add("metal", leg(x, z, 0.43));
+  }
+  for (const [key, geometries] of Object.entries(local.parts)) m.add(key, ...geometries.map((g) => g.rotateY(rotation).translate(ox, 0, oz)));
+}
+function desk() {
+  const m = model();
+  m.add("wood", rounded(1.5, 0.045, 0.75, 0, 0.75, 0, 0.016));
+  for (const x of [-0.65, 0.65]) {
+    m.add("metal", box(0.045, 0.69, 0.045, x, 0.365, 0), rounded(0.07, 0.035, 0.64, x, 0.035, 0));
+  }
+  m.add("dark", box(1.3, 0.06, 0.04, 0, 0.66, -0.15), rounded(0.61, 0.36, 0.035, 0, 1.075, -0.23, 0.012), box(0.045, 0.15, 0.04, 0, 0.85, -0.23), rounded(0.23, 0.015, 0.16, 0, 0.786, -0.22));
+  m.add("screen", box(0.575, 0.316, 6e-3, 0, 1.08, -0.208));
+  m.add("dark", rounded(0.4, 0.014, 0.14, -0.03, 0.783, 0.13, 6e-3), rounded(0.055, 0.025, 0.085, 0.31, 0.79, 0.14, 0.012));
+  m.add("linen", rounded(0.16, 0.018, 0.22, -0.56, 0.786, 0.05, 8e-3));
+  m.add("shell", cyl(0.035, 0.03, 0.09, 0.57, 0.82, -0.13));
+  chairParts(m, 0, 0.8, Math.PI);
+  return m;
+}
+function table() {
+  const m = model();
+  m.add("wood", rounded(1.6, 0.065, 7.5, 0, 0.76, 0, 0.03));
+  for (const z of [-2.6, 0, 2.6]) {
+    m.add("dark", box(0.1, 0.68, 0.5, 0, 0.37, z), rounded(1.1, 0.04, 0.6, 0, 0.04, z));
+    m.add("metal", rounded(0.18, 8e-3, 0.3, 0, 0.798, z));
+  }
+  for (const z of [-3, -1.5, 0, 1.5, 3]) for (const s of [-1, 1]) chairParts(m, s * 1.2, z, -s * Math.PI / 2);
+  return m;
+}
+function sofa() {
+  const m = model();
+  m.add("fabric", rounded(2.3, 0.24, 0.9, 0, 0.29, 0, 0.09), rounded(2.28, 0.65, 0.2, 0, 0.61, -0.39, 0.065));
+  for (const x of [-1.06, 1.06]) m.add("fabric", rounded(0.19, 0.44, 0.9, x, 0.48, 0, 0.07));
+  for (const x of [-0.64, 0, 0.64]) {
+    m.add("fabric", rounded(0.62, 0.16, 0.67, x, 0.46, 0.065, 0.065), rounded(0.61, 0.4, 0.14, x, 0.7, -0.24, 0.06));
+  }
+  for (const x of [-0.92, 0.92]) for (const z of [-0.31, 0.31]) m.add("wood", leg(x, z, 0.17));
+  m.add("linen", rounded(0.33, 0.33, 0.13, -0.77, 0.67, -0.08, 0.06).rotateZ(0.09));
+  m.add("wood", cyl(0.48, 0.48, 0.045, 0, 0.44, 1.18, 48));
+  for (let i = 0; i < 3; i++) m.add("dark", leg(Math.cos(i * 2.094) * 0.3, 1.18 + Math.sin(i * 2.094) * 0.3, 0.42));
+  m.add("linen", rounded(0.22, 0.025, 0.29, 0.05, 0.476, 1.18));
+  return m;
+}
+function bed() {
+  const m = model();
+  m.add("wood", rounded(1.94, 0.24, 2.14, 0, 0.25, 0, 0.04), rounded(2.06, 1.16, 0.12, 0, 0.65, -1.08));
+  m.add("fabric", rounded(1.88, 0.75, 0.09, 0, 0.79, -0.998, 0.04), rounded(1.92, 0.045, 0.63, 0, 0.65, 0.68, 0.018));
+  m.add("linen", rounded(1.88, 0.22, 2.03, 0, 0.48, 0, 0.08), rounded(1.92, 0.08, 1.5, 0, 0.615, 0.24, 0.035));
+  for (const x of [-0.46, 0.46]) m.add("linen", rounded(0.74, 0.14, 0.43, x, 0.65, -0.72, 0.065));
+  for (const x of [-0.82, 0.82]) for (const z of [-0.92, 0.92]) m.add("dark", leg(x, z, 0.16));
+  for (const s of [-1, 1]) {
+    m.add("wood", rounded(0.44, 0.42, 0.46, s * 1.27, 0.3, -0.81));
+    m.add("metal", box(0.14, 0.012, 0.018, s * 1.27, 0.38, -0.57), cyl(0.09, 0.09, 0.018, s * 1.27, 0.52, -0.81), cyl(0.013, 0.013, 0.29, s * 1.27, 0.67, -0.81));
+    m.add("light", cyl(0.11, 0.16, 0.2, s * 1.27, 0.87, -0.81));
+  }
+  return m;
+}
+function aircraftSeat({ type, width, pitch }) {
+  const m = model(), premium = ["first", "business"].includes(type);
+  const w = width * (premium ? 0.6 : 0.86), depth = Math.min(pitch * 0.48, 0.62);
+  m.add("fabric", rounded(depth, 0.14, w, 0.02, 0.47, 0, 0.05), rounded(0.13, 0.7, w, -depth * 0.48, 0.82, 0, 0.055), rounded(0.15, 0.22, w * 0.82, -depth * 0.45, 1.16, 0, 0.055));
+  m.add("shell", rounded(0.06, 0.63, w * 1.03, -depth * 0.65, 0.81, 0, 0.022));
+  m.add("dark", box(depth * 0.72, 0.045, w * 0.8, 0, 0.35, 0));
+  for (const s of [-1, 1]) {
+    m.add("metal", box(0.035, 0.3, 0.035, -0.1, 0.2, s * w * 0.35), box(0.04, 0.22, 0.025, -0.03, 0.57, s * (w / 2 + 0.01)));
+    m.add("dark", rounded(depth * 0.9, 0.045, 0.055, 0.035, 0.69, s * (w / 2 + 0.01), 0.017));
+    m.add("dark", box(0.04, 0.012, w * 0.44, 0.08, 0.55, s * w * 0.25));
+  }
+  m.add("metal", box(0.065, 0.019, 0.048, 0.08, 0.56, 0));
+  m.add("screen", box(8e-3, 0.18, w * 0.64, -depth * 0.686, 0.92, 0));
+  m.add("shell", rounded(0.018, 0.21, w * 0.74, -depth * 0.69, 0.66, 0, 7e-3));
+  if (premium) {
+    m.add("shell", rounded(pitch * 0.87, 1.04, 0.07, 0, 0.57, width * 0.46));
+    m.add("wood", rounded(pitch * 0.44, 0.045, width * 0.22, pitch * 0.12, 0.66, width * 0.32));
+    m.add("fabric", rounded(Math.min(0.4, pitch * 0.2), 0.22, w, pitch * 0.37, 0.33, 0));
+    if (type === "first") m.add("shell", rounded(pitch * 0.87, 1.15, 0.07, 0, 0.62, -width * 0.46));
+  }
+  return m;
+}
+function addFurniture(group, type, positions, fabric, palette, options = {}, rotations = null) {
+  if (!positions.length) return [];
+  const meshes = [];
+  const m = type === "desk" ? desk() : type === "table" ? table() : type === "sofa" ? sofa() : type === "bed" ? bed() : type === "aircraft" ? aircraftSeat(options) : model();
+  if (type === "chair") chairParts(m, 0, 0, 0, false);
+  if (type === "stage") {
+    m.add("wood", rounded(6, 0.45, 3.2, 0, 0.25, 0));
+    m.add("dark", box(6, 0.05, 3.2, 0, 0.5, 0));
+  }
+  for (const [key, parts] of Object.entries(m.parts)) {
+    const mesh2 = instanced(merge(parts), key === "fabric" ? fabric : palette[key], positions, rotations);
+    mesh2.name = `${type} / ${key}`;
+    if (options.zone) {
+      mesh2.userData.zone = options.zone;
+      mesh2.userData.seatParts = meshes;
+      mesh2.userData.seatLabels = options.seatLabels;
+    }
+    meshes.push(mesh2);
+    group.add(mesh2);
+  }
+  return meshes;
+}
+
+// src/spec/site-layout.js
+var DEV = { UW: 7.5, D: 11, FH: 3.2, BASE: 0.6, GAP_X: 16, GAP_Z: 26, BALCONY: 1.6 };
+function developmentLayout({ buildings: buildings2, rows, floors, unitsPerFloor }) {
+  const { UW: UW2, D: D2, FH: FH2, BASE: BASE2, GAP_X, GAP_Z: GAP_Z2 } = DEV;
+  const cols = Math.ceil(buildings2 / rows);
+  const BX = unitsPerFloor * UW2;
+  const siteX = cols * BX + (cols - 1) * GAP_X, siteZ = rows * D2 + (rows - 1) * GAP_Z2;
+  const towerWidth = Math.min(26, BX), towerDepth = rows > 1 ? 14 : 6;
+  const towerZ = rows > 1 ? siteZ / 2 - D2 - GAP_Z2 / 2 : siteZ / 2 + 10;
+  const origin = (b) => {
+    if (b > buildings2) return { x: -siteX / 2 + BX / 2 + (b - buildings2 - 1) * (BX + GAP_X), z: towerZ, row: rows > 1 ? 0.5 : 0, tower: true };
+    const i = b - 1, row = Math.floor(i / cols), col = i % cols;
+    const inRow = Math.min(cols, buildings2 - row * cols);
+    const rowW = inRow * BX + (inRow - 1) * GAP_X;
+    return { x: -rowW / 2 + BX / 2 + col * (BX + GAP_X), z: siteZ / 2 - D2 / 2 - row * (D2 + GAP_Z2), row, col };
+  };
+  const unitAt = (z) => {
+    const o = origin(z.building);
+    return { x: o.x - (o.tower ? towerWidth : BX) / 2 + (z.unit - 0.5) * (o.tower ? towerWidth / unitsPerFloor : UW2), z: o.z, row: o.row };
+  };
+  return { buildings: buildings2, cols, rows, floors, towerWidth, towerDepth, towerZ, totalBuildings: buildings2 + cols, maxFloors: 100, BX, siteX, siteZ, H: BASE2 + floors * FH2, origin, unitAt };
+}
+
+// src/scene/residential-detail.js
+import * as THREE4 from "three";
+function buildResidentialLandscape(layout) {
+  const group = new THREE4.Group();
+  group.name = "Residential gardens and central towers";
+  const labels = [], stone = [], bronze = [], windows = [], crowns = [];
+  const height = DEV.BASE + 100 * DEV.FH;
+  const z = layout.towerZ;
+  const width = layout.towerWidth, depth = layout.towerDepth;
+  for (let c = 0; c < layout.cols; c++) {
+    const x = -layout.siteX / 2 + layout.BX / 2 + c * (layout.BX + DEV.GAP_X);
+    const tower = new THREE4.Group();
+    tower.name = `Central residence ${c + 1} \xB7 100 storeys`;
+    tower.userData.storeys = 100;
+    tower.userData.building = layout.buildings + c + 1;
+    tower.position.set(x, 0, z);
+    group.add(tower);
+    const tex = gridTexture({ cols: 8, rows: 100, w: 512, h: 4096, frame: "#79766c", lit: "#f7d9a2", dark: "#344650", litP: 0.24, seed: 100 + c, pad: [7, 5] });
+    const facade = new THREE4.Mesh(new THREE4.BoxGeometry(width, 320, depth), new THREE4.MeshPhysicalMaterial({ color: "#d9dbd5", map: tex, roughness: 0.24, metalness: 0.24, clearcoat: 0.7, emissive: "#ffce8b", emissiveMap: tex, emissiveIntensity: 0.15 }));
+    facade.position.y = DEV.BASE + 160;
+    tower.add(facade);
+    for (let f = 0; f <= 100; f++) {
+      const y = DEV.BASE + f * DEV.FH;
+      stone.push(box(width + 1.2, 0.22, depth + 1.4, x, y, z));
+      if (f < 100) for (const side of [-1, 1]) {
+        stone.push(box(width * 0.7, 0.18, 1.3, x, y, z + side * (depth / 2 + 0.75)));
+        bronze.push(box(width * 0.7, 0.055, 0.07, x, y + 1.08, z + side * (depth / 2 + 1.35)));
+        windows.push(box(width * 0.7, 0.85, 0.045, x, y + 0.56, z + side * (depth / 2 + 1.35)));
+      }
+    }
+    for (const dx2 of [-width / 2, -width * 0.3, width * 0.3, width / 2]) {
+      stone.push(box(0.85, height + 3, depth + 1.1, x + dx2, (height + 3) / 2, z));
+      crowns.push(box(1.2, 7, 1.2, x + dx2, height + 3, z - depth / 2), box(1.2, 7, 1.2, x + dx2, height + 3, z + depth / 2));
+    }
+    crowns.push(box(width + 3, 0.9, depth + 3, x, height + 6, z));
+    labels.push({ text: `Building ${String.fromCharCode(65 + layout.buildings + c)} \xB7 100 storeys`, pos: new THREE4.Vector3(x, height + 10, z) });
+  }
+  group.add(new THREE4.Mesh(merge(stone), surface("stone", "#c9baa4")));
+  group.add(new THREE4.Mesh(merge(crowns), surface("stone", "#e4d5bb")));
+  group.add(new THREE4.Mesh(merge(bronze), std("#554d40", { metalness: 0.65, roughness: 0.3 })));
+  group.add(new THREE4.Mesh(merge(windows), new THREE4.MeshPhysicalMaterial({ color: "#739295", roughness: 0.18, metalness: 0.25, clearcoat: 1 })));
+  const random = rng(901), trunks = [], leaves = [], treePositions = [], paths = [], beds = [];
+  for (let row = 0; row < layout.rows; row++) {
+    const oz = layout.origin(row * layout.cols + 1).z;
+    for (const side of [-1, 1]) {
+      const pathZ = oz + side * (DEV.D / 2 + 4);
+      paths.push(box(layout.siteX + 8, 0.18, 2.5, 0, 0.49, pathZ));
+      beds.push(box(layout.siteX + 8, 0.1, 1.6, 0, 0.46, oz + side * (DEV.D / 2 + 2.1)));
+      for (let x = -layout.siteX / 2 - 3; x <= layout.siteX / 2 + 3; x += 8) treePositions.push(new THREE4.Vector3(x, 0.5, oz + side * (DEV.D / 2 + 2.1)));
+    }
+  }
+  group.add(new THREE4.Mesh(merge(paths), surface("stone", "#b8b3a6")));
+  group.add(new THREE4.Mesh(merge(beds), surface("stone", "#65734a", { roughness: 1 })));
+  for (const p of treePositions) {
+    trunks.push(p);
+    for (let k = 0; k < 15; k++) {
+      const a = k * 2.399, radius = 0.6 + random() * 1.2;
+      leaves.push(new THREE4.Vector3(p.x + Math.cos(a) * radius, 3.5 + random() * 2.4, p.z + Math.sin(a) * radius));
+    }
+  }
+  group.add(instanced(cyl(0.12, 0.23, 3.7, 0, 1.85, 0, 8), surface("wood", "#66513c"), trunks));
+  const foliageMat = std("#426339", { roughness: 0.95 });
+  const wind = { value: 0 };
+  foliageMat.onBeforeCompile = (shader) => {
+    shader.uniforms.windTime = wind;
+    shader.vertexShader = "uniform float windTime;\n" + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+      transformed.x += sin(windTime * 1.1 + instanceMatrix[3].x * 0.6 + instanceMatrix[3].z) * 0.07 * (position.y + 1.5);`);
+  };
+  const canopy = instanced(new THREE4.SphereGeometry(1.15, 9, 7).scale(1, 1.15, 1), foliageMat, leaves);
+  leaves.forEach((p, i) => canopy.setColorAt(i, new THREE4.Color().setHSL(0.25 + random() * 0.06, 0.28 + random() * 0.2, 0.62 + random() * 0.3)));
+  group.add(canopy);
+  const walkers = [], skin = std("#b98c6f"), trousers = std("#303b44"), shoes = std("#242724");
+  const headGeo = new THREE4.SphereGeometry(0.115, 10, 8), limbGeo = cyl(0.055, 0.045, 0.65, 0, -0.325, 0, 8);
+  for (let i = 0; i < 36; i++) {
+    const row = i % layout.rows, side = i % 2 ? 1 : -1;
+    const pathZ = layout.origin(row * layout.cols + 1).z + side * (DEV.D / 2 + 4);
+    const person = new THREE4.Group();
+    person.name = "Footpath pedestrian";
+    const shirt = std(["#b8aa8d", "#466278", "#b56a4c", "#7a8070", "#ded8ca"][i % 5]);
+    const torso = new THREE4.Mesh(cyl(0.17, 0.13, 0.56, 0, 1.13, 0, 10), shirt);
+    person.add(torso);
+    const head = new THREE4.Mesh(headGeo, skin);
+    head.position.y = 1.55;
+    person.add(head);
+    const limbs = [];
+    for (let j = 0; j < 4; j++) {
+      const pivot = new THREE4.Group();
+      pivot.position.set(j < 2 ? j ? 0.095 : -0.095 : j === 2 ? -0.21 : 0.21, j < 2 ? 0.87 : 1.37, 0);
+      pivot.add(new THREE4.Mesh(limbGeo, j < 2 ? trousers : shirt));
+      if (j < 2) {
+        const shoe = new THREE4.Mesh(box(0.12, 0.09, 0.24, 0, -0.68, 0.035), shoes);
+        pivot.add(shoe);
+      }
+      person.add(pivot);
+      limbs.push(pivot);
+    }
+    const span = Math.max(3, layout.siteX / 2 - 2), speed = 0.9 + random() * 0.55;
+    walkers.push({ person, limbs, span, speed, offset: random() * span * 4, z: pathZ + (i % 3 - 1) * 0.48 });
+    group.add(person);
+  }
+  return { group, labels, height: height + 7, update(dt, t) {
+    wind.value = t;
+    for (const w of walkers) {
+      const phase = (w.offset + t * w.speed) % (4 * w.span), dir = phase < 2 * w.span ? 1 : -1;
+      w.person.position.set(phase < 2 * w.span ? -w.span + phase : 3 * w.span - phase, 0.435, w.z);
+      w.person.rotation.y = dir * Math.PI / 2;
+      w.limbs.forEach((limb, j) => limb.rotation.x = Math.sin(t * w.speed * 5 + w.offset + (j === 0 || j === 3 ? 0 : Math.PI)) * (j < 2 ? 0.42 : 0.3));
+    }
+  } };
+}
+function detailTraffic(group, bodies, truck = false) {
+  const parts = [], add = (geo2, mat) => {
+    const m = new THREE4.InstancedMesh(geo2, mat, bodies.count);
+    m.instanceMatrix = bodies.instanceMatrix;
+    m.frustumCulled = false;
+    group.add(m);
+    parts.push(m);
+  };
+  const wheels = [], rims = [];
+  for (const x of truck ? [-3.5, -2.3, 5.9] : [-1.35, 1.35]) for (const z of [-1, 1]) {
+    wheels.push(new THREE4.CylinderGeometry(truck ? 0.49 : 0.34, truck ? 0.49 : 0.34, 0.22, 12).rotateX(Math.PI / 2).translate(x, truck ? 0.5 : 0.36, z * (truck ? 1.22 : 0.88)));
+    rims.push(new THREE4.CylinderGeometry(0.2, 0.2, 0.235, 10).rotateX(Math.PI / 2).translate(x, truck ? 0.5 : 0.36, z * (truck ? 1.22 : 0.88)));
+  }
+  add(merge(wheels), std("#181b1c", { roughness: 0.95 }));
+  add(merge(rims), std("#b6b9bb", { metalness: 0.85, roughness: 0.24 }));
+  add(truck ? box(1.8, 0.9, 2.43, 6.4, 2.3, 0) : merge([box(1.65, 0.49, 1.625, -0.15, 1.5, 0), box(0.05, 0.5, 1.4, 0.92, 1.48, 0), box(0.05, 0.46, 1.4, -1.31, 1.48, 0)]), new THREE4.MeshPhysicalMaterial({ color: "#253b48", metalness: 0.25, roughness: 0.13, clearcoat: 1 }));
+  for (const front of [true, false]) {
+    const x = truck ? front ? 7.52 : -5.02 : front ? 2.12 : -2.12;
+    add(merge([-0.64, 0.64].map((z) => box(0.045, 0.18, 0.38, x, 0.83, z))), std(front ? "#fff0cb" : "#8a1b12", { emissive: front ? "#ffe0a0" : "#ff2918", emissiveIntensity: front ? 0.7 : 0.5 }));
+  }
+  bodies.frustumCulled = false;
+  return parts;
+}
+
+// src/scene/site-layers.js
+import * as THREE5 from "three";
+
+// src/spec/site-layers.js
+var FLOOD_EVENTS = {
+  20: { label: "1-in-20 year", level: 0.75, inland: 2, ground: -0.08, first: 0 },
+  100: { label: "1-in-100 year", level: 1.1, inland: 6, ground: -0.12, first: 0 },
+  500: { label: "1-in-500 year", level: 1.7, inland: 14, ground: -0.16, first: -0.04 }
+};
+var WINTER_SUN_DEG = [8, 15, 21, 26, 29, 30, 29, 26, 21, 15, 8];
+function siteFeatures(layout) {
+  const { siteX, siteZ } = layout;
+  return {
+    river: { width: 20, zAt: (x) => siteZ / 2 + 44 + 5 * Math.sin(x / 38 + 0.6) },
+    roads: { front: siteZ / 2 + 22, back: -siteZ / 2 - 14, side: siteX / 2 + 14, width: 7 },
+    motorway: { z: -siteZ / 2 - 44, width: 26 },
+    flood: { edgeAt: (x, event) => siteZ / 2 - FLOOD_EVENTS[event].inland + 6 * Math.sin(x / 22 + 2) }
+  };
+}
+
+// src/scene/site-layers.js
+var LEN = 700;
+function ribbon(zA, zB, y, x0, x1, step = 4, uPerMetre = 1 / 20) {
+  const pos = [], uv = [], idx = [];
+  const n = Math.ceil((x1 - x0) / step);
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n;
+    pos.push(x, y, zA(x), x, y, zB(x));
+    uv.push(x * uPerMetre, 0, x * uPerMetre, 1);
+    if (i < n) {
+      const a = i * 2;
+      idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    }
+  }
+  const g = new THREE5.BufferGeometry();
+  g.setAttribute("position", new THREE5.Float32BufferAttribute(pos, 3));
+  g.setAttribute("uv", new THREE5.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+function canvasTex(w, h, draw, repeat = [1, 1]) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  draw(c.getContext("2d"), w, h);
+  const t = new THREE5.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE5.RepeatWrapping;
+  t.repeat.set(...repeat);
+  t.colorSpace = THREE5.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+var flat = (mesh2) => {
+  mesh2.userData.noShadow = true;
+  mesh2.receiveShadow = true;
+  return mesh2;
+};
+var overlay = (m, k = -2) => Object.assign(m, { polygonOffset: true, polygonOffsetFactor: k, polygonOffsetUnits: k });
+function buildSiteLayers(layout) {
+  const F = siteFeatures(layout);
+  const { siteX, siteZ, H } = layout;
+  const root = new THREE5.Group();
+  const groups = {}, tickers = [], labels = [];
+  const layer2 = (id) => {
+    const g = new THREE5.Group();
+    g.name = `layer:${id}`;
+    root.add(g);
+    groups[id] = g;
+    return g;
+  };
+  {
+    const g = layer2("river"), w = F.river.width, zc = F.river.zAt;
+    const ripple = canvasTex(256, 256, (x, W, Hh) => {
+      const r = rng(7);
+      x.fillStyle = "#808080";
+      x.fillRect(0, 0, W, Hh);
+      for (let i = 0; i < 900; i++) {
+        x.strokeStyle = `rgba(${r() < 0.5 ? "255,255,255" : "0,0,0"},${0.08 + r() * 0.12})`;
+        x.lineWidth = 1 + r() * 2;
+        const px = r() * W, py = r() * Hh;
+        x.beginPath();
+        x.moveTo(px, py);
+        x.quadraticCurveTo(px + 10, py - 3 + r() * 6, px + 22 + r() * 20, py);
+        x.stroke();
+      }
+    }, [1, 1]);
+    ripple.colorSpace = THREE5.NoColorSpace;
+    const water = new THREE5.MeshPhysicalMaterial(overlay({ color: "#3d6f80", roughness: 0.14, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.1, bumpMap: ripple, bumpScale: 0.35 }, -3));
+    const waterTime = { value: 0 };
+    water.onBeforeCompile = (shader) => {
+      shader.uniforms.waterTime = waterTime;
+      shader.vertexShader = "uniform float waterTime; varying vec3 waterPosition;\n" + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+        waterPosition = position;
+        transformed.y += 0.035 * sin(position.x * 1.8 - waterTime * 2.2) + 0.018 * sin(position.z * 3.2 + position.x * 0.7 - waterTime * 1.6);`);
+      shader.fragmentShader = "uniform float waterTime; varying vec3 waterPosition;\n" + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+        float dx = 0.063 * cos(waterPosition.x * 1.8 - waterTime * 2.2) + 0.0126 * cos(waterPosition.z * 3.2 + waterPosition.x * 0.7 - waterTime * 1.6);
+        float dz = 0.0576 * cos(waterPosition.z * 3.2 + waterPosition.x * 0.7 - waterTime * 1.6);
+        normal = normalize(normal + mat3(viewMatrix) * vec3(-dx, 0.0, -dz));`);
+    };
+    tickers.push((dt, t) => {
+      waterTime.value = t;
+    });
+    g.add(flat(new THREE5.Mesh(ribbon((x) => zc(x) - w / 2, (x) => zc(x) + w / 2, 0.05, -LEN, LEN, 4, 1 / 14), water)));
+    const streaks = canvasTex(512, 128, (x, W, Hh) => {
+      const r = rng(11);
+      x.clearRect(0, 0, W, Hh);
+      for (let i = 0; i < 46; i++) {
+        const px = r() * W, py = 8 + r() * (Hh - 16), len = 30 + r() * 90;
+        const gr = x.createLinearGradient(px, 0, px + len, 0);
+        gr.addColorStop(0, "rgba(255,255,255,0)");
+        gr.addColorStop(0.5, `rgba(255,255,255,${0.35 + r() * 0.4})`);
+        gr.addColorStop(1, "rgba(255,255,255,0)");
+        x.strokeStyle = gr;
+        x.lineWidth = 1.5 + r() * 1.5;
+        x.beginPath();
+        x.moveTo(px, py);
+        x.lineTo(px + len, py + (r() - 0.5) * 3);
+        x.stroke();
+      }
+    });
+    const flow = new THREE5.MeshBasicMaterial(overlay({ map: streaks, transparent: true, opacity: 0.16, depthWrite: false }, -4));
+    g.add(flat(new THREE5.Mesh(ribbon((x) => zc(x) - w / 2 + 1.5, (x) => zc(x) + w / 2 - 1.5, 0.07, -LEN, LEN, 4, 1 / 40), flow)));
+    const bankMat = new THREE5.MeshStandardMaterial(overlay({ color: "#b9ad8f", roughness: 0.95 }, -2));
+    for (const s of [-1, 1]) g.add(flat(new THREE5.Mesh(ribbon((x) => zc(x) + s * w / 2, (x) => zc(x) + s * (w / 2 + 3.5), 0.04, -LEN, LEN), bankMat)));
+    tickers.push((dt) => {
+      ripple.offset.x -= dt * 0.05;
+      streaks.offset.x -= dt * 0.16;
+    });
+    labels.push({ layer: "river", text: "River", pos: new THREE5.Vector3(siteX / 2 + 40, 3, zc(siteX / 2 + 40)) });
+  }
+  const asphalt = surface("stone", "#363a3d", { roughness: 0.94, bumpScale: 0.035 }), paint = std("#f2efe6", { roughness: 0.6 });
+  {
+    const g = layer2("roads"), R = F.roads, rw = R.width, ext = 40;
+    const segs = [
+      [-R.side - ext, R.side + ext, R.front, "x"],
+      [-R.side - ext, R.side + ext, R.back, "x"],
+      [R.back, R.front, -R.side, "z"],
+      [R.back, R.front, R.side, "z"],
+      [F.motorway.z + F.motorway.width / 2, R.back, -R.side, "z"],
+      [F.motorway.z + F.motorway.width / 2, R.back, R.side, "z"]
+    ];
+    const slabs = [], dashes = [];
+    for (const [a, b, c, axis] of segs) {
+      const L = b - a, mid = (a + b) / 2;
+      slabs.push(axis === "x" ? box(L, 0.47, rw, mid, 0.235, c) : box(rw, 0.47, L, c, 0.235, mid));
+      for (let s = a + 2; s < b - 2; s += 7) dashes.push(axis === "x" ? box(3, 0.02, 0.18, s, 0.48, c) : box(0.18, 0.02, 3, c, 0.48, s));
+    }
+    g.add(new THREE5.Mesh(merge(slabs), asphalt));
+    g.add(flat(new THREE5.Mesh(merge(dashes), paint)));
+    const kerbs = [], paving = [], posts = [], lamps = [];
+    for (const roadZ of [R.front, R.back]) for (const side of [-1, 1]) {
+      const edge = roadZ + side * (rw / 2 + 0.18);
+      kerbs.push(box(R.side * 2, 0.18, 0.3, 0, 0.55, edge));
+      paving.push(box(R.side * 2, 0.15, 2.4, 0, 0.49, edge + side * 1.35));
+      for (let x = -R.side + 9; x < R.side; x += 24) {
+        posts.push(box(0.12, 6, 0.12, x, 3.5, edge + side * 2.1), box(0.12, 0.12, 1.8, x, 6.45, edge + side * 1.3));
+        lamps.push(box(0.38, 0.1, 0.9, x, 6.38, edge + side * 0.6));
+      }
+    }
+    g.add(new THREE5.Mesh(merge(kerbs), std("#cbc6ba")), new THREE5.Mesh(merge(paving), surface("stone", "#b0afa5")));
+    g.add(new THREE5.Mesh(merge(posts), std("#464d51", { metalness: 0.65 })), new THREE5.Mesh(merge(lamps), std("#ffe7b6", { emissive: "#ffe4a1", emissiveIntensity: 1.5 })));
+    const carGeo = merge([box(4.2, 0.9, 1.8, 0, 0.75, 0), box(2.2, 0.7, 1.6, -0.2, 1.5, 0)]);
+    const cars = new THREE5.InstancedMesh(carGeo, std("#ffffff", { roughness: 0.35, metalness: 0.4 }), 8);
+    const r = rng(23), local = [];
+    for (let i = 0; i < 8; i++) {
+      const lane = i % 2 ? 1 : -1, onFront = i < 4;
+      local.push({ x: -R.side - ext + (Math.floor(i % 4 / 2) + 0.5) * (R.side + ext), z: (onFront ? R.front : R.back) + lane * 1.8, dir: lane, speed: 9, span: R.side + ext });
+      cars.setColorAt(i, new THREE5.Color().setHSL(r(), 0.35, 0.35 + r() * 0.3));
+    }
+    g.add(cars);
+    detailTraffic(g, cars);
+    const q0 = new THREE5.Quaternion(), q1 = new THREE5.Quaternion().setFromAxisAngle(new THREE5.Vector3(0, 1, 0), Math.PI), one = new THREE5.Vector3(1, 1, 1), p = new THREE5.Vector3();
+    tickers.push((dt) => {
+      local.forEach((c, i) => {
+        c.x += c.dir * c.speed * dt;
+        if (c.x > c.span) c.x = -c.span;
+        if (c.x < -c.span) c.x = c.span;
+        cars.setMatrixAt(i, m4.compose(p.set(c.x, 0.47, c.z), c.dir > 0 ? q0 : q1, one));
+      });
+      cars.instanceMatrix.needsUpdate = true;
+    });
+    labels.push({ layer: "roads", text: "Local road", pos: new THREE5.Vector3(-R.side - 20, 2.5, R.front) });
+  }
+  {
+    const g = layer2("motorway"), mz = F.motorway.z, mw = F.motorway.width, half = mw / 2;
+    g.add(new THREE5.Mesh(box(2 * LEN, 0.5, mw, 0, 0.25, mz), asphalt));
+    const concrete = std("#b9b5ab", { roughness: 0.9 });
+    g.add(new THREE5.Mesh(merge([box(2 * LEN, 0.9, 0.6, 0, 0.95, mz), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz - half + 0.2), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz + half - 0.2)]), concrete));
+    const lane = (half - 1.2) / 3, dashes = [];
+    for (const s of [-1, 1]) for (const k of [1, 2]) {
+      const z = mz + s * (0.6 + k * lane);
+      for (let x = -LEN; x < LEN; x += 12) dashes.push(box(4, 0.02, 0.2, x, 0.51, z));
+    }
+    for (const s of [-1, 1]) dashes.push(box(2 * LEN, 0.02, 0.2, 0, 0.51, mz + s * (half - 0.9)));
+    g.add(flat(new THREE5.Mesh(merge(dashes), paint)));
+    const sign = canvasTex(512, 128, (x, W, Hh) => {
+      x.fillStyle = "#0f6b3a";
+      x.fillRect(0, 0, W, Hh);
+      x.strokeStyle = "#fff";
+      x.lineWidth = 6;
+      x.strokeRect(6, 6, W - 12, Hh - 12);
+      x.fillStyle = "#fff";
+      x.font = "bold 56px system-ui, sans-serif";
+      x.fillText("MOTORWAY  \xB7  CITY \u27F6", 28, 86);
+    });
+    const steel = std("#8d939a", { metalness: 0.6, roughness: 0.4 });
+    g.add(new THREE5.Mesh(merge([box(0.5, 8, 0.5, -6, 4, mz - half - 0.5), box(0.5, 8, 0.5, -6, 4, mz + half + 0.5), box(0.5, 0.6, mw + 1.5, -6, 7.8, mz)]), steel));
+    const panel = new THREE5.Mesh(new THREE5.PlaneGeometry(10, 2.5), new THREE5.MeshBasicMaterial({ map: sign, side: THREE5.DoubleSide }));
+    panel.position.set(-6.3, 6.4, mz + half / 2);
+    panel.rotation.y = -Math.PI / 2;
+    g.add(panel);
+    const carGeo = merge([box(4.4, 1, 1.9, 0, 0.8, 0), box(2.3, 0.75, 1.7, -0.2, 1.65, 0)]);
+    const truckGeo = merge([box(10, 3.2, 2.5, 0, 2.1, 0), box(2.4, 2.4, 2.4, 6.3, 1.7, 0)]);
+    const r = rng(31), traffic = [], N = 66;
+    const cars = new THREE5.InstancedMesh(carGeo, std("#ffffff", { roughness: 0.3, metalness: 0.5 }), N);
+    const trucks = new THREE5.InstancedMesh(truckGeo, std("#e8e4dc", { roughness: 0.6 }), 12);
+    for (let i = 0; i < N + 12; i++) {
+      const dir = i % 2 ? 1 : -1, ln = Math.floor(i / 2) % 3, truck = i >= N;
+      const z = mz + (dir > 0 ? 1 : -1) * (0.6 + (ln + 0.5) * lane);
+      traffic.push({ x: -LEN + (Math.floor(i / 6) + 0.5) * (2 * LEN / 13), z, dir, speed: 24 + ln * 3, truck, i: truck ? i - N : i });
+      if (!truck) cars.setColorAt(i, new THREE5.Color().setHSL(r(), 0.4, 0.3 + r() * 0.4));
+    }
+    g.add(cars, trucks);
+    detailTraffic(g, cars);
+    detailTraffic(g, trucks, true);
+    const q0 = new THREE5.Quaternion(), q1 = new THREE5.Quaternion().setFromAxisAngle(new THREE5.Vector3(0, 1, 0), Math.PI), one = new THREE5.Vector3(1, 1, 1), p = new THREE5.Vector3();
+    tickers.push((dt) => {
+      for (const c of traffic) {
+        c.x += c.dir * c.speed * dt;
+        if (c.x > LEN) c.x = -LEN;
+        if (c.x < -LEN) c.x = LEN;
+        (c.truck ? trucks : cars).setMatrixAt(c.i, m4.compose(p.set(c.x, 0.5, c.z), c.dir > 0 ? q0 : q1, one));
+      }
+      cars.instanceMatrix.needsUpdate = trucks.instanceMatrix.needsUpdate = true;
+    });
+    labels.push({ layer: "motorway", text: "Motorway", pos: new THREE5.Vector3(-siteX / 2 - 60, 9, mz) });
+  }
+  const floodGroup = layer2("flood");
+  const floodLabel = { layer: "flood", text: "", pos: new THREE5.Vector3() };
+  labels.push(floodLabel);
+  let floodMat = null;
+  function buildFlood(event) {
+    floodGroup.children.slice().forEach((c) => {
+      floodGroup.remove(c);
+      c.geometry?.dispose();
+      c.material?.map?.dispose();
+      c.material?.dispose();
+    });
+    const ev = FLOOD_EVENTS[event], X1 = siteX / 2 + 110, edge = (x) => F.flood.edgeAt(x, event);
+    const hatch = canvasTex(64, 64, (x, W) => {
+      x.fillStyle = "rgba(61,139,255,.55)";
+      x.fillRect(0, 0, W, W);
+      x.strokeStyle = "rgba(190,220,255,.95)";
+      x.lineWidth = 3;
+      for (let k = -W; k < W * 2; k += 16) {
+        x.beginPath();
+        x.moveTo(k, 0);
+        x.lineTo(k + W, W);
+        x.stroke();
+      }
+    });
+    floodMat = new THREE5.MeshBasicMaterial({ color: "#ffffff", map: hatch, transparent: true, opacity: 0.7, depthWrite: false, side: THREE5.DoubleSide });
+    const sheet = flat(new THREE5.Mesh(ribbon(edge, F.river.zAt, ev.level, -X1, X1, 3, 1 / 6), floodMat));
+    sheet.renderOrder = 3;
+    floodGroup.add(sheet);
+    const pts = [];
+    for (let x = -X1; x <= X1; x += 3) pts.push(new THREE5.Vector3(x, ev.level + 0.05, edge(x)));
+    const line = new THREE5.Line(new THREE5.BufferGeometry().setFromPoints(pts), new THREE5.LineDashedMaterial({ color: "#9cc8ff", dashSize: 2.5, gapSize: 1.5 }));
+    line.computeLineDistances();
+    floodGroup.add(line);
+    floodLabel.text = `Flood area \xB7 ${ev.label} \xB7 ${ev.level.toFixed(1)} m`;
+    {
+      const lx = -siteX / 2 - 75;
+      floodLabel.pos.set(lx, ev.level + 3, (edge(lx) + F.river.zAt(lx)) / 2);
+    }
+  }
+  buildFlood(100);
+  tickers.push((dt, t) => {
+    if (floodMat) floodMat.opacity = 0.62 + 0.1 * Math.sin(t * 1.6);
+  });
+  {
+    const g = layer2("solar");
+    const panelGeo = new THREE5.BoxGeometry(1.7, 0.05, 1.05);
+    const cellTex = canvasTex(64, 40, (x, W, Hh) => {
+      x.fillStyle = "#16264a";
+      x.fillRect(0, 0, W, Hh);
+      x.strokeStyle = "#6f8fc9";
+      x.lineWidth = 1;
+      for (let i = 1; i < 6; i++) {
+        x.beginPath();
+        x.moveTo(i * W / 6, 0);
+        x.lineTo(i * W / 6, Hh);
+        x.stroke();
+      }
+      for (let j = 1; j < 4; j++) {
+        x.beginPath();
+        x.moveTo(0, j * Hh / 4);
+        x.lineTo(W, j * Hh / 4);
+        x.stroke();
+      }
+    });
+    const panelMat = new THREE5.MeshPhysicalMaterial({ color: "#ffffff", map: cellTex, roughness: 0.2, metalness: 0.3, clearcoat: 1 });
+    const spots = [];
+    for (let b = 1; b <= layout.buildings; b++) {
+      const o = layout.origin(b);
+      for (let x = -layout.BX / 2 + 1.6; x <= layout.BX / 2 - 1.6; x += 2.1) for (let z = -DEV.D / 2 + 1.6; z <= DEV.D / 2 - 1.6; z += 1.8) spots.push(new THREE5.Vector3(o.x + x, H + 1.05, o.z + z));
+    }
+    const panels = new THREE5.InstancedMesh(panelGeo, panelMat, spots.length);
+    const tilt = new THREE5.Quaternion().setFromAxisAngle(new THREE5.Vector3(1, 0, 0), THREE5.MathUtils.degToRad(20));
+    spots.forEach((p, i) => panels.setMatrixAt(i, m4.compose(p, tilt, new THREE5.Vector3(1, 1, 1))));
+    g.add(panels);
+    const R = 520, pts = [];
+    WINTER_SUN_DEG.forEach((deg, i) => {
+      const az = THREE5.MathUtils.degToRad(62 - 124 * i / (WINTER_SUN_DEG.length - 1)), el = THREE5.MathUtils.degToRad(deg);
+      pts.push(new THREE5.Vector3(Math.sin(az) * Math.cos(el) * R, Math.sin(el) * R, Math.cos(az) * Math.cos(el) * R));
+    });
+    const curve = new THREE5.CatmullRomCurve3(pts);
+    const arc = new THREE5.Line(new THREE5.BufferGeometry().setFromPoints(curve.getPoints(80)), new THREE5.LineDashedMaterial({ color: "#ffd23f", dashSize: 16, gapSize: 10 }));
+    arc.computeLineDistances();
+    g.add(arc);
+    const sun = new THREE5.Mesh(new THREE5.SphereGeometry(14, 24, 16), new THREE5.MeshBasicMaterial({ color: "#ffd96a" }));
+    sun.userData.noShadow = true;
+    g.add(sun);
+    const halo = new THREE5.Mesh(new THREE5.SphereGeometry(24, 24, 16), new THREE5.MeshBasicMaterial({ color: "#ffd23f", transparent: true, opacity: 0.25, depthWrite: false }));
+    g.add(halo);
+    tickers.push((dt, t) => {
+      const k = (Math.sin(t * 0.18) + 1) / 2;
+      curve.getPoint(0.1 + k * 0.8, sun.position);
+      halo.position.copy(sun.position);
+    });
+    labels.push({ layer: "solar", text: "Winter sun path \xB7 midday 30\xB0", pos: pts[Math.floor(pts.length / 2)].clone().add(new THREE5.Vector3(0, 40, 0)) });
+  }
+  for (const ticker of tickers) ticker(0, 0);
+  const riverZ = [F.river.zAt(0) - 30, F.river.zAt(0) + 30], motorZ = [F.motorway.z - F.motorway.width, F.motorway.z + F.motorway.width];
+  return {
+    group: root,
+    labels,
+    /** z bands to keep free of the generated skyline and trees */
+    clearBands: [riverZ, motorZ],
+    /** how far the layers reach, for camera framing */
+    extent: { zMin: F.motorway.z - F.motorway.width / 2 - 4, zMax: F.river.zAt(0) + F.river.width },
+    setActive(id, on) {
+      if (groups[id]) groups[id].visible = on;
+    },
+    setFloodEvent(event) {
+      buildFlood(event);
+    },
+    update(dt, t) {
+      for (const f of tickers) f(dt, t);
+    }
+  };
+}
+
+// src/scene/development.js
+var { UW, D, FH, BASE, GAP_Z, BALCONY } = DEV;
+function buildDevelopment(sp) {
+  const group = new THREE6.Group();
+  const zones = /* @__PURE__ */ new Map();
+  const palette = furniturePalette(sp.design);
+  const { buildings: buildings2, rows, floors, unitsPerFloor } = sp.shell;
+  const layout = developmentLayout(sp.shell);
+  const { BX, siteX, siteZ, H } = layout;
+  const origin = (b) => layout.origin(b);
+  const slabMat = std("#d4cec3"), roofMat = std("#b9b2a6"), wallMat = std(sp.design?.wallColor || "#e2ddd4", { roughness: 0.85 });
+  const railMat = std("#3a3f47", { metalness: 0.4, roughness: 0.4 });
+  const balustradeMat = new THREE6.MeshPhysicalMaterial({ color: "#cfe0e4", transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0, depthWrite: false });
+  const winTex = gridTexture({ cols: 2, rows: 1, frame: "#1b2433", lit: "#ffd59a", dark: "#2d4262", litP: 0.38, seed: 21 });
+  const front = repeatTex(winTex, unitsPerFloor, floors), side = repeatTex(winTex, D / UW, floors);
+  winTex.dispose();
+  const facMat = (t) => new THREE6.MeshPhysicalMaterial({ color: "#d0dad8", map: t, emissive: "#ffe2b9", emissiveMap: t, emissiveIntensity: 0.12, transparent: true, roughness: 0.18, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.15 });
+  const fSide = facMat(side), fFront = facMat(front), none = new THREE6.MeshBasicMaterial({ visible: false });
+  const facades = [];
+  const slabs = [], roofs = [], walls = [], balconies = [], rails = [], panes = [], paths = [];
+  for (let b = 1; b <= buildings2; b++) {
+    const o = origin(b);
+    for (let f = 0; f <= floors; f++) slabs.push(new THREE6.Vector3(o.x, BASE + f * FH, o.z));
+    roofs.push(box(BX + 0.8, 0.7, D + 0.8, o.x, H + 0.35, o.z));
+    roofs.push(box(BX + 1.2, BASE, D + 1.2, o.x, BASE / 2, o.z));
+    const facade = new THREE6.Mesh(new THREE6.BoxGeometry(BX + 0.2, floors * FH, D + 0.2), [fSide, fSide, none, none, fFront, fFront]);
+    facade.position.set(o.x, BASE + floors * FH / 2, o.z);
+    facade.renderOrder = 2;
+    group.add(facade);
+    facades.push(facade);
+    paths.push(box(3, 0.08, GAP_Z * 0.6, o.x, 0.45, o.z + D / 2 + GAP_Z * 0.3));
+  }
+  group.add(instanced(box(BX + 0.6, 0.3, D + 0.6), slabMat, slabs));
+  group.add(new THREE6.Mesh(merge(roofs), roofMat));
+  group.add(new THREE6.Mesh(merge(paths), surface("stone", "#cfc8ba")));
+  const blockAt = [];
+  const towerMats = { floor: std("#d4cec3"), furn: std("#8c9293") };
+  const materialOwner = new THREE6.Mesh(new THREE6.BoxGeometry(1, 1, 1), [towerMats.floor, towerMats.furn]);
+  materialOwner.visible = false;
+  group.add(materialOwner);
+  const towerHitGeo = new THREE6.BoxGeometry(layout.towerWidth / unitsPerFloor, FH, layout.towerDepth + 2.8);
+  sp.zones.forEach((z) => {
+    if (z.tower) {
+      const o2 = origin(z.building), uw = layout.towerWidth / unitsPerFloor;
+      const ux2 = o2.x - layout.towerWidth / 2 + (z.unit - 0.5) * uw;
+      const y2 = BASE + (z.floor - 1) * FH;
+      const frontZ = o2.z + layout.towerDepth / 2 + 1.4;
+      const hit2 = new THREE6.Mesh(towerHitGeo, hitMat);
+      hit2.position.set(ux2, y2 + FH / 2, o2.z);
+      hit2.userData.zone = z.id;
+      group.add(hit2);
+      blockAt.push({ id: z.id, pos: new THREE6.Vector3(ux2, y2 + FH / 2, o2.z), scale: new THREE6.Vector3((uw - 0.15) / (UW - 0.45), 1, (layout.towerDepth + 2.9) / (D - 0.5)) });
+      zones.set(z.id, {
+        z,
+        mats: towerMats,
+        hits: [hit2],
+        anchor: new THREE6.Vector3(ux2, y2 + 2, frontZ + 0.4),
+        center: new THREE6.Vector3(o2.x, y2 + FH / 2, o2.z),
+        seats: [{ pos: new THREE6.Vector3(ux2, y2 + 1.55, frontZ - 0.4), label: `Apartment ${z.name}`, note: `Level ${z.floor} \uFFFD ${z.bedrooms} bed \uFFFD ${z.area} m\uFFFD \uFFFD dummy value` }],
+        look: new THREE6.Vector3(0, -0.12, 1).normalize(),
+        floorsLabel: `building ${String.fromCharCode(64 + z.building)} \uFFFD level ${z.floor}`,
+        furniture: []
+      });
+      return;
+    }
+    const o = origin(z.building);
+    const mats = zoneMats(z, sp.design);
+    const y = BASE + (z.floor - 1) * FH + 0.16;
+    const ux = o.x - BX / 2 + (z.unit - 0.5) * UW;
+    const fz = o.z + D / 2;
+    group.add(new THREE6.Mesh(box(UW - 0.16, 0.06, D - 0.2, ux, y + 0.03, o.z), mats.floor));
+    const furn = [];
+    furn.push(...addFurniture(group, "bed", [new THREE6.Vector3(ux - UW * 0.18, y, o.z - D * 0.22)], mats.furn, palette));
+    furn.push(...addFurniture(group, "sofa", [new THREE6.Vector3(ux + UW * 0.12, y, o.z + D * 0.18)], mats.furn, palette));
+    if (z.unit > 1) walls.push(box(0.12, FH - 0.35, D - 0.4, ux - UW / 2, y + (FH - 0.35) / 2, o.z));
+    walls.push(box(UW - 0.3, FH - 0.35, 0.1, ux, y + (FH - 0.35) / 2, o.z - D * 0.02));
+    balconies.push(box(UW - 0.6, 0.18, BALCONY, ux, y - 0.07, fz + BALCONY / 2));
+    panes.push(box(UW - 0.6, 0.95, 0.04, ux, y + 0.48, fz + BALCONY - 0.03));
+    rails.push(box(UW - 0.6, 0.06, 0.08, ux, y + 1, fz + BALCONY - 0.03));
+    blockAt.push({ id: z.id, pos: new THREE6.Vector3(ux, y + (FH - 0.55) / 2 + 0.02, o.z) });
+    const hit = new THREE6.Mesh(box(UW, FH, D + BALCONY, ux, y - 0.16 + FH / 2, o.z + BALCONY / 2), hitMat);
+    hit.userData.zone = z.id;
+    group.add(hit);
+    const letter = String.fromCharCode(64 + z.building);
+    zones.set(z.id, {
+      z,
+      mats,
+      hits: [hit],
+      anchor: new THREE6.Vector3(ux, y + FH * 0.7, fz + BALCONY + 0.4),
+      center: new THREE6.Vector3(o.x, y + FH / 2, o.z),
+      seats: [{
+        pos: new THREE6.Vector3(ux, y + 1.55, fz - 1.2),
+        // just inside the glass, so the balcony and rail frame the view
+        label: `Apartment ${z.name}`,
+        note: `building ${letter} \xB7 level ${z.floor} \xB7 ${z.bedrooms} bed \xB7 ${z.area} m\xB2`
+      }],
+      look: new THREE6.Vector3(0, -0.12, 1).normalize(),
+      floorsLabel: `building ${letter} \xB7 level ${z.floor}`,
+      furniture: furn
+    });
+  });
+  group.add(new THREE6.Mesh(merge(walls), wallMat));
+  group.add(new THREE6.Mesh(merge(balconies), slabMat));
+  group.add(new THREE6.Mesh(merge(rails), railMat));
+  const glassRail = new THREE6.Mesh(merge(panes), balustradeMat);
+  glassRail.userData.noShadow = true;
+  group.add(glassRail);
+  const landscape = buildResidentialLandscape(layout);
+  group.add(landscape.group);
+  const blockMat = new THREE6.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6, metalness: 0.02 });
+  const blocks = new THREE6.InstancedMesh(box(UW - 0.45, FH - 0.55, D - 0.5), blockMat, Math.max(1, blockAt.length));
+  const unitIndex = /* @__PURE__ */ new Map(), q = new THREE6.Quaternion(), one = new THREE6.Vector3(1, 1, 1), white = new THREE6.Color("#ffffff");
+  blockAt.forEach(({ id, pos, scale }, i) => {
+    unitIndex.set(id, i);
+    blocks.setMatrixAt(i, m4.compose(pos, q, scale || one));
+    blocks.setColorAt(i, white);
+  });
+  blocks.count = blockAt.length;
+  blocks.visible = false;
+  blocks.userData.noShadow = true;
+  group.add(blocks);
+  const labels = [...landscape.labels];
+  for (let b = 1; b <= buildings2; b++) {
+    const o = origin(b);
+    labels.push({ text: `Building ${String.fromCharCode(64 + b)}`, pos: new THREE6.Vector3(o.x, H + 2.4, o.z) });
+  }
+  const site = buildSiteLayers(layout);
+  labels.push(...site.labels);
+  const env = buildSurroundings("office", "park", siteX, siteZ, site.clearBands);
+  const root = new THREE6.Group();
+  root.add(env, group, site.group);
+  return {
+    labels,
+    layout,
+    siteLayers: site,
+    valuationLayer: {
+      setVisible(on) {
+        blocks.visible = on;
+      },
+      setColor(id, color) {
+        const i = unitIndex.get(id);
+        if (i === void 0) return;
+        blocks.setColorAt(i, color);
+        blocks.instanceColor.needsUpdate = true;
+      }
+    },
+    setWireframe(on) {
+      root.traverse((o) => {
+        if (!o.isMesh) return;
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => {
+          if (m !== hitMat && "wireframe" in m) m.wireframe = on;
+        });
+      });
+    },
+    setContext(on) {
+      env.visible = on;
+    },
+    kind: "development",
+    group: root,
+    zones,
+    glassLabel: "Glass facades",
+    levels: layout.maxFloors,
+    // frame the site plus the river in front and the motorway behind
+    fitBox: new THREE6.Box3(new THREE6.Vector3(-siteX / 2 - 6, 0, site.extent.zMin), new THREE6.Vector3(siteX / 2 + 6, landscape.height + 4, site.extent.zMax)),
+    target: new THREE6.Vector3(0, landscape.height * 0.34, 0),
+    dirs: { wide: new THREE6.Vector3(0.55, 0.62, 1), tall: new THREE6.Vector3(0.45, 0.7, 1) },
+    applyGlass(g) {
+      [fSide, fFront].forEach((m) => {
+        m.opacity = lerp(0.97, 0.06, g);
+        m.emissiveIntensity = lerp(0.12, 0.01, g);
+        m.depthWrite = g < 0.02;
+      });
+    },
+    setView(on) {
+      facades.forEach((f) => {
+        f.visible = !on;
+      });
+    },
+    update(dt, t) {
+      site.update(dt, t);
+      landscape.update(dt, t);
+    }
+  };
+}
+
+// src/thane/roads.js
+import * as THREE8 from "three";
+
+// src/thane/road-route.js
+import * as THREE7 from "three";
+function createRoadRoute(layout) {
+  const R = siteFeatures(layout).roads, radius = 11, x = R.side, a = R.front, b = R.back;
+  const path = new THREE7.Path();
+  path.moveTo(x, a - radius);
+  path.absarc(x - radius, a - radius, radius, 0, Math.PI / 2, false);
+  path.lineTo(-x + radius, a);
+  path.absarc(-x + radius, a - radius, radius, Math.PI / 2, Math.PI, false);
+  path.lineTo(-x, b + radius);
+  path.absarc(-x + radius, b + radius, radius, Math.PI, Math.PI * 1.5, false);
+  path.lineTo(x - radius, b);
+  path.absarc(x - radius, b + radius, radius, Math.PI * 1.5, Math.PI * 2, false);
+  path.closePath();
+  path.arcLengthDivisions = 1800;
+  path.updateArcLengths();
+  const length = path.getLength();
+  function at(distance, offset = 0) {
+    const u = (distance / length % 1 + 1) % 1, p = path.getPointAt(u), t = path.getTangentAt(u).normalize();
+    return { x: p.x - t.y * offset, z: p.y + t.x * offset, tx: t.x, tz: t.y, y: 0.47 };
+  }
+  return { at, length, R };
+}
+
+// src/thane/roads.js
+function texture(kind) {
+  const size = 1024, c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d"), r = rng(kind === "asphalt" ? 861 : 427), data = ctx.createImageData(size, size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const i = (y * size + x) * 4, grain = r(), n = kind === "asphalt" ? 57 + (grain - 0.5) * 27 + Math.sin(x * 0.021) * 2 + Math.cos(y * 0.017) * 2 : 137 + (grain - 0.5) * 17;
+    data.data[i] = n;
+    data.data[i + 1] = n + 2;
+    data.data[i + 2] = kind === "asphalt" ? n + 3 : n - 5;
+    data.data[i + 3] = 255;
+  }
+  ctx.putImageData(data, 0, 0);
+  if (kind === "pavers") {
+    ctx.strokeStyle = "rgba(52,49,43,.45)";
+    ctx.lineWidth = 3;
+    for (let y = 0; y < size; y += 128) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(size, y);
+      ctx.stroke();
+      for (let x = y / 128 % 2 * 128; x < size; x += 256) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + 128);
+        ctx.stroke();
+      }
+    }
+  } else {
+    for (let i = 0; i < 11e3; i++) {
+      const x = r() * size, y = r() * size;
+      ctx.fillStyle = r() < 0.5 ? "rgba(15,19,20,.12)" : "rgba(173,168,155,.16)";
+      ctx.fillRect(x, y, 1 + r() * 2, 1 + r() * 2);
+    }
+    ctx.strokeStyle = "rgba(15,20,23,.16)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(720, 0);
+    for (let y = 0; y <= size; y += 25) ctx.lineTo(710 + Math.sin(y * 0.013) * 12, y);
+    ctx.stroke();
+  }
+  const tex = new THREE8.CanvasTexture(c);
+  tex.colorSpace = THREE8.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE8.RepeatWrapping;
+  tex.anisotropy = 16;
+  return tex;
+}
+function buildDetailedRoads(layout) {
+  const group = new THREE8.Group();
+  group.name = "Detailed residential streets";
+  const route = createRoadRoute(layout), { R, length, at } = route, half = R.width / 2;
+  const asphaltMap = texture("asphalt"), paverMap = texture("pavers");
+  const bump = asphaltMap.clone();
+  bump.colorSpace = THREE8.NoColorSpace;
+  const asphalt = std("#ffffff", { map: asphaltMap, bumpMap: bump, bumpScale: 0.018, roughness: 0.96, metalness: 0 });
+  const paving = std("#c3b8a5", { map: paverMap, roughness: 0.94, metalness: 0 });
+  const concrete = std("#aaa698", { roughness: 0.95, metalness: 0 });
+  const paint = std("#d9d4bf", { roughness: 0.88, metalness: 0, polygonOffset: true, polygonOffsetFactor: -1 });
+  const dark = std("#3b4041", { roughness: 0.9, metalness: 0.1 });
+  function strip(from, to, y, mat, period = 4, start = 0, end = length) {
+    const n = Math.max(1, Math.ceil((end - start) / 0.7)), pos2 = [], uv2 = [], idx = [];
+    for (let i = 0; i <= n; i++) {
+      const d = start + (end - start) * i / n;
+      for (const offset of [from, to]) {
+        const p = at(d, offset);
+        pos2.push(p.x, y, p.z);
+        uv2.push(p.x / period, p.z / period);
+      }
+      if (i < n) {
+        const a = i * 2;
+        idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+    }
+    const geo2 = new THREE8.BufferGeometry();
+    geo2.setAttribute("position", new THREE8.Float32BufferAttribute(pos2, 3));
+    geo2.setAttribute("uv", new THREE8.Float32BufferAttribute(uv2, 2));
+    geo2.setIndex(idx);
+    geo2.computeVertexNormals();
+    const mesh3 = new THREE8.Mesh(geo2, mat);
+    mesh3.receiveShadow = true;
+    group.add(mesh3);
+    return mesh3;
+  }
+  strip(-half, half, 0.47, asphalt);
+  const curbs = [], kerbDark = [], grates = [], covers = [], marks = [], poles = [], lights = [], bollards = [];
+  for (const side of [-1, 1]) {
+    const a = side * (half + 0.15), b = side * (half + 2.75);
+    strip(Math.min(a, b), Math.max(a, b), 0.62, paving, 2);
+    const va = side * (half + 2.75), vb = side * (half + 3.35);
+    strip(Math.min(va, vb), Math.max(va, vb), 0.12, std("#706d55", { roughness: 1 }), 3);
+    strip(side * half - 0.12, side * half + 0.12, 0.48, concrete);
+    for (let d = 0; d < length; d += 1.25) {
+      const p = at(d, side * (half + 0.13));
+      const crossing = Math.abs(p.z - R.front) < 1 && (Math.abs(p.x) < 4 || Math.abs(Math.abs(p.x) - 44) < 3);
+      const h = crossing ? 0.04 : 0.17;
+      const geo2 = box(1.22, h, 0.26, 0, 0.47 + h / 2, 0).rotateY(-Math.atan2(p.tz, p.tx)).translate(p.x, 0, p.z);
+      (Math.floor(d / 2.5) % 2 ? curbs : kerbDark).push(geo2);
+    }
+    strip(side * (half - 0.35) - 0.055, side * (half - 0.35) + 0.055, 0.482, paint);
+  }
+  for (let d = 0; d < length; d += 7) {
+    const p = at(d);
+    if (Math.abs(p.z - R.front) < 4 && (Math.abs(p.x) < 6 || Math.abs(Math.abs(p.x) - 44) < 7)) continue;
+    strip(-0.065, 0.065, 0.485, paint, 4, d, Math.min(length, d + 2.5));
+  }
+  const rubber = std("#24292b", { transparent: true, opacity: 0.075, roughness: 0.8, depthWrite: false });
+  for (const offset of [-2.5, -1.05, 1.05, 2.5]) strip(offset - 0.18, offset + 0.18, 0.479, rubber);
+  for (const x of [-44, 44]) {
+    for (let k = -2; k <= 2; k++) marks.push(box(0.55, 8e-3, R.width - 1, x + k * 1.05, 0.49, R.front));
+    marks.push(box(0.23, 8e-3, 2.8, x - 4.1, 0.49, R.front - 1.75), box(0.23, 8e-3, 2.8, x + 4.1, 0.49, R.front + 1.75));
+  }
+  for (let d = 9; d < length; d += 26) {
+    const p = at(d, -half + 0.32), angle = -Math.atan2(p.tz, p.tx);
+    for (let i = 0; i < 8; i++) grates.push(box(0.035, 0.016, 0.43, (i - 3.5) * 0.08, 0.488, 0).rotateY(angle).translate(p.x, 0, p.z));
+    const q = at(d, -half - 2.3);
+    poles.push(cyl(0.055, 0.105, 6.2, q.x, 3.72, q.z, 10));
+    const arm = box(0.09, 0.09, 1.4, 0, 6.78, -0.7).rotateY(angle).translate(q.x, 0, q.z);
+    poles.push(arm);
+    lights.push(box(0.35, 0.07, 0.9, 0, 6.72, -1).rotateY(angle).translate(q.x, 0, q.z));
+  }
+  for (const x of [-25, 25]) {
+    covers.push(cyl(0.34, 0.34, 0.018, x, 0.487, R.front + 0.7, 32));
+    for (let i = -2; i <= 2; i++) grates.push(box(0.48, 6e-3, 0.018, x, 0.501, R.front + 0.7 + i * 0.09));
+  }
+  for (let x = -layout.siteX / 2; x <= layout.siteX / 2; x += 9) {
+    if (Math.abs(x) < 5 || Math.abs(Math.abs(x) - 44) < 4) continue;
+    bollards.push(cyl(0.065, 0.075, 0.8, x, 1.02, R.front - half - 1, 8));
+  }
+  const mesh2 = (parts, mat) => {
+    if (!parts.length) return;
+    const m = new THREE8.Mesh(merge(parts), mat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    group.add(m);
+  };
+  mesh2(curbs, concrete);
+  mesh2(kerbDark, std("#676b63", { roughness: 0.95 }));
+  mesh2(marks, paint);
+  mesh2(grates, std("#424746", { metalness: 0.55, roughness: 0.7 }));
+  mesh2(covers, dark);
+  mesh2(poles, std("#586061", { metalness: 0.7, roughness: 0.55 }));
+  mesh2(lights, std("#d6d5c0", { emissive: "#e6dcbd", emissiveIntensity: 0.12 }));
+  mesh2(bollards, dark);
+  const entranceGeo = box(8, 0.12, 14, 0, 0.43, R.front - 10);
+  const pos = entranceGeo.attributes.position, uv = entranceGeo.attributes.uv;
+  for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) / 2, pos.getZ(i) / 2);
+  const entrance = new THREE8.Mesh(entranceGeo, paving);
+  group.add(entrance);
+  const apron = new THREE8.Mesh(box(layout.siteX + 8, 0.15, 12, 0, 0.16, R.front - 11), std("#777f60", { roughness: 1 }));
+  apron.receiveShadow = true;
+  group.add(apron);
+  group.userData.routeLength = length;
+  return { group, route };
+}
+
+// src/thane/street-life.js
+import * as THREE9 from "three";
+function createStreetLife(layout, route = createRoadRoute(layout)) {
+  const group = new THREE9.Group();
+  group.name = "Simulated street life";
+  const random = rng(210), count = 180, people = [];
+  const batch2 = (geo2, mat, n = count) => {
+    const mesh2 = new THREE9.InstancedMesh(geo2, mat, n);
+    mesh2.frustumCulled = false;
+    group.add(mesh2);
+    return mesh2;
+  };
+  const heads = batch2(new THREE9.SphereGeometry(0.12, 8, 6), std("#c2997b"));
+  const bodies = batch2(cyl(0.18, 0.14, 0.55, 0, 1.14, 0, 8), std("#ffffff"));
+  const limbs = Array.from({ length: 4 }, (_, i) => batch2(cyl(0.055, 0.045, 0.66, 0, -0.33, 0, 6), std(i < 2 ? "#303b46" : "#a3a49a")));
+  const shoes = batch2(merge([box(0.13, 0.1, 0.25, -0.09, 0.1, 0.04), box(0.13, 0.1, 0.25, 0.09, 0.1, 0.04)]), std("#262b2b"));
+  for (let i = 0; i < count; i++) {
+    const row = i % layout.rows, side = i % 2 ? 1 : -1;
+    people.push({ z: layout.origin(row * layout.cols + 1).z + side * (DEV.D / 2 + 4) + (random() - 0.5) * 1.6, offset: random() * layout.siteX * 2, speed: 0.8 + random() * 0.6 });
+    bodies.setColorAt(i, new THREE9.Color().setHSL(random(), 0.24 + random() * 0.3, 0.28 + random() * 0.42));
+    heads.setColorAt(i, new THREE9.Color().setScalar(0.55 + random() * 0.5));
+  }
+  const body = batch2(merge([box(4.2, 0.9, 1.8, 0, 0.75, 0), box(2.2, 0.7, 1.6, -0.2, 1.5, 0)]), std("#ffffff", { metalness: 0.45, roughness: 0.28 }), 32);
+  detailTraffic(group, body);
+  for (let i = 0; i < 32; i++) body.setColorAt(i, new THREE9.Color(["#e9e3da", "#babdc1", "#1c3647", "#9f4631", "#555b58"][i % 5]));
+  const o = new THREE9.Object3D(), pivot = new THREE9.Object3D(), matrix = new THREE9.Matrix4();
+  body.name = "Residential road traffic";
+  return { group, update(t) {
+    for (let i = 0; i < count; i++) {
+      const p = people[i], span = layout.siteX / 2 - 1, phase = (p.offset + t * p.speed) % (span * 4), dir = phase < span * 2 ? 1 : -1;
+      o.position.set(phase < span * 2 ? -span + phase : span * 3 - phase, 0.44, p.z);
+      o.rotation.set(0, dir * Math.PI / 2, 0);
+      o.updateMatrix();
+      bodies.setMatrixAt(i, o.matrix);
+      shoes.setMatrixAt(i, o.matrix);
+      pivot.position.set(0, 1.56, 0);
+      pivot.rotation.set(0, 0, 0);
+      pivot.updateMatrix();
+      heads.setMatrixAt(i, matrix.multiplyMatrices(o.matrix, pivot.matrix));
+      for (let j = 0; j < 4; j++) {
+        pivot.position.set(j < 2 ? j ? 0.095 : -0.095 : j === 2 ? -0.21 : 0.21, j < 2 ? 0.87 : 1.37, 0);
+        pivot.rotation.x = Math.sin(t * p.speed * 5 + p.offset + (j === 0 || j === 3 ? 0 : Math.PI)) * (j < 2 ? 0.4 : 0.3);
+        pivot.updateMatrix();
+        limbs[j].setMatrixAt(i, matrix.multiplyMatrices(o.matrix, pivot.matrix));
+      }
+    }
+    for (const mesh2 of [heads, bodies, shoes, ...limbs]) mesh2.instanceMatrix.needsUpdate = true;
+    for (let i = 0; i < 32; i++) {
+      const dir = i % 2 ? 1 : -1;
+      const p = route.at(Math.floor(i / 2) * route.length / 16 + t * dir * 5.5, -dir * 1.75);
+      o.position.set(p.x, p.y, p.z);
+      o.rotation.set(0, -Math.atan2(p.tz * dir, p.tx * dir), 0);
+      o.updateMatrix();
+      body.setMatrixAt(i, o.matrix);
+    }
+    body.instanceMatrix.needsUpdate = true;
+  } };
+}
+
+// src/thane/water.js
+import * as THREE10 from "three";
+function rippleNormals(size = 256) {
+  const h = new Float32Array(size * size), TAU = Math.PI * 2;
+  const waves = [[3, 1, 0.9, 0.3], [1, 4, 0.7, 1.7], [5, 3, 0.45, 2.4], [7, -2, 0.35, 0.8], [2, -6, 0.3, 4.1], [11, 5, 0.18, 2.2], [-9, 8, 0.16, 5], [13, -11, 0.1, 1.1]];
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    let v = 0;
+    for (const [kx, ky, a, p] of waves) v += a * Math.sin(TAU * (kx * x + ky * y) / size + p);
+    h[y * size + x] = v;
+  }
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const g = c.getContext("2d"), img = g.createImageData(size, size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const at = (dx2, dy2) => h[(y + dy2 + size) % size * size + (x + dx2 + size) % size];
+    const nx = (at(-1, 0) - at(1, 0)) * 1.4, ny = (at(0, -1) - at(0, 1)) * 1.4, l = Math.hypot(nx, ny, 1);
+    const i = (y * size + x) * 4;
+    img.data[i] = (nx / l * 0.5 + 0.5) * 255;
+    img.data[i + 1] = (ny / l * 0.5 + 0.5) * 255;
+    img.data[i + 2] = (1 / l * 0.5 + 0.5) * 255;
+    img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE10.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE10.RepeatWrapping;
+  t.colorSpace = THREE10.NoColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+var vertexShader = `
+  varying vec3 vWorld;
+  void main() { vec4 w = modelMatrix * vec4(position, 1.0); vWorld = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`;
+var fragmentShader = `
+  uniform sampler2D tNormal; uniform float time; uniform vec3 camPos, sunDir, sunColor, deep, shallow, skyTop, horizon;
+  varying vec3 vWorld;
+  vec3 tap(vec2 uv) { vec3 n = texture2D(tNormal, uv).rgb * 2.0 - 1.0; return vec3(n.x, n.z, n.y); }   // tangent space \u2192 y up
+  void main() {
+    vec2 p = vWorld.xz;
+    vec3 n = tap(p / 23.0 + vec2(time * 0.011, time * 0.007)) + tap(p / 8.5 + vec2(-time * 0.019, time * 0.013)) + tap(p / 3.1 + vec2(time * 0.031, -time * 0.024)) * 0.5;
+    n = normalize(vec3(n.x * 0.55, n.y, n.z * 0.55));
+    vec3 V = normalize(camPos - vWorld);
+    float fres = 0.02 + 0.98 * pow(1.0 - max(dot(n, V), 0.0), 5.0);
+    vec3 R = reflect(-V, n);
+    vec3 sky = mix(horizon, skyTop, clamp(R.y * 1.6, 0.0, 1.0));
+    float glint = pow(max(dot(R, sunDir), 0.0), 220.0) * 3.0 + pow(max(dot(R, sunDir), 0.0), 18.0) * 0.08;
+    vec3 body = mix(deep, shallow, 0.35 + 0.25 * n.x);
+    vec3 col = mix(body, sky, fres * 0.85) + sunColor * glint;
+    gl_FragColor = vec4(col, 0.93);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }`;
+function buildWater(water) {
+  const group = new THREE10.Group();
+  group.name = "Real water (OpenStreetMap)";
+  const tNormal = rippleNormals();
+  const lin = (hex) => new THREE10.Color(hex);
+  const uniforms = {
+    tNormal: { value: tNormal },
+    time: { value: 0 },
+    camPos: { value: new THREE10.Vector3(0, 400, 400) },
+    sunDir: { value: new THREE10.Vector3(-260, 480, 210).normalize() },
+    sunColor: { value: lin("#fff1d6") },
+    deep: { value: lin("#243b33") },
+    shallow: { value: lin("#4d5f45") },
+    skyTop: { value: lin("#7b9db8") },
+    horizon: { value: lin("#d6dcd8") }
+  };
+  const material = new THREE10.ShaderMaterial({ uniforms, vertexShader, fragmentShader, transparent: true, side: THREE10.DoubleSide });
+  const geos = [];
+  for (const w of water) {
+    const shape = new THREE10.Shape(w.rings[0].map((p) => new THREE10.Vector2(p.x, p.z)));
+    for (const hole of w.rings.slice(1)) if (hole.length > 3) shape.holes.push(new THREE10.Path(hole.map((p) => new THREE10.Vector2(p.x, p.z))));
+    const g = new THREE10.ShapeGeometry(shape);
+    g.rotateX(Math.PI / 2).translate(0, 0.28, 0);
+    geos.push(g);
+  }
+  for (const g of geos) {
+    const m = new THREE10.Mesh(g, material);
+    m.renderOrder = 1;
+    m.userData.noShadow = true;
+    group.add(m);
+  }
+  return {
+    group,
+    update(t, camLocal) {
+      uniforms.time.value = t;
+      if (camLocal) uniforms.camPos.value.set(camLocal.x, camLocal.y, camLocal.z);
+    },
+    dispose() {
+      group.traverse((o) => o.geometry?.dispose());
+      material.dispose();
+      tNormal.dispose();
+    }
+  };
+}
+
+// src/thane/real-roads.js
+import * as THREE11 from "three";
+var ROAD_WIDTH = { motorway: 15, trunk: 13, primary: 11, secondary: 9, tertiary: 7.5, minor: 5.5, service: 4 };
+var ROAD_Y = { motorway: 0.2, trunk: 0.19, primary: 0.17, secondary: 0.15, tertiary: 0.13, minor: 0.11, service: 0.1 };
+var ASSET_BASE = /\/dist\//.test(location.pathname) ? "../assets/" : "assets/";
+function loadAsphalt() {
+  const tl = new THREE11.TextureLoader(), base = `${ASSET_BASE}tex/asphalt_02/`;
+  const tex = (f, srgb) => {
+    const t = tl.load(base + f);
+    t.wrapS = t.wrapT = THREE11.RepeatWrapping;
+    t.anisotropy = 16;
+    if (srgb) t.colorSpace = THREE11.SRGBColorSpace;
+    return t;
+  };
+  return new THREE11.MeshStandardMaterial({ map: tex("diff.jpg", true), normalMap: tex("nor.jpg"), roughnessMap: tex("rough.jpg"), roughness: 1, color: "#b9b6ae", normalScale: new THREE11.Vector2(0.8, 0.8), polygonOffset: true, polygonOffsetFactor: -1 });
+}
+function outsideRuns(pts, keepOut) {
+  const runs = [];
+  let cur = [];
+  const inside2 = (p) => Math.abs(p.x) < keepOut.x && Math.abs(p.z) < keepOut.z;
+  for (const p of pts) {
+    if (inside2(p)) {
+      if (cur.length > 1) runs.push(cur);
+      cur = [];
+    } else cur.push(p);
+  }
+  if (cur.length > 1) runs.push(cur);
+  return runs;
+}
+function ribbon2(pts, a, b, y, tile, positions, uvs, index) {
+  let along = 0;
+  const base = positions.length / 3;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i], prev = pts[Math.max(0, i - 1)], next = pts[Math.min(pts.length - 1, i + 1)];
+    let tx = next.x - prev.x, tz = next.z - prev.z;
+    const l = Math.hypot(tx, tz) || 1;
+    tx /= l;
+    tz /= l;
+    const nx = tz, nz = -tx;
+    if (i) along += Math.hypot(p.x - pts[i - 1].x, p.z - pts[i - 1].z);
+    positions.push(p.x + nx * a, y, p.z + nz * a, p.x + nx * b, y, p.z + nz * b);
+    uvs.push(along / tile, a / tile, along / tile, b / tile);
+    if (i) {
+      const k = base + (i - 1) * 2;
+      index.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
+    }
+  }
+}
+function stripe(pts, off, y, width, dash, gap, positions, index) {
+  let d = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], L = Math.hypot(b.x - a.x, b.z - a.z);
+    if (!L) continue;
+    const tx = (b.x - a.x) / L, tz = (b.z - a.z) / L, nx = tz, nz = -tx;
+    for (let s = 0; s < L; ) {
+      const phase = d % (dash + gap), on = gap === 0 || phase < dash, step = Math.min(L - s, gap === 0 ? L : on ? dash - phase : dash + gap - phase);
+      if (on) {
+        const k = positions.length / 3, x0 = a.x + tx * s + nx * off, z0 = a.z + tz * s + nz * off, x1 = x0 + tx * step, z1 = z0 + tz * step;
+        positions.push(x0 + nx * width / 2, y, z0 + nz * width / 2, x0 - nx * width / 2, y, z0 - nz * width / 2, x1 + nx * width / 2, y, z1 + nz * width / 2, x1 - nx * width / 2, y, z1 - nz * width / 2);
+        index.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
+      }
+      s += step;
+      d += step;
+    }
+  }
+}
+function mesh(positions, uvs, index, material) {
+  const g = new THREE11.BufferGeometry();
+  g.setAttribute("position", new THREE11.Float32BufferAttribute(positions, 3));
+  if (uvs) g.setAttribute("uv", new THREE11.Float32BufferAttribute(uvs, 2));
+  g.setIndex(index);
+  g.computeVertexNormals();
+  const m = new THREE11.Mesh(g, material);
+  m.receiveShadow = true;
+  m.userData.noShadow = true;
+  return m;
+}
+function buildRealRoads(roads, keepOut) {
+  const group = new THREE11.Group();
+  group.name = "Real road surfaces (OpenStreetMap)";
+  const asphalt = loadAsphalt();
+  const white = new THREE11.MeshStandardMaterial({ color: "#e9e6dc", roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -3 });
+  const yellow = new THREE11.MeshStandardMaterial({ color: "#e2b23a", roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -3 });
+  const P = [], U = [], I = [], W = [], WI = [], Y = [], YI = [];
+  for (const r of roads) {
+    const w = ROAD_WIDTH[r.cls] || 5, y = ROAD_Y[r.cls] || 0.1, h = w / 2;
+    for (const run of outsideRuns(r.pts, keepOut)) {
+      ribbon2(run, h, -h, y, 4, P, U, I);
+      const my = y + 0.015;
+      if (r.cls === "minor" || r.cls === "service") continue;
+      if (r.oneway) {
+        const lanes = Math.max(2, Math.round(w / 3.5));
+        for (let k = 1; k < lanes; k++) stripe(run, -h + k * w / lanes, my, 0.15, 3, 6, W, WI);
+        stripe(run, h - 0.35, my, 0.15, 1, 0, Y, YI);
+        stripe(run, -h + 0.35, my, 0.15, 1, 0, W, WI);
+      } else {
+        stripe(run, 0, my, 0.15, 3, 6, W, WI);
+        if (w >= 9) {
+          stripe(run, h - 0.35, my, 0.13, 1, 0, W, WI);
+          stripe(run, -h + 0.35, my, 0.13, 1, 0, W, WI);
+        }
+      }
+    }
+  }
+  if (I.length) group.add(mesh(P, U, I, asphalt));
+  if (WI.length) group.add(mesh(W, null, WI, white));
+  if (YI.length) group.add(mesh(Y, null, YI, yellow));
+  return { group, dispose() {
+    group.traverse((o) => o.geometry?.dispose());
+    [asphalt, white, yellow].forEach((m) => {
+      m.map?.dispose();
+      m.normalMap?.dispose();
+      m.roughnessMap?.dispose();
+      m.dispose();
+    });
+  } };
+}
+
+// src/thane/vehicles.js
+import * as THREE12 from "three";
+import { mergeGeometries as mergeGeometries2 } from "three/addons/utils/BufferGeometryUtils.js";
+import { RoundedBoxGeometry as RoundedBoxGeometry2 } from "three/addons/geometries/RoundedBoxGeometry.js";
+var merge2 = (gs) => mergeGeometries2(gs.map((g) => g.index ? g.toNonIndexed() : g));
+var rbox = (w, h, d, x, y, z, r = 0.08) => new RoundedBoxGeometry2(w, h, d, 3, Math.min(r, w / 2, h / 2, d / 2) * 0.99).translate(x, y, z);
+var extrudeSide = (pts, width, bevel = 0.06) => {
+  const g = new THREE12.ExtrudeGeometry(new THREE12.Shape(pts.map(([x, y]) => new THREE12.Vector2(x, y))), { depth: width, bevelEnabled: true, bevelSize: bevel, bevelThickness: bevel, bevelSegments: 3, curveSegments: 6 });
+  return g.translate(0, 0, -width / 2);
+};
+var wheel = (r, w, x, y, z) => new THREE12.CylinderGeometry(r, r, w, 20).rotateX(Math.PI / 2).translate(x, y, z);
+function carParts() {
+  const body = extrudeSide([[-2.12, 0.34], [2.12, 0.34], [2.18, 0.62], [2.05, 0.84], [0.95, 0.96], [0.2, 1.38], [-1, 1.4], [-1.86, 0.98], [-2.16, 0.9]], 1.6);
+  const glass = extrudeSide([[0.88, 0.97], [0.23, 1.33], [-0.98, 1.35], [-1.76, 0.99]], 1.66, 0.03);
+  const tyres = merge2([-1.35, 1.38].flatMap((x) => [-0.78, 0.78].map((z) => wheel(0.33, 0.23, x, 0.33, z))));
+  const rims = merge2([-1.35, 1.38].flatMap((x) => [-0.79, 0.79].map((z) => wheel(0.19, 0.245, x, 0.33, z))));
+  const head = merge2([-0.6, 0.6].map((z) => rbox(0.08, 0.13, 0.36, 2.15, 0.72, z, 0.03)));
+  const tail = merge2([-0.62, 0.62].map((z) => rbox(0.08, 0.14, 0.3, -2.17, 0.8, z, 0.03)));
+  return { body, glass, tyres, rims, head, tail };
+}
+function autoParts() {
+  const body = merge2([rbox(2, 0.55, 1.28, -0.25, 0.62, 0, 0.12), rbox(0.7, 0.8, 0.9, 0.98, 0.78, 0, 0.18)]);
+  const canopy = merge2([rbox(1.95, 0.08, 1.36, -0.28, 1.78, 0, 0.04), rbox(1.6, 0.9, 0.05, -0.35, 1.33, 0.66, 0.03), rbox(1.6, 0.9, 0.05, -0.35, 1.33, -0.66, 0.03), rbox(0.06, 0.95, 1.3, -1.22, 1.3, 0, 0.03)]);
+  const glass = rbox(0.06, 0.55, 1, 0.72, 1.33, 0, 0.03);
+  const tyres = merge2([wheel(0.24, 0.16, 1.2, 0.24, 0), wheel(0.25, 0.17, -0.9, 0.25, 0.56), wheel(0.25, 0.17, -0.9, 0.25, -0.56)]);
+  const rims = merge2([wheel(0.12, 0.18, 1.2, 0.24, 0), wheel(0.13, 0.19, -0.9, 0.25, 0.56), wheel(0.13, 0.19, -0.9, 0.25, -0.56)]);
+  const head = rbox(0.06, 0.14, 0.2, 1.34, 0.95, 0, 0.03);
+  const tail = merge2([-0.5, 0.5].map((z) => rbox(0.05, 0.1, 0.16, -1.26, 0.7, z, 0.02)));
+  return { body, canopy, glass, tyres, rims, head, tail };
+}
+function busParts() {
+  const body = rbox(11, 2.6, 2.5, 0, 1.75, 0, 0.18);
+  const glass = merge2([rbox(10.4, 0.95, 2.53, -0.1, 2.32, 0, 0.06), rbox(0.06, 1.3, 2.2, 5.49, 2.2, 0, 0.04)]);
+  const stripe2 = rbox(11.02, 0.25, 2.52, 0, 1.35, 0, 0.04);
+  const tyres = merge2([-3.6, 3.4].flatMap((x) => [-1.1, 1.1].map((z) => wheel(0.5, 0.3, x, 0.5, z))));
+  const rims = merge2([-3.6, 3.4].flatMap((x) => [-1.12, 1.12].map((z) => wheel(0.26, 0.3, x, 0.5, z))));
+  const head = merge2([-0.85, 0.85].map((z) => rbox(0.06, 0.2, 0.4, 5.5, 0.85, z, 0.03)));
+  const tail = merge2([-0.95, 0.95].map((z) => rbox(0.06, 0.3, 0.3, -5.5, 0.95, z, 0.03)));
+  return { body, glass, stripe: stripe2, tyres, rims, head, tail };
+}
+var MATS = {
+  paint: () => new THREE12.MeshPhysicalMaterial({ color: "#ffffff", metalness: 0.55, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08 }),
+  glass: () => new THREE12.MeshPhysicalMaterial({ color: "#0f1a20", metalness: 0.1, roughness: 0.05, clearcoat: 1, reflectivity: 0.9 }),
+  tyres: () => new THREE12.MeshStandardMaterial({ color: "#141617", roughness: 0.92 }),
+  rims: () => new THREE12.MeshStandardMaterial({ color: "#b9bec2", metalness: 0.9, roughness: 0.25 }),
+  head: () => new THREE12.MeshStandardMaterial({ color: "#fff4d6", emissive: "#ffe9b8", emissiveIntensity: 0.9 }),
+  tail: () => new THREE12.MeshStandardMaterial({ color: "#7a1410", emissive: "#ff2414", emissiveIntensity: 0.55 }),
+  canopy: () => new THREE12.MeshPhysicalMaterial({ color: "#f1c232", roughness: 0.55, clearcoat: 0.3 }),
+  stripe: () => new THREE12.MeshStandardMaterial({ color: "#f4f1ea", roughness: 0.5 })
+};
+var CAR_PAINT = ["#f4f4f2", "#f4f4f2", "#f4f4f2", "#c6c9cc", "#c6c9cc", "#7d8288", "#17191b", "#a5161a", "#1d3f7a", "#5a6b4c", "#8c5a2b"];
+function batch(parts, count, colourOf) {
+  const group = new THREE12.Group(), meshes = [];
+  let shared = null;
+  for (const [name, geo2] of Object.entries(parts)) {
+    const mat = name === "body" ? MATS.paint() : (MATS[name] || MATS.paint)();
+    const m = new THREE12.InstancedMesh(geo2, mat, count);
+    m.frustumCulled = false;
+    m.castShadow = name === "body";
+    if (shared) m.instanceMatrix = shared;
+    else shared = m.instanceMatrix;
+    if (name === "body") for (let i = 0; i < count; i++) m.setColorAt(i, new THREE12.Color(colourOf(i)));
+    group.add(m);
+    meshes.push(m);
+  }
+  return { group, meshes, set(i, matrix) {
+    meshes[0].setMatrixAt(i, matrix);
+  }, commit() {
+    meshes[0].instanceMatrix.needsUpdate = true;
+  } };
+}
+var SPEED = { motorway: 19, trunk: 15, primary: 12, secondary: 10, tertiary: 8.5, minor: 6, service: 4 };
+var WEIGHT = { motorway: 3, trunk: 3, primary: 2.2, secondary: 1.6, tertiary: 1.2, minor: 0.45, service: 0.15 };
+var ROAD_Y2 = { motorway: 0.2, trunk: 0.19, primary: 0.17, secondary: 0.15, tertiary: 0.13, minor: 0.11, service: 0.1 };
+function createTraffic(roads, { cars = 110, autos = 40, buses = 10, seed = 77 } = {}) {
+  const group = new THREE12.Group();
+  group.name = "Traffic on real roads (simulated)";
+  const r = rng(seed);
+  const lanes = roads.filter((x) => SPEED[x.cls]).map((x) => {
+    const cum = [0];
+    for (let i = 1; i < x.pts.length; i++) cum.push(cum[i - 1] + Math.hypot(x.pts[i].x - x.pts[i - 1].x, x.pts[i].z - x.pts[i - 1].z));
+    return { ...x, cum, length: cum[cum.length - 1] };
+  }).filter((x) => x.length > 25);
+  const pool = (allowMinor) => {
+    const list = lanes.filter((l) => allowMinor || !["minor", "service"].includes(l.cls));
+    const total = list.reduce((s, l) => s + l.length * WEIGHT[l.cls], 0);
+    return { list, total };
+  };
+  const pools = { any: pool(true), main: pool(false) };
+  const pick = (p) => {
+    let t = r() * p.total;
+    for (const l of p.list) {
+      t -= l.length * WEIGHT[l.cls];
+      if (t <= 0) return l;
+    }
+    return p.list[p.list.length - 1];
+  };
+  const kinds = [
+    { batch: batch(carParts(), cars, () => CAR_PAINT[Math.floor(r() * CAR_PAINT.length)]), n: cars, pool: pools.any, len: 4.3 },
+    { batch: batch(autoParts(), autos, () => r() < 0.75 ? "#18201a" : "#2f6b3a"), n: autos, pool: pools.any, len: 2.6, slow: 0.75 },
+    { batch: batch(busParts(), buses, () => r() < 0.5 ? "#b8322a" : "#2b6f8f"), n: buses, pool: pools.main.list.length ? pools.main : pools.any, len: 11 }
+  ];
+  const vehicles = [];
+  function place(v, start) {
+    const lane = pick(v.kind.pool);
+    v.lane = lane;
+    v.dir = lane.oneway ? 1 : r() < 0.5 ? 1 : -1;
+    v.s = start ? r() * lane.length : v.dir > 0 ? 0 : lane.length;
+    v.speed = SPEED[lane.cls] * (0.8 + r() * 0.35) * (v.kind.slow || 1);
+    const w = ROAD_WIDTH[lane.cls] || 5;
+    v.offset = lane.oneway ? r() < 0.5 ? -w / 4 : w / 4 : w / 4;
+  }
+  for (const kind of kinds) for (let i = 0; i < kind.n; i++) {
+    const v = { kind, i };
+    if (lanes.length) place(v, true);
+    vehicles.push(v);
+  }
+  for (const k of kinds) group.add(k.batch.group);
+  const m = new THREE12.Matrix4(), q = new THREE12.Quaternion(), pos = new THREE12.Vector3(), one = new THREE12.Vector3(1, 1, 1), up = new THREE12.Vector3(0, 1, 0);
+  const hidden = new THREE12.Matrix4().makeScale(0, 0, 0);
+  function update(dt) {
+    for (const v of vehicles) {
+      if (!v.lane) {
+        v.kind.batch.set(v.i, hidden);
+        continue;
+      }
+      v.s += v.speed * dt * v.dir;
+      if (v.s < 0 || v.s > v.lane.length) place(v, false);
+      const L = v.lane, s = Math.max(0, Math.min(L.length, v.s));
+      let k = 1;
+      while (k < L.cum.length - 1 && L.cum[k] < s) k++;
+      const a = L.pts[k - 1], b = L.pts[k], seg = L.cum[k] - L.cum[k - 1] || 1, t = (s - L.cum[k - 1]) / seg;
+      let hx = (b.x - a.x) / seg * v.dir, hz = (b.z - a.z) / seg * v.dir;
+      const hl = Math.hypot(hx, hz) || 1;
+      hx /= hl;
+      hz /= hl;
+      pos.set(a.x + (b.x - a.x) * t + hz * v.offset, ROAD_Y2[L.cls] || 0.1, a.z + (b.z - a.z) * t - hx * v.offset);
+      q.setFromAxisAngle(up, Math.atan2(-hz, hx));
+      v.kind.batch.set(v.i, m.compose(pos, q, one));
+    }
+    for (const k of kinds) k.batch.commit();
+  }
+  update(0);
+  return {
+    group,
+    count: vehicles.length,
+    update,
+    dispose() {
+      group.traverse((o) => {
+        o.geometry?.dispose();
+        o.material?.dispose();
+      });
+    }
+  };
+}
+
+// src/thane/development-layer.js
+function createDevelopmentLayer(map2, spec2, location2, onReady) {
+  let renderer, world, scene, environment, life, transform, last = 0, elapsed = 0;
+  const camera = new THREE13.Camera(), ray = new THREE13.Raycaster();
+  const selection = new THREE13.Mesh(new THREE13.BoxGeometry(1, 1, 1), new THREE13.MeshBasicMaterial({ color: "#e2f2b3", transparent: true, opacity: 0.26, depthWrite: false }));
+  const outline = new THREE13.LineSegments(new THREE13.EdgesGeometry(new THREE13.BoxGeometry(1, 1, 1)), new THREE13.LineBasicMaterial({ color: "#efffc9", depthTest: false }));
+  selection.visible = outline.visible = false;
+  let showLife = true, selected2 = null, motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let real = null, geo2 = null;
+  const realGroup = new THREE13.Group();
+  realGroup.name = "Real surroundings";
+  const layer2 = {
+    id: "vrindavan-development",
+    type: "custom",
+    renderingMode: "3d",
+    onAdd(map3, gl) {
+      scene = new THREE13.Scene();
+      world = buildDevelopment(spec2);
+      const syntheticContext = world.group.children[0];
+      world.group.remove(syntheticContext);
+      disposeTree(syntheticContext);
+      for (const id of ["river", "motorway", "flood", "solar", "roads"]) world.siteLayers.setActive(id, false);
+      world.siteLayers.group.getObjectByName("layer:roads")?.traverse((o) => {
+        if (o.isInstancedMesh) o.visible = false;
+      });
+      world.group.traverse((o) => {
+        if (o.name === "Footpath pedestrian") o.visible = false;
+      });
+      scene.add(world.group, selection, outline, realGroup);
+      const streets = buildDetailedRoads(world.layout);
+      scene.add(streets.group);
+      life = createStreetLife(world.layout, streets.route);
+      scene.add(life.group);
+      const plinth = new THREE13.Mesh(box(world.layout.siteX + 9, 0.4, world.layout.siteZ + 12, 0, 0.03, 0), std("#858a78", { roughness: 1 }));
+      scene.add(plinth);
+      renderer = new THREE13.WebGLRenderer({ canvas: map3.getCanvas(), context: gl, antialias: true });
+      renderer.autoClear = false;
+      renderer.outputColorSpace = THREE13.SRGBColorSpace;
+      renderer.toneMapping = THREE13.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.03;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE13.PCFSoftShadowMap;
+      const pmrem = new THREE13.PMREMGenerator(renderer), room = new RoomEnvironment();
+      environment = pmrem.fromScene(room, 0.04);
+      scene.environment = environment.texture;
+      room.dispose();
+      pmrem.dispose();
+      scene.add(new THREE13.HemisphereLight("#e0edff", "#827158", 1.3));
+      const sun = new THREE13.DirectionalLight("#fff0d5", 3.5);
+      sun.position.set(-260, 480, 210);
+      sun.target.position.set(0, 100, 0);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -240, right: 240, top: 240, bottom: -240, near: 1, far: 1100 });
+      sun.shadow.normalBias = 0.12;
+      sun.shadow.bias = -15e-5;
+      scene.add(sun, sun.target);
+      prepareShadows(world.group);
+      const pos = window.maplibregl.MercatorCoordinate.fromLngLat(location2, 0), s = pos.meterInMercatorCoordinateUnits();
+      transform = new THREE13.Matrix4().makeTranslation(pos.x, pos.y, pos.z).scale(new THREE13.Vector3(s, -s, s)).multiply(new THREE13.Matrix4().makeRotationX(Math.PI / 2));
+      world.applyGlass(0);
+      world.valuationLayer.setVisible(false);
+      life.update(0);
+      scene.updateMatrixWorld(true);
+      onReady(world);
+    },
+    render(gl, matrix) {
+      const now = performance.now() / 1e3, dt = Math.min(0.05, last ? now - last : 0);
+      last = now;
+      if (map2.getZoom() < 14.2) return;
+      if (motion && !document.hidden) elapsed += dt;
+      camera.projectionMatrix.fromArray(matrix).multiply(transform);
+      camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+      world.update(motion ? dt : 0, elapsed);
+      life.group.visible = showLife;
+      if (showLife) life.update(elapsed);
+      if (real) {
+        const zoom = map2.getZoom();
+        real.roads.group.visible = zoom >= 16.4;
+        real.traffic.group.visible = showLife && zoom >= 15.2;
+        if (real.traffic.group.visible && motion) real.traffic.update(dt);
+        const cam = map2.getFreeCameraOptions().position;
+        real.water.update(elapsed, cam && geo2 ? geo2.mercatorToLocal(cam) : null);
+      }
+      renderer.resetState();
+      renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      renderer.render(scene, camera);
+      renderer.resetState();
+      if (motion && !document.hidden) map2.triggerRepaint();
+    },
+    pick(point) {
+      if (!world || map2.getZoom() < 16) return null;
+      const canvas = map2.getCanvas(), x = point.x / canvas.clientWidth * 2 - 1, y = 1 - point.y / canvas.clientHeight * 2;
+      const a = new THREE13.Vector3(x, y, -1).applyMatrix4(camera.projectionMatrixInverse), b = new THREE13.Vector3(x, y, 1).applyMatrix4(camera.projectionMatrixInverse);
+      ray.set(a, b.sub(a).normalize());
+      const hits = ray.intersectObjects([...world.zones.values()].flatMap((z) => z.hits), false);
+      return hits[0]?.object.userData.zone || null;
+    },
+    select(id) {
+      selected2 = id;
+      const zone = world?.zones.get(id);
+      if (!zone) return;
+      const hit = zone.hits[0];
+      hit.geometry.computeBoundingBox();
+      const bounds = hit.geometry.boundingBox.clone().applyMatrix4(hit.matrixWorld);
+      bounds.getCenter(selection.position);
+      bounds.getSize(selection.scale);
+      selection.scale.multiplyScalar(1.012);
+      outline.position.copy(selection.position);
+      outline.scale.copy(selection.scale);
+      selection.visible = outline.visible = true;
+      map2.triggerRepaint();
+    },
+    setActivity(on) {
+      showLife = on;
+      map2.triggerRepaint();
+    },
+    /** Installs water, road surfaces and traffic built from the real map data around the site. */
+    setRealContext(ctx, geoRef) {
+      geo2 = geoRef;
+      if (real) {
+        realGroup.remove(real.water.group, real.roads.group, real.traffic.group);
+        real.water.dispose();
+        real.roads.dispose();
+        real.traffic.dispose();
+      }
+      const L = world.layout, keepOut = { x: L.siteX / 2 + 6, z: L.siteZ / 2 + 8 };
+      real = { water: buildWater(ctx.water), roads: buildRealRoads(ctx.roads, keepOut), traffic: createTraffic(ctx.roads) };
+      realGroup.add(real.water.group, real.roads.group, real.traffic.group);
+      map2.triggerRepaint();
+      return { water: ctx.water.length, roads: ctx.roads.length, vehicles: real.traffic.count };
+    },
+    /** Colours every flat by its value (colourOf(id) → THREE.Color), or switches the colouring off. */
+    setValueColours(on, colourOf) {
+      if (!world) return;
+      world.valuationLayer.setVisible(on);
+      world.applyGlass(on ? 0.85 : 0);
+      if (on && colourOf) for (const id of world.zones.keys()) world.valuationLayer.setColor(id, colourOf(id));
+      map2.triggerRepaint();
+    },
+    getRealStats() {
+      return real ? { vehicles: real.traffic.count, water: real.water.group.children.length, roadsVisible: real.roads.group.visible } : null;
+    },
+    projectUnit(id) {
+      const zone = world?.zones.get(id);
+      if (!zone) return null;
+      const p = zone.anchor.clone().applyMatrix4(camera.projectionMatrix);
+      return { x: (p.x + 1) / 2 * map2.getCanvas().clientWidth, y: (1 - p.y) / 2 * map2.getCanvas().clientHeight };
+    },
+    getWorld() {
+      return world;
+    },
+    onRemove() {
+      if (scene) disposeTree(scene);
+      environment?.dispose();
+      renderer?.dispose();
+    }
+  };
+  return layer2;
+}
+
+// src/thane/real-context.js
+var ROAD_CLASSES = { motorway: 1, trunk: 1, primary: 1, secondary: 1, tertiary: 1, minor: 1, service: 1 };
+var WATER_CLASSES = { river: 1, lake: 1, pond: 1, reservoir: 1, basin: 1 };
+function createGeo(location2, ml2 = window.maplibregl) {
+  const origin = ml2.MercatorCoordinate.fromLngLat(location2, 0), s = origin.meterInMercatorCoordinateUnits();
+  return {
+    origin,
+    scale: s,
+    toLocal(lng, lat) {
+      const m = ml2.MercatorCoordinate.fromLngLat([lng, lat], 0);
+      return { x: (m.x - origin.x) / s, z: (m.y - origin.y) / s };
+    },
+    /** A MercatorCoordinate (e.g. the camera position) in local metres, including height. */
+    mercatorToLocal(m) {
+      return { x: (m.x - origin.x) / s, y: (m.z - origin.z) / s, z: (m.y - origin.y) / s };
+    }
+  };
+}
+function collectContext(map2, geo2, radius = 1400) {
+  const seen = /* @__PURE__ */ new Set(), water = [], roads = [];
+  const near = (pts) => pts.some((p) => Math.abs(p.x) < radius && Math.abs(p.z) < radius);
+  const key = (kind, pts) => `${kind}:${pts.length}:${pts[0].x.toFixed(1)},${pts[0].z.toFixed(1)}:${pts[pts.length - 1].x.toFixed(1)},${pts[pts.length - 1].z.toFixed(1)}`;
+  const local = (ring) => ring.map(([lng, lat]) => geo2.toLocal(lng, lat));
+  for (const f of map2.querySourceFeatures("city", { sourceLayer: "water" })) {
+    const cls = f.properties.class;
+    if (!WATER_CLASSES[cls]) continue;
+    const polys = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.type === "MultiPolygon" ? f.geometry.coordinates : [];
+    for (const poly of polys) {
+      const rings = poly.map(local);
+      if (rings[0].length < 4 || !near(rings[0])) continue;
+      const k = key("w", rings[0]);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      water.push({ cls, name: f.properties.name || null, rings });
+    }
+  }
+  for (const f of map2.querySourceFeatures("city", { sourceLayer: "transportation" })) {
+    const cls = f.properties.class;
+    if (!ROAD_CLASSES[cls] || f.properties.brunnel === "tunnel") continue;
+    const lines = f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.type === "MultiLineString" ? f.geometry.coordinates : [];
+    for (const line of lines) {
+      const pts = local(line);
+      if (pts.length < 2 || !near(pts)) continue;
+      const k = key("r", pts);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      roads.push({ cls, name: f.properties.name || null, oneway: f.properties.oneway === 1, bridge: f.properties.brunnel === "bridge", pts });
+    }
+  }
+  return { water, roads, signature: `${water.length}/${roads.length}` };
+}
+function segDist(p, a, b) {
+  const dx2 = b.x - a.x, dz = b.z - a.z, l = dx2 * dx2 + dz * dz;
+  const t = l ? Math.max(0, Math.min(1, ((p.x - a.x) * dx2 + (p.z - a.z) * dz) / l)) : 0;
+  return Math.hypot(p.x - (a.x + t * dx2), p.z - (a.z + t * dz));
+}
+function distanceToLines(p, lines) {
+  let best = Infinity;
+  for (const pts of lines) for (let i = 1; i < pts.length; i++) best = Math.min(best, segDist(p, pts[i - 1], pts[i]));
+  return best;
+}
+function inside(p, ring) {
+  let c = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i], b = ring[j];
+    if (a.z > p.z !== b.z > p.z && p.x < (b.x - a.x) * (p.z - a.z) / (b.z - a.z) + a.x) c = !c;
+  }
+  return c;
+}
+function distanceToWater(p, water) {
+  let best = Infinity;
+  for (const w of water) {
+    if (inside(p, w.rings[0])) return 0;
+    best = Math.min(best, distanceToLines(p, [w.rings[0]]));
+  }
+  return best;
+}
+
+// src/thane/location-value.js
+var clamp01 = (v) => Math.max(0, Math.min(1, v));
+var ARTERIAL = { motorway: 1, trunk: 1, primary: 1 };
+function locationFactors(zones, layout, ctx) {
+  const views = ctx.water.filter((w) => w.cls === "river" || w.cls === "lake" || w.cls === "reservoir");
+  const channels = ctx.water.filter((w) => w.cls === "river");
+  const arterials = ctx.roads.filter((r) => ARTERIAL[r.cls]);
+  const streets = ctx.roads.filter((r) => !ARTERIAL[r.cls]);
+  const cache = /* @__PURE__ */ new Map(), out = /* @__PURE__ */ new Map();
+  for (const z of zones) {
+    const u = layout.unitAt(z);
+    const k = `${Math.round(u.x)},${Math.round(u.z)}`;
+    if (!cache.has(k)) {
+      const near = (list) => {
+        let best = Infinity, which = null;
+        for (const r of list) {
+          const d2 = distanceToLines(u, [r.pts]);
+          if (d2 < best) {
+            best = d2;
+            which = r;
+          }
+        }
+        return { d: best, road: which };
+      };
+      cache.set(k, { water: distanceToWater(u, views), channel: distanceToWater(u, channels), arterial: near(arterials), street: near(streets).d });
+    }
+    const d = cache.get(k), h = DEV.BASE + (z.floor - 1) * DEV.FH, effects = [];
+    const add = (label, pct) => {
+      if (Math.abs(pct) >= 2e-3) effects.push({ label, pct });
+    };
+    if (d.water < 900) add(`Water view \xB7 ${Math.round(d.water)} m to the ${d.water === d.channel ? "river channel" : "lake"}`, 0.07 * clamp01(1 - d.water / 900) * (h > 20 ? 1 : d.water < 150 ? 0.5 : 0));
+    if (z.floor <= 2 && d.channel < 200) add("Near river channel: monsoon flood risk", -0.1 * clamp01(1 - d.channel / 200) * (z.floor === 1 ? 1 : 0.4));
+    if (d.arterial.road) {
+      const name = d.arterial.road.name || `${d.arterial.road.cls} road`;
+      add(`Traffic noise \xB7 ${Math.round(d.arterial.d)} m to ${name}`, -0.07 * clamp01(1 - d.arterial.d / 300) * (z.floor <= 12 ? 1 : 0.6));
+      if (d.arterial.d < 500) add(`Arterial road access \xB7 ${name}`, 0.02);
+    }
+    if (d.street < 40) add("Street frontage", 0.01);
+    out.set(z.id, { effects, factor: effects.reduce((m, e) => m * (1 + e.pct), 1) });
+  }
+  return out;
+}
+function applyFactors(values2, factors) {
+  const byZone = /* @__PURE__ */ new Map(), all = [];
+  for (const [id, e] of values2.byZone) {
+    const f = factors?.get(id) || { effects: [], factor: 1 };
+    const valuations = e.valuations.map((v) => ({ ...v, rate: Math.round(v.rate * f.factor / 10) * 10, value: Math.round(v.value * f.factor / 1e3) * 1e3 }));
+    all.push(...valuations);
+    byZone.set(id, { ...e, valuations, latest: valuations[valuations.length - 1] || null, baseLatest: e.latest, effects: f.effects, factor: f.factor });
+  }
+  const rates = [...byZone.values()].filter((e) => e.latest).map((e) => e.latest.rate);
+  return { byZone, all, min: Math.min(...rates), max: Math.max(...rates), valuedCount: rates.length };
+}
+
+// src/thane/main.js
+var $ = (s) => document.querySelector(s);
+var ml = window.maplibregl;
+var LOCATION = [72.983287, 19.209007];
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var spec = normalize({ kind: "development", name: "Vrindavan Residences", currency: "INR", shell: { buildings: 6, rows: 2, floors: 4, unitsPerFloor: 4, basePrice: 85e5 } });
+var values = buildValuations(spec);
+var byId = new Map(spec.zones.map((z) => [z.id, z]));
+var priced = applyFactors(values, null);
+var realCtx = null;
+var geo = null;
+var valueColours = true;
+var format = (n) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+var compact = (n) => n >= 1e7 ? `${(n / 1e7).toFixed(2)} Cr` : `${(n / 1e5).toFixed(1)} L`;
+var stage = "city";
+var layer;
+var marker;
+var ready = false;
+var satellite = true;
+var buildings = true;
+var activity = true;
+var orbit = false;
+var selected;
+var transition = 0;
+var cameras = { city: { center: [72.977, 19.215], zoom: 12.8, pitch: 48, bearing: -22 }, neighbourhood: { center: LOCATION, zoom: 15.8, pitch: 57, bearing: -28 }, development: { center: LOCATION, zoom: 16.25, pitch: 58, bearing: -24 } };
+var status = $("#status");
+var coord = [LOCATION[0], LOCATION[1]];
+var dx = 12e-4;
+var dy = 85e-5;
+var footprint = { type: "Polygon", coordinates: [[[coord[0] - dx, coord[1] - dy], [coord[0] + dx, coord[1] - dy], [coord[0] + dx, coord[1] + dy], [coord[0] - dx, coord[1] + dy], [coord[0] - dx, coord[1] - dy]]] };
+var style = { version: 8, glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf", sources: {
+  imagery: { type: "raster", tiles: ["https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 19, attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics and the GIS User Community" },
+  city: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap contributors</a> | <a href="https://openfreemap.org">OpenFreeMap</a>' }
+}, layers: [
+  { id: "background", type: "background", paint: { "background-color": "#263b3d" } },
+  { id: "land", type: "fill", source: "city", "source-layer": "landcover", paint: { "fill-color": ["match", ["get", "class"], "wood", "#355549", "grass", "#4a6252", "#34494b"] } },
+  { id: "water", type: "fill", source: "city", "source-layer": "water", paint: { "fill-color": "#264f60" } },
+  { id: "satellite", type: "raster", source: "imagery", paint: { "raster-saturation": -0.25, "raster-contrast": 0.12, "raster-brightness-max": 0.87, "raster-fade-duration": 350 } },
+  { id: "roads", type: "line", source: "city", "source-layer": "transportation", filter: ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service"], true, false], paint: { "line-color": "#b6b4a0", "line-opacity": 0.42, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.3, 14, 1, 18, 5] } },
+  { id: "buildings-3d", type: "fill-extrusion", source: "city", "source-layer": "building", minzoom: 13.5, filter: ["!", ["within", footprint]], paint: { "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 12], 0, "#abaca0", 25, "#c3bdab", 70, "#e1d5b8"], "fill-extrusion-height": ["coalesce", ["get", "render_height"], 12], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity": 0.93, "fill-extrusion-vertical-gradient": true } },
+  { id: "road-labels", type: "symbol", source: "city", "source-layer": "transportation_name", minzoom: 14, layout: { "symbol-placement": "line", "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 11, "text-max-angle": 30 }, paint: { "text-color": "#f2eee0", "text-halo-color": "#253b3e", "text-halo-width": 1.4 } },
+  { id: "places", type: "symbol", source: "city", "source-layer": "place", layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 15, 17], "text-letter-spacing": 0.08 }, paint: { "text-color": "#f2f2e8", "text-halo-color": "#203b40", "text-halo-width": 1.5 } }
+], light: { anchor: "viewport", color: "#fff0d6", intensity: 0.65, position: [1.5, 210, 35] } };
+var map;
+try {
+  if (!ml?.Map) throw new Error("Map renderer unavailable");
+  map = new ml.Map({ container: "map", style, ...cameras.city, maxPitch: 72, minZoom: 10, maxZoom: 21.5, antialias: true, attributionControl: { compact: true }, maxBounds: [[72.87, 19.11], [73.12, 19.35]], pixelRatio: Math.min(devicePixelRatio, 2) });
+  map.addControl(new ml.NavigationControl({ showCompass: true }), "top-right");
+  map.addControl(new ml.ScaleControl({ maxWidth: 120 }), "bottom-left");
+  map.on("error", (e) => {
+    status.textContent = "Some map detail could not load. Check your connection; apartment values remain available.";
+    console.warn("Map data:", e.error?.message);
+  });
+  map.once("style.load", () => {
+    layer = createDevelopmentLayer(map, spec, LOCATION, () => {
+      ready = true;
+      status.textContent = "";
+    });
+    map.addLayer(layer);
+    const pin = document.createElement("button");
+    pin.className = "pin";
+    pin.innerHTML = "Vrindavan<small>Explore the neighbourhood</small>";
+    pin.setAttribute("aria-label", "Zoom into Vrindavan neighbourhood");
+    pin.onclick = () => go("neighbourhood");
+    marker = new ml.Marker({ element: pin, anchor: "bottom" }).setLngLat(LOCATION).addTo(map);
+    showUnits(7, 50, 1);
+    if (stage !== "city") go(stage);
+  });
+  map.on("click", (e) => {
+    if (!ready || stage !== "development") return;
+    const id = layer.pick(e.point);
+    if (id) choose(id);
+  });
+  map.on("mousemove", (e) => {
+    if (!ready || stage !== "development") {
+      $("#flatTip").hidden = true;
+      return;
+    }
+    const id = layer.pick(e.point);
+    map.getCanvas().style.cursor = id ? "pointer" : "";
+    const tip = $("#flatTip");
+    if (!id) {
+      tip.hidden = true;
+      return;
+    }
+    const z = byId.get(id), v = priced.byZone.get(id).latest;
+    tip.innerHTML = `<b>Flat ${z.name}</b><span>&#8377; ${compact(v.value)} &middot; ${format(v.rate)}/m&sup2;</span><small>Level ${z.floor} &middot; ${z.bedrooms} bed &middot; dummy value</small>`;
+    tip.style.transform = `translate(${e.point.x + 16}px,${e.point.y + 12}px)`;
+    tip.hidden = false;
+  });
+  map.on("mouseout", () => {
+    $("#flatTip").hidden = true;
+  });
+  let contextTimer;
+  map.on("idle", () => {
+    clearTimeout(contextTimer);
+    contextTimer = setTimeout(refreshContext, 120);
+  });
+  let excludedKey = "";
+  const updateFootprints = () => {
+    if (!map.getLayer("buildings-3d") || map.getZoom() < 14) return;
+    const ids = /* @__PURE__ */ new Set();
+    for (const feature of map.querySourceFeatures("city", { sourceLayer: "building" })) {
+      if (feature.id === void 0) continue;
+      const rings = feature.geometry.type === "Polygon" ? feature.geometry.coordinates : feature.geometry.type === "MultiPolygon" ? feature.geometry.coordinates.flat() : [];
+      const points = rings.flat();
+      if (!points.length) continue;
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const p of points) {
+        x0 = Math.min(x0, p[0]);
+        x1 = Math.max(x1, p[0]);
+        y0 = Math.min(y0, p[1]);
+        y1 = Math.max(y1, p[1]);
+      }
+      if (x0 < coord[0] + dx && x1 > coord[0] - dx && y0 < coord[1] + dy && y1 > coord[1] - dy) ids.add(feature.id);
+    }
+    const list = [...ids].sort((a, b) => a - b), key = JSON.stringify(list);
+    if (key !== excludedKey) {
+      excludedKey = key;
+      map.setFilter("buildings-3d", list.length ? ["!", ["in", ["id"], ["literal", list]]] : null);
+    }
+  };
+  let footprintTimer;
+  const scheduleFootprints = () => {
+    clearTimeout(footprintTimer);
+    footprintTimer = setTimeout(updateFootprints, 150);
+  };
+  map.on("sourcedata", (e) => {
+    if (e.sourceId === "city") scheduleFootprints();
+  });
+  map.on("moveend", scheduleFootprints);
+  map.on("dragstart", () => setOrbit(false));
+} catch (error) {
+  console.warn("Map startup:", error.message);
+  status.textContent = "3D maps need WebGL on this device. You can still browse every apartment and its dummy valuation.";
+  $("#nextStep").textContent = "Browse apartment values";
+}
+function go(next) {
+  stage = next;
+  transition++;
+  setOrbit(false);
+  document.body.className = next;
+  document.querySelectorAll("[data-stage]").forEach((b) => {
+    if (b.dataset.stage === next) b.setAttribute("aria-current", "step");
+    else b.removeAttribute("aria-current");
+  });
+  $("#valuation").hidden = next !== "development";
+  $("#destination").hidden = next === "development";
+  const copy = { city: ["MAHARASHTRA, INDIA", "A city.<br>A thousand<br>perspectives.", "From the skyline of Thane to the streets of Vrindavan. Find your place in the bigger picture."], neighbourhood: ["THANE WEST", "Closer to<br>Vrindavan.", "The neighbourhood, its streets, and the city around it. An illustrative residential landmark awaits."], development: ["ILLUSTRATIVE DEVELOPMENT", "A place in<br>the skyline.", "Three 100-storey towers. 1,296 individual apartments. Select a flat to discover its dummy value."] }[next];
+  $("#chapterLabel").textContent = copy[0];
+  $("#chapterTitle").innerHTML = copy[1];
+  $("#chapterText").textContent = copy[2];
+  $("#nextStep").textContent = next === "city" ? "Explore Vrindavan" : "Explore residences";
+  $("#destination h2").textContent = next === "city" ? "Vrindavan" : "Vrindavan Residences";
+  $("#destination p").textContent = next === "city" ? "A neighbourhood within the city." : "An illustrative development in context.";
+  if (marker) marker.getElement().hidden = next === "development";
+  if (map) {
+    map.stop();
+    map.flyTo({ ...cameras[next], duration: reduced ? 0 : next === "city" ? 3e3 : 4200, essential: false, padding: padding(next) });
+  }
+  if (next === "development") {
+    if (!selected) showUnits(7, 50, 1);
+    layer?.select(selected);
+  }
+  updateColours();
+  if (next !== "development") $("#flatTip").hidden = true;
+}
+var lastSignature = "";
+function refreshContext() {
+  if (!map || !ready || !layer || map.getZoom() < 14.5 || stage === "city") return;
+  geo ?? (geo = createGeo(LOCATION));
+  const ctx = collectContext(map, geo, 1400);
+  if (!ctx.roads.length || ctx.signature === lastSignature) return;
+  lastSignature = ctx.signature;
+  realCtx = ctx;
+  const stats = layer.setRealContext(ctx, geo);
+  priced = applyFactors(values, locationFactors(spec.zones, layer.getWorld().layout, ctx));
+  updateColours();
+  if (selected) renderValue(byId.get(selected));
+  refreshUnitPrices();
+  window.thaneAtlas.real = { ...stats, signature: ctx.signature };
+}
+var LOW = [219, 232, 255];
+var HIGH = [11, 63, 168];
+function rampColour(id) {
+  const e = priced.byZone.get(id), k = priced.max > priced.min ? (e.latest.rate - priced.min) / (priced.max - priced.min) : 0.5;
+  const c = LOW.map((l, i) => Math.round(l + (HIGH[i] - l) * k));
+  return new Color8(`rgb(${c[0]},${c[1]},${c[2]})`);
+}
+function updateColours() {
+  layer?.setValueColours(valueColours && stage === "development", rampColour);
+  $("#valueKey").hidden = !(valueColours && stage === "development");
+  $("#valueKeyLow").textContent = `${format(priced.min)}/m\xB2`;
+  $("#valueKeyHigh").textContent = `${format(priced.max)}/m\xB2`;
+}
+function refreshUnitPrices() {
+  document.querySelectorAll("#unitList [data-unit]").forEach((b) => {
+    const v = priced.byZone.get(b.dataset.unit).latest;
+    const p = b.querySelector(".unit-price");
+    if (p) p.textContent = `\u20B9 ${compact(v.value)}`;
+  });
+}
+function padding(next) {
+  return innerWidth < 650 ? { top: 50, bottom: next === "development" ? 220 : 90, left: 0, right: 0 } : { top: 60, bottom: 100, left: next === "development" ? 100 : 180, right: next === "development" ? 350 : 250 };
+}
+$("#nextStep").onclick = () => go(!map ? "development" : stage === "city" ? "neighbourhood" : "development");
+document.querySelectorAll("[data-stage]").forEach((b) => b.onclick = () => go(b.dataset.stage));
+for (let b = 1; b <= 9; b++) {
+  const option = document.createElement("option");
+  option.value = b;
+  option.textContent = `${b > 6 ? "Tower" : "Building"} ${String.fromCharCode(64 + b)}${b > 6 ? " - 100 floors" : ""}`;
+  $("#buildingSelect").append(option);
+}
+function showUnits(building, floor, unit = 1) {
+  const max = building > 6 ? 100 : 4;
+  floor = Math.max(1, Math.min(max, Math.round(Number(floor) || 1)));
+  $("#buildingSelect").value = building;
+  $("#floorNumber").max = $("#floorRange").max = max;
+  $("#floorNumber").value = $("#floorRange").value = floor;
+  $("#maxFloorLabel").textContent = `Level ${max}`;
+  const units = spec.zones.filter((z2) => z2.building === Number(building) && z2.floor === floor);
+  $("#unitList").innerHTML = units.map((z2) => `<button class="unit" data-unit="${z2.id}" aria-pressed="false">Flat ${z2.name.split(" ")[2]}<small>${z2.bedrooms} bed / ${z2.area} m&sup2;</small><span class="unit-price">&#8377; ${compact(priced.byZone.get(z2.id).latest.value)}</span></button>`).join("");
+  const z = units.find((z2) => z2.unit === unit) || units[0];
+  if (z) renderValue(z);
+}
+function choose(id) {
+  const z = byId.get(id);
+  if (!z) return;
+  showUnits(z.building, z.floor, z.unit);
+}
+function renderValue(z) {
+  selected = z.id;
+  layer?.select(selected);
+  document.querySelectorAll("[data-unit]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === selected)));
+  const e = priced.byZone.get(z.id), v = e.latest, history = e.valuations;
+  const low = Math.min(...history.map((v2) => v2.value)) * 0.94, high = Math.max(...history.map((v2) => v2.value)) * 1.06;
+  const points = history.map((v2, i) => `${history.length === 1 ? 140 : 8 + i * 264 / (history.length - 1)},${57 - (v2.value - low) / (high - low) * 48}`).join(" ");
+  $("#unitDetail").innerHTML = `<div class="value-label">FLAT ${z.name} / DUMMY VALUATION</div><div class="price">&#8377; ${compact(v.value)}</div><div class="unit-facts"><span>${format(v.rate)} / m&sup2;</span><span>Level ${z.floor}</span><span>${z.area} m&sup2;</span></div><div class="history"><header><span>Illustrative valuation history</span><span>${v.quarter}</span></header><svg viewBox="0 0 280 65" role="img" aria-label="Dummy valuation history"><path d="M0 60H280" stroke="#42615b"/><polyline points="${points}" fill="none" stroke="#d3eab9" stroke-width="2"/>${points.split(" ").map((p) => {
+    const [x, y] = p.split(",");
+    return `<circle cx="${x}" cy="${y}" r="3" fill="#d3eab9"/>`;
+  }).join("")}</svg></div>`;
+  const pct = (p) => `${p > 0 ? "+" : "\u2212"}${Math.abs(p * 100).toFixed(1)}%`;
+  $("#unitDetail").insertAdjacentHTML("beforeend", realCtx ? `<div class="factors"><header><span>Location factors</span><span>from real map data</span></header>${e.effects.length ? `<ul>${e.effects.map((x) => `<li><span>${x.label}</span><b class="${x.pct > 0 ? "up" : "down"}">${pct(x.pct)}</b></li>`).join("")}<li class="net"><span>Net \xB7 before factors &#8377; ${compact(e.baseLatest.value)}</span><b class="${e.factor >= 1 ? "up" : "down"}">${pct(e.factor - 1)}</b></li></ul>` : "<p>No nearby water or arterial roads affect this flat.</p>"}</div>` : '<div class="factors"><p>Location factors appear once the surrounding map data has loaded.</p></div>');
+}
+$("#unitList").onclick = (e) => {
+  const b = e.target.closest("[data-unit]");
+  if (b) choose(b.dataset.unit);
+};
+$("#buildingSelect").onchange = () => showUnits(Number($("#buildingSelect").value), Number($("#floorNumber").value));
+$("#floorNumber").onchange = () => showUnits(Number($("#buildingSelect").value), Number($("#floorNumber").value));
+$("#floorRange").oninput = () => showUnits(Number($("#buildingSelect").value), Number($("#floorRange").value));
+$("#focusFlat").onclick = () => {
+  if (!map || !ready) return;
+  setOrbit(false);
+  const token = ++transition;
+  map.stop();
+  map.once("moveend", () => {
+    if (token !== transition) return;
+    map.once("render", () => {
+      if (token !== transition) return;
+      const p = layer.projectUnit(selected);
+      if (p) map.panBy([p.x - (innerWidth < 650 ? innerWidth * 0.5 : (innerWidth - 350) / 2), p.y - innerHeight * (innerWidth < 650 ? 0.28 : 0.46)], { duration: reduced ? 0 : 900 });
+    });
+    map.triggerRepaint();
+  });
+  map.flyTo({ ...cameras.development, zoom: 17.5, duration: reduced ? 0 : 1400, padding: padding("development") });
+};
+$("#satellite").onclick = () => {
+  satellite = !satellite;
+  $("#satellite").setAttribute("aria-pressed", satellite);
+  if (map?.getLayer("satellite")) map.setLayoutProperty("satellite", "visibility", satellite ? "visible" : "none");
+};
+$("#buildings").onclick = () => {
+  buildings = !buildings;
+  $("#buildings").setAttribute("aria-pressed", buildings);
+  if (map?.getLayer("buildings-3d")) map.setLayoutProperty("buildings-3d", "visibility", buildings ? "visible" : "none");
+};
+$("#activity").onclick = () => {
+  activity = !activity;
+  $("#activity").setAttribute("aria-pressed", activity);
+  layer?.setActivity(activity);
+};
+function setOrbit(on) {
+  orbit = on;
+  $("#orbit").setAttribute("aria-pressed", on);
+}
+$("#orbit").onclick = () => setOrbit(!orbit);
+$("#streetView").onclick = () => {
+  if (!map) return;
+  go("development");
+  map.stop();
+  let at = [LOCATION[0] + 22e-5, LOCATION[1] - 25e-5], bearing = -25;
+  if (realCtx && geo) {
+    let best = null;
+    for (const r of realCtx.roads) {
+      if (!["primary", "secondary", "tertiary", "trunk", "minor"].includes(r.cls)) continue;
+      for (const p of r.pts) {
+        const d = Math.hypot(p.x, p.z);
+        if (d > 90 && d < 260 && (!best || d < best.d)) best = { p, d };
+      }
+    }
+    if (best) {
+      const s = geo.scale, o = geo.origin, m = new window.maplibregl.MercatorCoordinate(o.x + best.p.x * s, o.y + best.p.z * s, 0).toLngLat();
+      at = [m.lng, m.lat];
+      bearing = Math.atan2(-best.p.x, best.p.z) * 180 / Math.PI;
+    }
+  }
+  map.flyTo({ center: at, zoom: 20.6, pitch: 78, bearing, padding: { top: 80, bottom: 100, left: 60, right: innerWidth < 650 ? 0 : 340 }, duration: reduced ? 0 : 2400 });
+};
+var updateRealView = () => {
+  if (!map) return;
+  const c = map.getCenter();
+  $("#realStreetView").href = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${c.lat.toFixed(6)},${c.lng.toFixed(6)}&heading=${Math.round((map.getBearing() + 360) % 360)}`;
+};
+map?.on("moveend", updateRealView);
+$("#values").onclick = () => {
+  valueColours = !valueColours;
+  $("#values").setAttribute("aria-pressed", valueColours);
+  updateColours();
+};
+var previous = 0;
+function frame(t) {
+  if (orbit && map && !document.hidden) {
+    const dt = Math.min(0.05, (t - previous) / 1e3);
+    map.setBearing(map.getBearing() + dt * 3);
+  }
+  previous = t;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.addEventListener("resize", () => {
+  map?.resize();
+});
+showUnits(7, 50, 1);
+window.thaneAtlas = { get state() {
+  return { stage, ready, selected, units: spec.zones.length, crowd: 180, location: LOCATION, zoom: map?.getZoom() };
+}, map, get layer() {
+  return layer;
+} };
+export {
+  LOCATION
+};
+</script>
+</body></html>

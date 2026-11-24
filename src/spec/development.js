@@ -14,17 +14,19 @@ export function normalizeDevelopment(s, colors) {
     if (z && typeof z === 'object') overrides.set(`${z.building}-${z.floor}-${z.unit}`, z);
   }
   const zones = [];
-  for (let b = 1; b <= shell.buildings; b++) for (let f = 1; f <= shell.floors; f++) for (let u = 1; u <= shell.unitsPerFloor; u++) {
+  const towerCount = Math.ceil(shell.buildings / shell.rows);
+  for (let b = 1; b <= shell.buildings + towerCount; b++) for (let f = 1; f <= (b > shell.buildings ? 100 : shell.floors); f++) for (let u = 1; u <= shell.unitsPerFloor; u++) {
     const z = overrides.get(`${b}-${f}-${u}`) || {};
     const letter = String.fromCharCode(64 + b), number = `${f}${String(u).padStart(2, '0')}`;
     const bedrooms = integer(z.bedrooms, u % 2 ? 1 : 2, 1, 4);
     const area = integer(z.area, u % 2 ? 64 : 80, 25, 400);
-    const example = Math.round(shell.basePrice * (area / 64) * (1 + (f - 1) * 0.035 + (b - 1) * 0.018 + (u - 1) * 0.003) / 1000) * 1000;
+    const tower = b > shell.buildings;
+    const example = Math.round(shell.basePrice * (area / 64) * (1 + (f - 1) * (tower ? 0.008 : 0.035) + (b - 1) * 0.018 + (u - 1) * 0.003) / 1000) * 1000;
     const supplied = z.price !== undefined && Number.isFinite(Number(z.price));
     const price = integer(z.price, example, 0, 1000000000);
     const valueSource = supplied && z.valueSource !== 'illustrative' ? 'provided' : 'illustrative';
     zones.push({ id: `apartment-${letter.toLowerCase()}-${number}`, type: 'apartment', name: `${letter} · ${number}`,
-      building: b, floor: f, unit: u, bedrooms, area, capacity: 1, price, valueSource,
+      building: b, tower, floor: f, unit: u, bedrooms, area, capacity: 1, price, valueSource,
       priceUnit: valueSource === 'provided' ? 'provided value' : 'example value',
       color: colors[(b - 1) % colors.length],
       features: [`${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}`, `${area} m² interior`, 'Private balcony'],

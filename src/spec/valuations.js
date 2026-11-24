@@ -20,13 +20,13 @@ export function buildValuations(spec) {
   for (const z of spec.zones) {
     const r = rng(z.building * 1009 + z.floor * 97 + z.unit * 13 + 7);
     const confidence = r() < 0.5 ? 'H' : r() < 0.72 ? 'M' : 'L';
-    if (r() > 0.74) { byZone.set(z.id, { valuations: [], latest: null, confidence }); continue; }
+    r(); // Preserve deterministic random sequence; every flat receives dummy history.
     const count = 1 + (r() < 0.45 ? 1 : 0) + (r() < 0.15 ? 1 : 0);
     const quarters = new Set();
     while (quarters.size < count) quarters.add(Math.floor(r() * QUARTERS));
     const valuations = [...quarters].sort((a, b) => a - b).map((q) => {
       const time = 1 + 0.011 * q + 0.00035 * q * q;
-      const floor = 1 + 0.028 * (z.floor - 1) - 0.0018 * (z.floor - 1) ** 2;
+      const floor = z.tower ? 1.12 + 0.008 * (z.floor - 1) : 1 + 0.028 * (z.floor - 1) - 0.0018 * (z.floor - 1) ** 2;
       const building = 1 + (((z.building * 37) % 7) - 3) * 0.012;
       const corner = z.unit === 1 || z.unit === unitsPerFloor ? 1.03 : 1;
       const size = z.bedrooms >= 2 ? 0.98 : 1;

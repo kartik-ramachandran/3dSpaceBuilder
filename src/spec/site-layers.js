@@ -54,7 +54,7 @@ export function locationEffects(zone, layout, features, layers) {
   }
   if (on('motorway')) {
     const d = Math.max(0, back - (features.motorway.z + features.motorway.width / 2));
-    add('motorway', 'Motorway noise', -0.09 * clamp01(1 - d / 110) * (1 + 0.08 * (f - 1)));
+    add('motorway', 'Motorway noise', -0.09 * clamp01(1 - d / 110) * (1 + 0.08 * (Math.min(f, 8) - 1)));
   }
   if (on('flood')) {
     const ev = FLOOD_EVENTS[layers.flood.event || 100];

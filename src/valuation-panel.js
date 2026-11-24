@@ -123,7 +123,7 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
       <div class="vu-head"><h3>${z.name}</h3>
         <p>Building ${letter(z.building)} · Level ${z.floor} · <button class="link" data-act="floor">view floor</button></p></div>
       <div class="vu-badges"><span class="badge conf-${e.confidence}">Placement confidence ${e.confidence}</span><span class="badge">${z.bedrooms} bed · ${z.area} m²</span></div>
-      ${latest ? `<div class="vu-figs"><div><b>${fmt(latest.value)}</b><span>latest valuation · ${latest.quarter}</span></div><div><b>${fmt(latest.rate)}</b><span>per m²</span></div></div>
+      ${latest ? `<div class="vu-figs"><div><b>${fmt(latest.value)}</b><span>dummy valuation · ${latest.quarter}</span></div><div><b>${fmt(latest.rate)}</b><span>per m²</span></div></div>
       <table class="vu-hist"><thead><tr><th>Quarter</th><th>Purpose</th><th>Rate /m²</th><th>Value</th></tr></thead><tbody>
         ${e.valuations.slice().reverse().map((v) => `<tr><td>${v.quarter}</td><td>${v.purpose}</td><td>${fmt(v.rate)}</td><td>${fmt(v.value)}</td></tr>`).join('')}
       </tbody></table>` : `<p class="vu-empty">No market valuation for this apartment yet. Its example value is ${fmt(z.price)} (illustrative).</p>`}
@@ -206,7 +206,7 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
     const pts = building ? data.all.filter((v) => v.building === building) : data.all;
     const fit = fitTrend(pts);
     const highlight = z ? (data.byZone.get(z.id)?.valuations || []) : [];
-    chart.set({ points: pts, fit, highlight, floors: spec.shell.floors, min: Math.min(...data.all.map((v) => v.rate)), max: Math.max(...data.all.map((v) => v.rate)), fmt });
+    chart.set({ points: pts, fit, highlight, floors: building && building <= spec.shell.buildings ? spec.shell.floors : world.layout.maxFloors, min: Math.min(...data.all.map((v) => v.rate)), max: Math.max(...data.all.map((v) => v.rate)), fmt });
     $('#vpStats').innerHTML = `<i class="dot"></i>${building ? `Building ${letter(building)}` : 'Whole project'}: n = ${pts.length}${fit ? `, R² = ${fit.r2.toFixed(2)}` : ' (too few to fit)'}`;
     const sl = $('#vpSelLegend');
     sl.hidden = !z || !highlight.length; if (z) sl.querySelector('span').textContent = `Selected: ${z.name}`;
@@ -235,12 +235,12 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
       for (const t of LAYER_TYPES) world.siteLayers.setActive(t.id, !!layers[t.id]?.on);
       if (layers.flood) world.siteLayers.setFloodEvent(layers.flood.event);
       renderLayers();
-      $('#valLede').textContent = `${sp.zones.length} apartments across ${sp.shell.buildings} building${sp.shell.buildings > 1 ? 's' : ''}.`;
+      $('#valLede').textContent = `${sp.zones.length} apartments across ${w.layout.totalBuildings} building${w.layout.totalBuildings > 1 ? 's' : ''}.`;
       $('#valMin').textContent = `${fmt(data.min)} · lowest`;
       $('#valMax').textContent = `highest · ${fmt(data.max)}`;
-      $('#valUnitNote').textContent = `${sp.currency} per m², latest valuation per apartment`;
+      $('#valUnitNote').textContent = `${sp.currency} per m², dummy valuation per apartment`;
       $('#valCount').textContent = `${data.valuedCount} of ${sp.zones.length} apartments valued (${data.all.length} valuations, ${quarterLabel(0)}–${quarterLabel(QUARTERS - 1)}). Hover an apartment for its valuation.`;
-      $('#vpSub').textContent = `Valuer-assessed rate per m² by quarter and floor. All ${data.all.length} valuations.`;
+      $('#vpSub').textContent = `Dummy data (not a market appraisal): rate per m² by quarter and floor. All ${data.all.length} valuations.`;
       world.valuationLayer.setVisible(colourBy === 'valuation');
       world.setWireframe(controls.querySelector('[data-render="wire"]').getAttribute('aria-pressed') === 'true');
       world.setContext($('#valContext').checked);
@@ -359,7 +359,7 @@ function createTrendChart(canvas) {
       // rate ticks (back wall) and floor ticks (side)
       for (let i = 0; i <= 4; i++) { const r = lo + (hi - lo) * i / 4; const s = sprite(fmt(r), 0.6); s.position.set(-BX - 2.3, ry(r), -BZ); dynLabels.push(s); dyn.add(s); }
       { const s = sprite('Rate per m²', 0.75, '#d7deec'); s.position.set(-BX - 1.8, BY + 0.9, -BZ); dynLabels.push(s); dyn.add(s); }
-      for (let f = 1; f <= floors; f++) { const s = sprite(`L${f}`, 0.62); s.position.set(BX + 0.9, -0.25, fz(f)); dynLabels.push(s); dyn.add(s); }
+      for (const f of (floors <= 10 ? Array.from({ length: floors }, (_, i) => i + 1) : [1, 20, 40, 60, 80, 100])) { const s = sprite(`L${f}`, 0.62); s.position.set(BX + 0.9, -0.25, fz(f)); dynLabels.push(s); dyn.add(s); }
       { const s = sprite('Floor', 0.75, '#d7deec'); s.position.set(BX + 2.2, -0.8, 0); dynLabels.push(s); dyn.add(s); }
       render();
     },

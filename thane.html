@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23182e30'/%3E%3Ctext x='10' y='30' font-size='30' fill='%23d3eac5'%3ET%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#0c171d"><title>Thane Atlas | Vrindavan Residences</title>
+<link rel="stylesheet" href="node_modules/maplibre-gl/dist/maplibre-gl.css">
+<link rel="stylesheet" href="src/thane/style.css">
+</head>
+<body>
+<div id="map" aria-label="Interactive 3D map of Thane"></div>
+<div class="vignette" aria-hidden="true"></div>
+<header><a class="brand" href="index.html"><span class="brand-mark">T</span><span>THANE<span class="brand-sub">SPATIAL ATLAS</span></span></a><div class="header-right"><span class="live-label">CITY EXPLORER</span><a href="app.html">Space builder</a></div></header>
+<main>
+<section class="intro" aria-labelledby="chapterTitle"><div class="eyebrow" id="chapterLabel">MAHARASHTRA, INDIA</div><h1 id="chapterTitle">A city.<br>A thousand<br>perspectives.</h1><p id="chapterText">From the skyline of Thane to the streets of Vrindavan. Find your place in the bigger picture.</p><div class="intro-rule"></div><div class="coordinate">19.2090&deg; N &nbsp; 72.9833&deg; E</div></section>
+<section class="destination glass" id="destination"><div class="eyebrow">YOUR DESTINATION</div><h2>Vrindavan</h2><p>A neighbourhood within the city.</p><div class="destination-meta"><span>Thane West</span><span>3D exploration</span></div><button class="primary" id="nextStep">Explore Vrindavan</button><small>Real geography. Illustrative development.</small></section>
+<section class="valuation glass" id="valuation" hidden aria-label="Apartment valuations"><div class="panel-heading"><div><div class="eyebrow">VRINDAVAN RESIDENCES</div><h2>Find your apartment</h2></div><span class="demo">DUMMY DATA</span></div><p class="panel-note">Illustrative 100-storey development, not an existing project or market appraisal.</p><div class="selectors"><label>Building<select id="buildingSelect"></select></label><label>Floor<input id="floorNumber" type="number" value="50" min="1" max="100"></label></div><input id="floorRange" type="range" min="1" max="100" value="50" aria-label="Select floor"><div class="floor-scale"><span>Ground level</span><span id="maxFloorLabel">Level 100</span></div><div id="unitList" class="units" aria-label="Apartments on this floor"></div><div id="unitDetail" aria-live="polite"></div><button id="focusFlat" class="secondary">Focus on this flat</button><p class="panel-foot">Each flat has its own generated value. All amounts are INR.</p></section>
+</main>
+<div class="map-tools glass"><button id="satellite" aria-pressed="true">Satellite</button><button id="buildings" aria-pressed="true">3D buildings</button><button id="activity" aria-pressed="true">Street life</button><button id="values" aria-pressed="true" title="Colour every flat by its value">Values</button><button id="streetView">Street view</button><a id="realStreetView" href="https://www.google.com/maps/@?api=1&amp;map_action=pano&amp;viewpoint=19.209007,72.983287" target="_blank" rel="noopener" title="Real street-level photos in Google Street View (opens a new tab)">Real Street View &#8599;</a><button id="orbit" aria-pressed="false">Orbit</button></div>
+<div class="flat-tip glass" id="flatTip" hidden></div><div class="value-key glass" id="valueKey" hidden><span>Value per m&sup2;</span><i></i><div><small id="valueKeyLow"></small><small id="valueKeyHigh"></small></div></div><div class="status" role="status" id="status">Loading the Thane map...</div>
+<nav class="journey glass" aria-label="Exploration stages"><button data-stage="city" aria-current="step"><span class="step-icon">01</span><span>Thane<small>The city</small></span></button><span class="journey-line"></span><button data-stage="neighbourhood"><span class="step-icon">02</span><span>Vrindavan<small>The neighbourhood</small></span></button><span class="journey-line"></span><button data-stage="development"><span class="step-icon">03</span><span>Residences<small>Your apartment</small></span></button></nav>
+<div class="map-hint">Drag to explore &middot; Scroll to zoom &middot; Right-drag to tilt</div>
+<div class="source-note">Map: OpenStreetMap / OpenFreeMap. Imagery: Esri and contributors.<br>Building heights may be estimated. People and traffic are simulated.</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","maplibre-gl":"./node_modules/maplibre-gl/dist/maplibre-gl.js"}}</script>
+<script src="node_modules/maplibre-gl/dist/maplibre-gl.js"></script>
+<script type="module" src="src/thane/main.js"></script>
+</body></html>

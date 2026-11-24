@@ -9,6 +9,7 @@ import { box, merge, std, surface, hitMat, instanced, gridTexture, repeatTex, zo
 import { buildSurroundings } from './surroundings.js';
 import { addFurniture, furniturePalette } from './furniture.js';
 import { DEV, developmentLayout } from '../spec/site-layout.js';
+import { buildResidentialLandscape } from './residential-detail.js';
 import { buildSiteLayers } from './site-layers.js';
 
 const { UW, D, FH, BASE, GAP_Z, BALCONY } = DEV;
@@ -50,7 +51,25 @@ export function buildDevelopment(sp) {
 
   // apartments
   const blockAt = [];                                  // per-apartment volume centres for the valuation colour layer
+  const towerMats = { floor: std('#d4cec3'), furn: std('#8c9293') };
+  const materialOwner = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), [towerMats.floor, towerMats.furn]);
+  materialOwner.visible = false; group.add(materialOwner);
+  const towerHitGeo = new THREE.BoxGeometry(layout.towerWidth / unitsPerFloor, FH, layout.towerDepth + 2.8);
   sp.zones.forEach((z) => {
+    if (z.tower) {
+      const o = origin(z.building), uw = layout.towerWidth / unitsPerFloor;
+      const ux = o.x - layout.towerWidth / 2 + (z.unit - 0.5) * uw;
+      const y = BASE + (z.floor - 1) * FH;
+      const frontZ = o.z + layout.towerDepth / 2 + 1.4;
+      const hit = new THREE.Mesh(towerHitGeo, hitMat);
+      hit.position.set(ux, y + FH / 2, o.z); hit.userData.zone = z.id; group.add(hit);
+      blockAt.push({ id: z.id, pos: new THREE.Vector3(ux, y + FH / 2, o.z), scale: new THREE.Vector3((uw - 0.15) / (UW - 0.45), 1, (layout.towerDepth + 2.9) / (D - 0.5)) });
+      zones.set(z.id, { z, mats: towerMats, hits: [hit], anchor: new THREE.Vector3(ux, y + 2, frontZ + 0.4),
+        center: new THREE.Vector3(o.x, y + FH / 2, o.z),
+        seats: [{ pos: new THREE.Vector3(ux, y + 1.55, frontZ - 0.4), label: `Apartment ${z.name}`, note: `Level ${z.floor} · ${z.bedrooms} bed · ${z.area} m² · dummy value` }],
+        look: new THREE.Vector3(0, -0.12, 1).normalize(), floorsLabel: `building ${String.fromCharCode(64 + z.building)} · level ${z.floor}`, furniture: [] });
+      return;
+    }
     const o = origin(z.building);
     const mats = zoneMats(z, sp.design);
     const y = BASE + (z.floor - 1) * FH + 0.16;
@@ -85,28 +104,17 @@ export function buildDevelopment(sp) {
   group.add(new THREE.Mesh(merge(rails), railMat));
   const glassRail = new THREE.Mesh(merge(panes), balustradeMat); glassRail.userData.noShadow = true; group.add(glassRail);
 
-  // landscaping between rows: lawn strips and trees
-  const lawns = [], trees = [], canopies = [];
-  for (let r = 0; r < rows - 1; r++) {
-    const zc = siteZ / 2 - D - GAP_Z / 2 - r * (D + GAP_Z);
-    lawns.push(box(siteX + 6, 0.1, GAP_Z - 8, 0, 0.45, zc));
-    for (let x = -siteX / 2; x <= siteX / 2; x += 9) { trees.push(new THREE.Vector3(x, 0.5, zc)); }
-  }
-  if (lawns.length) group.add(new THREE.Mesh(merge(lawns), std('#7f9e63', { roughness: 1 })));
-  if (trees.length) {
-    group.add(instanced(box(0.5, 3, 0.5, 0, 1.5, 0), std('#6b4e36'), trees));
-    trees.forEach((t) => canopies.push(new THREE.Vector3(t.x, t.y + 4, t.z)));
-    group.add(instanced(new THREE.IcosahedronGeometry(2.2, 0), std('#5b8448', { flatShading: true }), canopies));
-  }
+  const landscape = buildResidentialLandscape(layout);
+  group.add(landscape.group);
 
   // Valuation colour layer: one solid block per apartment, coloured per instance, hidden until switched on.
   const blockMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6, metalness: 0.02 });
   const blocks = new THREE.InstancedMesh(box(UW - 0.45, FH - 0.55, D - 0.5), blockMat, Math.max(1, blockAt.length));
   const unitIndex = new Map(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1), white = new THREE.Color('#ffffff');
-  blockAt.forEach(({ id, pos }, i) => { unitIndex.set(id, i); blocks.setMatrixAt(i, m4.compose(pos, q, one)); blocks.setColorAt(i, white); });
+  blockAt.forEach(({ id, pos, scale }, i) => { unitIndex.set(id, i); blocks.setMatrixAt(i, m4.compose(pos, q, scale || one)); blocks.setColorAt(i, white); });
   blocks.count = blockAt.length; blocks.visible = false; blocks.userData.noShadow = true;
   group.add(blocks);
-  const labels = [];
+  const labels = [...landscape.labels];
   for (let b = 1; b <= buildings; b++) { const o = origin(b); labels.push({ text: `Building ${String.fromCharCode(64 + b)}`, pos: new THREE.Vector3(o.x, H + 2.4, o.z) }); }
 
   // Site layers (river, roads, motorway, flood, solar): toggled from the valuation panel
@@ -127,13 +135,13 @@ export function buildDevelopment(sp) {
       });
     },
     setContext(on) { env.visible = on; },
-    kind: 'development', group: root, zones, glassLabel: 'Glass facades', levels: floors,
+    kind: 'development', group: root, zones, glassLabel: 'Glass facades', levels: layout.maxFloors,
     // frame the site plus the river in front and the motorway behind
-    fitBox: new THREE.Box3(new THREE.Vector3(-siteX / 2 - 6, 0, site.extent.zMin), new THREE.Vector3(siteX / 2 + 6, H + 2, site.extent.zMax)),
-    target: new THREE.Vector3(0, H * 0.35, 0),
+    fitBox: new THREE.Box3(new THREE.Vector3(-siteX / 2 - 6, 0, site.extent.zMin), new THREE.Vector3(siteX / 2 + 6, landscape.height + 4, site.extent.zMax)),
+    target: new THREE.Vector3(0, landscape.height * 0.34, 0),
     dirs: { wide: new THREE.Vector3(0.55, 0.62, 1), tall: new THREE.Vector3(0.45, 0.7, 1) },
     applyGlass(g) { [fSide, fFront].forEach((m) => { m.opacity = lerp(0.97, 0.06, g); m.emissiveIntensity = lerp(0.12, 0.01, g); m.depthWrite = g < 0.02; }); },
     setView(on) { facades.forEach((f) => { f.visible = !on; }); },
-    update(dt, t) { site.update(dt, t); },
+    update(dt, t) { site.update(dt, t); landscape.update(dt, t); },
   };
 }

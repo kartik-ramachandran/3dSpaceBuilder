@@ -15,6 +15,8 @@
     "test:development": "node tests/development.mjs",
     "test:valuations": "node tests/valuations.mjs",
     "test:gestures": "node tests/gestures.mjs",
+    "test:thane": "node tests/thane.mjs",
+    "test:residential-detail": "node tests/residential-detail.mjs",
     "test:site-layers": "node tests/site-layers.mjs"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@anthropic-ai/sdk": "^1.12.0",
     "fflate": "^0.8.3",
     "mammoth": "^1.13.0",
+    "maplibre-gl": "^4.7.1",
     "pdf-lib": "^1.17.1"
   }
 }

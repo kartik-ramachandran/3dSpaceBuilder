@@ -7,7 +7,7 @@ const dev = normalize({ kind: 'development', shell: { buildings: 6, rows: 2, flo
 const a = buildValuations(dev), b = buildValuations(dev);
 assert.deepEqual(a.all, b.all, 'the same development always gets the same demo data');
 assert.equal(a.byZone.size, dev.zones.length, 'every apartment has an entry');
-assert.ok(a.valuedCount > dev.zones.length * 0.5 && a.valuedCount < dev.zones.length, 'most, but not all, apartments are valued');
+assert.equal(a.valuedCount, dev.zones.length, 'every flat has a dummy valuation');
 assert.ok(a.all.every((v) => v.q >= 0 && v.q < QUARTERS && v.rate > 0 && v.value > 0), 'valuations are in range');
 for (const e of a.byZone.values()) {
   assert.ok(['H', 'M', 'L'].includes(e.confidence));
@@ -30,3 +30,6 @@ const demo = fitTrend(a.all);
 assert.ok(demo.r2 > 0.3 && demo.r2 <= 1, `demo R² is plausible (${demo.r2.toFixed(2)})`);
 assert.ok(demo.predict(14, 4) > demo.predict(1, 1), 'later, higher valuations trend up');
 console.log(`ok: valuations — deterministic demo data, exact quadratic fit, demo R² ${demo.r2.toFixed(2)}`);
+
+const top = dev.zones.find(z => z.tower && z.floor === 100);
+assert(a.byZone.get(top.id).latest.value > 0, 'level 100 retains a positive dummy value');

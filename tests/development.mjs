@@ -6,7 +6,7 @@ import { offlineSpec } from '../src/spec/offline-parser.js';
 const dev = normalize(offlineSpec('Residential development with 6 apartment buildings in 2 rows, 4 floors, 4 apartments per floor, base price NZD 650,000'));
 assert.equal(dev.kind, 'development');
 assert.deepEqual([dev.shell.buildings, dev.shell.rows, dev.shell.floors, dev.shell.unitsPerFloor, dev.shell.basePrice], [6, 2, 4, 4, 650000]);
-assert.equal(dev.zones.length, 6 * 4 * 4, 'one zone per apartment');
+assert.equal(dev.zones.length, 6 * 4 * 4 + 3 * 100 * 4, 'one zone per apartment');
 assert.equal(new Set(dev.zones.map((z) => z.id)).size, dev.zones.length, 'apartment ids are unique');
 assert.ok(dev.zones.every((z) => Number.isInteger(z.price) && z.price > 0), 'every apartment has its own value');
 assert.ok(dev.zones.every((z) => z.valueSource === 'illustrative' && z.priceUnit === 'example value'), 'generated values are labelled as examples');
@@ -28,3 +28,8 @@ const clamped = normalize({ kind: 'development', shell: { buildings: 99, rows: 9
 assert.deepEqual([clamped.shell.buildings, clamped.shell.rows, clamped.shell.floors, clamped.shell.unitsPerFloor], [8, 4, 1, 2]);
 assert.equal(normalize(offlineSpec('A long-haul jet with first apartments')).kind, 'plane');
 console.log('ok: development spec — one value per apartment, provided overrides, limits, routing');
+
+const towers = dev.zones.filter(z => z.tower);
+assert.equal(towers.length, 1200);
+assert.equal(towers.filter(z => z.floor === 100).length, 12);
+assert.deepEqual(normalize(dev), dev, 'dummy tower inventory survives save/reload without duplicates');

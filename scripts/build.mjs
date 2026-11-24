@@ -2,7 +2,7 @@
 // Claude artifact. Three.js stays external and loads from jsDelivr through the import map.
 // Usage: npm run build
 import { build } from 'esbuild';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,3 +33,17 @@ html = html
 await mkdir(join(ROOT, 'dist'), { recursive: true });
 await writeFile(join(ROOT, 'dist/index.html'), html);
 console.log(`dist/index.html written (${(Buffer.byteLength(html) / 1024).toFixed(0)} KB)`);
+
+// Separate geographic explorer; retains the original builder at dist/index.html.
+const atlasBundle = await build({ entryPoints: [join(ROOT, 'src/thane/main.js')], bundle: true, format: 'esm', target: 'es2020', external: ['three', 'three/addons/*'], write: false });
+const atlasCSS = await readFile(join(ROOT, 'src/thane/style.css'), 'utf8');
+let atlasHTML = await readFile(join(ROOT, 'thane.html'), 'utf8');
+atlasHTML = atlasHTML.replace('<link rel="stylesheet" href="src/thane/style.css">', () => `<style>${atlasCSS}</style>`)
+  .replace('<script type="module" src="src/thane/main.js"></script>', () => `<script type="module">${atlasBundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')}</script>`)
+  .replaceAll('node_modules/maplibre-gl/dist/', 'vendor/')
+  .replaceAll('href="app.html"', 'href="index.html"');
+await mkdir(join(ROOT, 'dist/vendor'), { recursive: true });
+for (const file of ['maplibre-gl.js', 'maplibre-gl.css']) await copyFile(join(ROOT, 'node_modules/maplibre-gl/dist', file), join(ROOT, 'dist/vendor', file));
+await copyFile(join(ROOT, 'node_modules/maplibre-gl/LICENSE.txt'), join(ROOT, 'dist/vendor/maplibre-LICENSE.txt'));
+await writeFile(join(ROOT, 'dist/thane.html'), atlasHTML);
+console.log('dist/thane.html written with map renderer assets');
