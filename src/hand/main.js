@@ -24,7 +24,6 @@ const spec = normalize(PRESETS.development);
 const data = buildValuations(spec);
 const fmt = (v) => { try { return new Intl.NumberFormat('en-NZ', { style: 'currency', currency: spec.currency, currencyDisplay: 'code', maximumFractionDigits: 0 }).format(v).replace(/ /g, ' '); } catch (e) { return `${spec.currency} ${Math.round(v)}`; } };
 $('#name').textContent = spec.name;
-$('#lo').textContent = `${fmt(data.min)} /m²`; $('#hi').textContent = `${fmt(data.max)} /m²`;
 
 /* ---------- renderer, background video pass, hologram scene, bloom ---------- */
 const canvas = $('#gl');
@@ -37,20 +36,28 @@ const video = $('#cam');
 const videoTex = new THREE.VideoTexture(video); videoTex.colorSpace = THREE.SRGBColorSpace;
 const bgScene = new THREE.Scene(), bgCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 const bgMat = new THREE.ShaderMaterial({
-  uniforms: { map: { value: videoTex }, hasVideo: { value: 0 }, videoAspect: { value: 16 / 9 }, screenAspect: { value: 1 }, mirror: { value: 1 }, dim: { value: 0.4 }, gray: { value: 0 }, time: { value: 0 } },
+  uniforms: { map: { value: videoTex }, hasVideo: { value: 0 }, bgMode: { value: 1 }, videoAspect: { value: 16 / 9 }, screenAspect: { value: 1 }, mirror: { value: 1 }, dim: { value: 0.4 }, gray: { value: 0 }, time: { value: 0 } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
-  fragmentShader: `uniform sampler2D map; uniform float hasVideo, videoAspect, screenAspect, mirror, dim, gray, time; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D map; uniform float hasVideo, videoAspect, screenAspect, mirror, dim, gray, time, bgMode; varying vec2 vUv;
     void main(){
       vec2 uv = vUv; float r = screenAspect / videoAspect;
       if (r > 1.0) uv.y = (uv.y - 0.5) / r + 0.5; else uv.x = (uv.x - 0.5) * r + 0.5;
       if (mirror > 0.5) uv.x = 1.0 - uv.x;
       vec3 c;
-      if (hasVideo > 0.5) c = texture2D(map, uv).rgb;
-      else { float v = 1.0 - length(vUv - vec2(0.5, 0.42)) * 1.1; c = mix(vec3(0.01, 0.025, 0.045), vec3(0.03, 0.09, 0.14), clamp(v, 0.0, 1.0)); }
-      float l = dot(c, vec3(0.299, 0.587, 0.114));
-      c = mix(c, vec3(l), gray);
-      c *= 1.0 - dim;
-      c += vec3(0.0, 0.02, 0.03) * (0.5 + 0.5 * sin(vUv.y * 900.0 + time * 3.0)) * 0.35;  // faint scanlines
+      float vig = length(vUv - vec2(0.5, 0.45));
+      if (bgMode > 1.5) {                                   // plain white backdrop: camera still tracks, but isn't shown
+        c = mix(vec3(0.96, 0.97, 0.975), vec3(0.80, 0.83, 0.86), clamp(vig * 1.15, 0.0, 1.0));
+      } else if (bgMode > 0.5) {                            // plain black backdrop
+        c = mix(vec3(0.012, 0.016, 0.022), vec3(0.0), clamp(vig * 1.2, 0.0, 1.0));
+        c += vec3(0.0, 0.006, 0.01) * (0.5 + 0.5 * sin(vUv.y * 900.0 + time * 3.0));
+      } else {
+        if (hasVideo > 0.5) c = texture2D(map, uv).rgb;
+        else { float v = 1.0 - vig * 1.1; c = mix(vec3(0.01, 0.025, 0.045), vec3(0.03, 0.09, 0.14), clamp(v, 0.0, 1.0)); }
+        float l = dot(c, vec3(0.299, 0.587, 0.114));
+        c = mix(c, vec3(l), gray);
+        c *= 1.0 - dim;
+        c += vec3(0.0, 0.02, 0.03) * (0.5 + 0.5 * sin(vUv.y * 900.0 + time * 3.0)) * 0.35;  // faint scanlines
+      }
       gl_FragColor = vec4(c, 1.0);
       #include <colorspace_fragment>
     }`,
@@ -62,6 +69,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
 camera.position.set(0, 1.55, 3.3); camera.lookAt(0, 0.35, 0);
 const holo = buildHologram(spec, data);
+$('#lo').textContent = `${fmt(holo.range.lo)} /m²`; $('#hi').textContent = `${fmt(holo.range.hi)} /m²`;
 $('#meta').textContent = `${holo.units.size} apartments · ${spec.shell.buildings} buildings · ${spec.shell.floors} floors`;   // the low-rise buildings shown in the hologram
 const turntable = new THREE.Group(); turntable.add(holo.root); scene.add(turntable);
 turntable.position.y = 0.05;
@@ -83,7 +91,7 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 /* ---------- view state ---------- */
-const view = { driveUntil: 0, rotY: -0.5, rotX: 0.32, zoom: 1, spin: 0, explode: 0, explodeTarget: null, mirror: true, gray: false, dim: 0.4, debug: false };
+const view = { bg: 'black', driveUntil: 0, rotY: -0.5, rotX: 0.32, zoom: 1, spin: 0, explode: 0, explodeTarget: null, mirror: true, gray: false, dim: 0.4, debug: false };
 let hovered = null, selected = null;
 function paint() {
   for (const [id] of holo.units) {
@@ -184,6 +192,7 @@ addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   if (k === 'e') { view.explodeTarget = view.explode > 0.5 ? 0 : 1; toast(view.explodeTarget ? 'Exploded' : 'Assembled'); }
   if (k === 'a') assemble();
+  if (k === 'g') $('#tBg').click();
   if (k === 'm') setMirror(!view.mirror);
   if (k === 'b') setGray(!view.gray);
   if (k === 'c') nextCamera();
@@ -194,6 +203,18 @@ addEventListener('keydown', (e) => {
 /* ---------- toggles ---------- */
 function setMirror(on) { view.mirror = on; bgMat.uniforms.mirror.value = on ? 1 : 0; $('#tMirror b').textContent = on ? 'On' : 'Off'; }
 function setGray(on) { view.gray = on; bgMat.uniforms.gray.value = on ? 1 : 0; $('#tBW b').textContent = on ? 'On' : 'Off'; }
+// Backdrop behind the hologram: black (default), white, or the camera image. Tracking uses the camera in every mode.
+const BACKGROUNDS = ['black', 'white', 'camera'];
+function setBackground(mode) {
+  view.bg = mode;
+  bgMat.uniforms.bgMode.value = mode === 'white' ? 2 : mode === 'black' ? 1 : 0;
+  holo.setTheme(mode === 'white' ? 'light' : 'dark'); paint();
+  bloom.enabled = mode !== 'white';                   // glow reads on dark backdrops; on white it only washes out
+  document.body.dataset.bg = mode;
+  $('#tBg b').textContent = mode[0].toUpperCase() + mode.slice(1);
+  for (const id of ['#tBW', '.dim']) document.querySelector(id).classList.toggle('inactive', mode !== 'camera');
+}
+$('#tBg').addEventListener('click', () => { setBackground(BACKGROUNDS[(BACKGROUNDS.indexOf(view.bg) + 1) % BACKGROUNDS.length]); toast(`Background: ${$('#tBg b').textContent}`); });
 $('#tMirror').addEventListener('click', () => setMirror(!view.mirror));
 $('#tBW').addEventListener('click', () => setGray(!view.gray));
 $('#tCam').addEventListener('click', () => nextCamera());
@@ -344,4 +365,5 @@ function frame() {
   composer.render(dt);
   requestAnimationFrame(frame);
 }
+setBackground('black');   // the hologram starts on a plain black backdrop; Background (G) switches to white or the camera
 requestAnimationFrame(frame);

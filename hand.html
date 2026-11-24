@@ -79,6 +79,11 @@ video { position: fixed; left: 0; top: 0; width: 2px; height: 2px; opacity: 0.01
 #start .err { color: #ffb4a2; }
 #start small { display: block; margin-top: 14px; color: #8fc6d6; text-transform: none; letter-spacing: .02em; font-size: 12px; }
 [hidden] { display: none !important; }
+.tog.inactive { opacity: .45; }
+body[data-bg="white"] #title .ramp { background: linear-gradient(90deg, #bcd6ee, #0b3fa8); }
+body[data-bg="white"] .reticle { border-color: #0d5f8f; box-shadow: 0 0 10px rgba(13,95,143,.45), inset 0 0 8px rgba(13,95,143,.3); }
+body[data-bg="white"] .reticle::after { background: #0d5f8f; }
+body[data-bg="white"] .reticle .lbl { color: #0d5f8f; }
 @media (max-width: 760px) { #status, #help { display: none; } #card { width: auto; right: 16px; bottom: 16px; } #title { max-width: 60vw; } .dim input { width: 80px; } }
 </style>
 </head>
@@ -109,6 +114,7 @@ video { position: fixed; left: 0; top: 0; width: 2px; height: 2px; opacity: 0.01
 </section>
 
 <nav id="toggles" aria-label="View options">
+  <button class="panel tog" id="tBg" title="Backdrop behind the hologram (G). The camera still tracks your hands.">Background <b>Black</b></button>
   <button class="panel tog" id="tMirror">Mirror <b>On</b></button>
   <button class="panel tog" id="tBW">B&amp;W <b>Off</b></button>
   <button class="panel tog" id="tCam">Camera <b>—</b></button>
@@ -126,7 +132,7 @@ video { position: fixed; left: 0; top: 0; width: 2px; height: 2px; opacity: 0.01
 <div class="panel" id="help">
   <em>Pinch</em> an apartment: select · <em>Fist</em> and move: rotate · <em>Two pinches</em> apart or together: zoom · <em>Two fists</em> pull apart: explode floors ·
   Exploded: <em>pinch a floor and pull</em> it out · <em>Clap</em>: assemble · <em>Point and flick</em>: spin<br>
-  Keys: E explode · A assemble · M mirror · B black &amp; white · C camera · D debug · Esc clear · Mouse: drag rotate · scroll zoom · click select
+  Keys: G background · E explode · A assemble · M mirror · B black &amp; white · C camera · D debug · Esc clear · Mouse: drag rotate · scroll zoom · click select
 </div>
 <div class="panel off" id="toast" role="status"></div>
 

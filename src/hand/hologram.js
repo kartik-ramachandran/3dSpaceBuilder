@@ -28,8 +28,15 @@ export function buildHologram(spec, data) {
   const unitEdges = new THREE.EdgesGeometry(unitGeo);
   const slabEdges = new THREE.EdgesGeometry(new THREE.BoxGeometry(BX + 0.6, 0.12, D + 0.6));
   const slabMat = new THREE.LineBasicMaterial({ color: HOLO.edge, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
-  const lo = data.min, hi = data.max;
-  const baseColor = (id) => { const l = data.byZone.get(id)?.latest; return l ? HOLO.low.clone().lerp(HOLO.high, hi > lo ? (l.rate - lo) / (hi - lo) : 0.5) : HOLO.none.clone(); };
+  // Colour range from the flats this hologram shows (the towers' higher rates would wash out the low-rise colours)
+  const shownRates = spec.zones.filter((z) => z.building <= buildings && z.floor <= floors).map((z) => data.byZone.get(z.id)?.latest?.rate).filter(Boolean);
+  const lo = Math.min(...shownRates), hi = Math.max(...shownRates);
+  const ratio = (id) => { const l = data.byZone.get(id)?.latest; return l ? (hi > lo ? (l.rate - lo) / (hi - lo) : 0.5) : null; };
+  // Two looks: glowing cyan on dark backdrops, ink blues (the builder's value ramp) on white
+  let theme = 'dark';
+  const LIGHT = { low: new THREE.Color('#bcd6ee'), high: new THREE.Color('#0b3fa8'), none: new THREE.Color('#c4c9d1'), edge: '#1d5f88', ink: new THREE.Color('#0a2236') };
+  const themeColor = (k) => k === null ? (theme === 'light' ? LIGHT.none : HOLO.none).clone() : theme === 'light' ? LIGHT.low.clone().lerp(LIGHT.high, k) : HOLO.low.clone().lerp(HOLO.high, k);
+  const baseColor = (id) => themeColor(ratio(id));
 
   const floorGroups = new Map(), units = new Map(), pickables = [];
   for (let b = 1; b <= buildings; b++) {
@@ -54,7 +61,7 @@ export function buildHologram(spec, data) {
     const edge = new THREE.LineSegments(unitEdges, new THREE.LineBasicMaterial({ color: color.clone().lerp(new THREE.Color('#ffffff'), 0.35), transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
     edge.position.copy(fill.position);
     g.add(fill, edge);
-    units.set(z.id, { fill, edge, base: color, zone: z, group: g });
+    units.set(z.id, { fill, edge, base: color, k: ratio(z.id), zone: z, group: g });
     pickables.push(fill);
   }
 
@@ -83,12 +90,25 @@ export function buildHologram(spec, data) {
 
   let explode = 0;
   return {
-    root, model, base, units, pickables, floorGroups, scale, floors,
+    root, model, base, units, pickables, floorGroups, scale, floors, range: { lo, hi },
     height: floors * FH * scale,
     /** k: 0 assembled … 1 fully exploded. */
     setExplode(k) { explode = THREE.MathUtils.clamp(k, 0, 1); },
     get explode() { return explode; },
-    setUnitColor(id, color) { const u = units.get(id); if (!u) return; u.fill.material.color.copy(color); u.edge.material.color.copy(color).lerp(new THREE.Color('#ffffff'), 0.35); },
+    setUnitColor(id, color) { const u = units.get(id); if (!u) return; u.fill.material.color.copy(color); u.edge.material.color.copy(color).lerp(theme === 'light' ? LIGHT.ink : new THREE.Color('#ffffff'), theme === 'light' ? 0.45 : 0.35); },
+    /** 'dark': glowing cyan for black or camera backdrops; 'light': ink blues without glow for a white backdrop. */
+    setTheme(next) {
+      theme = next; const light = next === 'light';
+      const glow = (m, opacity) => { m.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending; m.opacity = opacity; m.needsUpdate = true; };
+      for (const u of units.values()) {
+        u.base = themeColor(u.k);
+        u.fill.material.opacity = light ? 0.5 : 0.3; u.fill.material.needsUpdate = true;
+        glow(u.edge.material, light ? 0.9 : 0.75);
+      }
+      slabMat.color.set(light ? LIGHT.edge : HOLO.edge); glow(slabMat, light ? 0.7 : 0.55);
+      ringMat.color.set(light ? LIGHT.edge : HOLO.edge); glow(ringMat, light ? 0.55 : 0.45);
+      disc.material.color.set(light ? '#d6e6f1' : '#0c3a55'); glow(disc.material, light ? 0.6 : 0.28);
+    },
     resetColor(id) { const u = units.get(id); if (u) this.setUnitColor(id, u.base); },
     /** follow: true while the user's hands are driving the model, so floors track them 1:1 instead of easing. */
     update(dt, t, follow = false) {
