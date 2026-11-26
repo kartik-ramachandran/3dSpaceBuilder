@@ -12,14 +12,16 @@ export function buildSurroundings(kind, setting, X, Z, clear = []) {
   const shoreZ = Z / 2 + 34;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), std(night ? '#1b1f2a' : setting === 'park' ? '#86a06c' : '#a3a596', { roughness: 1 }));
   ground.rotation.x = -Math.PI / 2; g.add(ground);
+  g.userData.ground = ground;
   const plaza = new THREE.Mesh(box(X + 40, 0.4, Z + 44, 0, 0.2, 4), surface('stone', '#c4beb2'));
-  g.add(plaza);
+  g.add(plaza); g.userData.plaza = plaza;
   const joints = [];
   for (let x = -(X + 40) / 2; x <= (X + 40) / 2; x += 3) joints.push(box(0.022, 0.005, Z + 44, x, 0.403, 4));
   for (let z = -(Z + 44) / 2 + 4; z <= (Z + 44) / 2 + 4; z += 3) joints.push(box(X + 40, 0.005, 0.022, 0, 0.403, z));
-  const paving = new THREE.Mesh(merge(joints), std('#8d8980')); paving.userData.noShadow = true; g.add(paving);
+  const paving = new THREE.Mesh(merge(joints), std('#8d8980')); paving.userData.noShadow = true; g.add(paving); g.userData.joints = paving;
   if (water) {
     const waterMat = surface('water', '#557c88', { metalness: 0.24, clearcoat: 0.75 });
+    waterMat.bumpMap = waterMat.bumpMap.clone();
     waterMat.bumpMap.repeat.set(1200, 600);
     const w = new THREE.Mesh(new THREE.PlaneGeometry(6000, 3000), waterMat);
     w.rotation.x = -Math.PI / 2; w.position.set(0, 0.08, shoreZ + 1500); g.add(w);
@@ -44,7 +46,7 @@ export function buildSurroundings(kind, setting, X, Z, clear = []) {
   const sk = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), skyMat, pos.length);
   const q = new THREE.Quaternion();
   pos.forEach((p, i) => { m4.compose(p, q, new THREE.Vector3(...scl[i])); sk.setMatrixAt(i, m4); });
-  g.add(sk);
+  g.add(sk); g.userData.skyline = { mesh: sk, pos, scl };
   // far shore hills across the water / mountains
   if (water || setting === 'mountain') {
     const hillMat = std(night ? '#1d2438' : '#6f8a8f', { roughness: 1, flatShading: true });
@@ -59,10 +61,11 @@ export function buildSurroundings(kind, setting, X, Z, clear = []) {
   if (setting === 'park' || setting === 'beach' || setting === 'mountain') {
     const tp = [];
     for (let i = 0; i < 70; i++) { const a = r() * Math.PI * 2, d = X / 2 + 14 + r() * 70; const p = new THREE.Vector3(Math.cos(a) * d, 0, Math.sin(a) * d * 0.8); if (water && p.z > shoreZ - 8) continue; if (blocked(p.z, 4)) continue; tp.push(p); }
-    g.add(instanced(cyl(0.16, 0.27, 3.5, 0, 1.75, 0), surface('wood', '#64513f'), tp));
+    const trunks = instanced(cyl(0.16, 0.27, 3.5, 0, 1.75, 0), surface('wood', '#64513f'), tp); g.add(trunks);
     const foliage = [];
     for (let i = 0; i < 12; i++) { const a = i * 2.399; foliage.push(new THREE.SphereGeometry(1.0, 12, 8).scale(1, 1.35, 1).translate(Math.cos(a) * (i % 3) * 0.5, 3.6 + (i % 4) * 0.45, Math.sin(a) * (i % 3) * 0.5)); }
-    g.add(instanced(merge(foliage), std('#49683d', { roughness: 0.95 }), tp));
+    const crowns = instanced(merge(foliage), std('#49683d', { roughness: 0.95 }), tp); g.add(crowns);
+    g.userData.trees = { positions: tp, meshes: [trunks, crowns] };
   }
   return g;
 }

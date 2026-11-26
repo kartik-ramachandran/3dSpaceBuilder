@@ -46,8 +46,12 @@
     </button>
   </div>
 
+  <div id="valButtons" hidden role="group" aria-label="Market panels">
+    <button type="button" class="pill" id="valOpen" aria-controls="valControls" aria-expanded="false">Market valuations</button>
+    <button type="button" class="pill" id="vpOpen" aria-controls="valPanel" aria-expanded="false">Market valuation trend</button>
+  </div>
   <section id="valControls" hidden aria-label="Valuation layer">
-    <header><h2>Market valuations</h2><button type="button" class="x" id="valCollapse" aria-expanded="true" aria-label="Collapse valuation controls">−</button></header>
+    <header><h2>Market valuations</h2><button type="button" class="x" id="valClose" aria-label="Close market valuations">×</button></header>
     <div class="val-body">
       <p id="valLede"></p>
       <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
@@ -74,7 +78,7 @@
 
   <div id="rightCol">
   <section id="valPanel" hidden aria-label="Valuation trend and apartment details">
-    <div class="vp-head"><div><h3>Market valuation trend</h3><p id="vpSub"></p></div><button type="button" class="vp-btn" id="vpExpand">Expand</button></div>
+    <div class="vp-head"><div><h3>Market valuation trend</h3><p id="vpSub"></p></div><button type="button" class="vp-btn" id="vpExpand">Expand</button><button type="button" class="x" id="vpClose" aria-label="Close market valuation trend">×</button></div>
     <div class="vp-row">
       <div class="vseg" role="group" aria-label="Trend scope"><button type="button" data-scope="building" aria-pressed="false">By building</button><button type="button" data-scope="project" aria-pressed="true">Whole project</button></div>
       <span id="vpStats"></span>

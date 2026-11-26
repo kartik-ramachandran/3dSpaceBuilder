@@ -77,6 +77,35 @@ export async function handleApi(req, res, pathname) {
     return true;
   }
 
+  // Compose from a picture: { instructions, image: { name, mediaType, data } } -> { summary, items }
+  if (pathname === '/api/compose' && req.method === 'POST') {
+    if (!hasCredentials()) { send(res, 503, { error: 'not_granted', message: 'Set ANTHROPIC_API_KEY (e.g. in .env) and restart the server.' }); return true; }
+    let body;
+    try { body = await readJson(req); } catch (e) { send(res, e.status || 400, { error: 'bad_request', message: 'The image is too large.' }); return true; }
+    const instructions = typeof body?.instructions === 'string' ? body.instructions.slice(0, 20000) : '';
+    if (!instructions || !body.image) { send(res, 400, { error: 'bad_request', message: 'Send an image.' }); return true; }
+    const ctl = new AbortController();
+    res.on('close', () => { if (!res.writableEnded) ctl.abort(); });
+    try {
+      const content = await referenceContent([body.image]);
+      content.push({ type: 'text', text: instructions });
+      const response = await getClient().beta.messages.create({
+        model: MODEL, max_tokens: 16000, output_config: { effort: 'low' },
+        betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
+        messages: [{ role: 'user', content }],
+      }, { signal: ctl.signal });
+      if (response.stop_reason === 'refusal') { send(res, 422, { error: 'refused' }); return true; }
+      send(res, 200, extractJson(response.content.filter((b) => b.type === 'text').map((b) => b.text).join('')));
+    } catch (err) {
+      if (ctl.signal.aborted) return true;
+      if (err.code === 'bad_reference') send(res, 400, { error: err.code, message: err.message });
+      else if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) send(res, 401, { error: 'session_expired', message: 'The Anthropic API key was rejected.' });
+      else if (err instanceof Anthropic.RateLimitError) send(res, 429, { error: 'rate_limited' });
+      else { console.error('[api compose]', err.message); send(res, 502, { error: 'bad_reply', message: err.message }); }
+    }
+    return true;
+  }
+
   send(res, 404, { error: 'not_found' });
   return true;
 }

@@ -19,6 +19,27 @@ const letter = (b) => String.fromCharCode(64 + b);
 export function createValuationPanel({ onSelect, onFly, onLayout }) {
   const controls = $('#valControls'), panel = $('#valPanel'), labelsEl = $('#valLabels');
   let world = null, spec = null, data = null, base = null, chart = null;
+  function setPanelOpen(target, open, restoreFocus = false) {
+    const trend = target === panel, button = $(trend ? '#vpOpen' : '#valOpen');
+    target.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle(trend ? 'trend-open' : 'valuations-open', open);
+    if (trend && !open) {
+      document.body.classList.remove('vp-wide');
+      $('#vpExpand').textContent = 'Expand';
+    }
+    if (trend && open) {
+      chart ??= createTrendChart($('#vpChart'));
+      chart.resize(); updateChart();
+    }
+    if (open) $(trend ? '#vpClose' : '#valClose').focus({ preventScroll: true });
+    else if (restoreFocus) button.focus({ preventScroll: true });
+    onLayout();
+  }
+  $('#valOpen').addEventListener('click', () => { if (world) setPanelOpen(controls, true); });
+  $('#vpOpen').addEventListener('click', () => { if (world) setPanelOpen(panel, true); });
+  $('#valClose').addEventListener('click', () => setPanelOpen(controls, false, true));
+  $('#vpClose').addEventListener('click', () => setPanelOpen(panel, false, true));
   // Site layers on the map: id → { on, event? }. A layer missing from here has been removed (it can be added back).
   const layers = { river: { on: true }, roads: { on: true }, motorway: { on: true }, flood: { on: true, event: 100 }, solar: { on: true } };
   const pctText = (p) => `${p > 0 ? '+' : p < 0 ? '−' : ''}${Math.abs(p * 100).toFixed(1)}%`;
@@ -36,11 +57,6 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
     const b = e.target.closest('button'); if (!b || !world) return;
     if (b.dataset.render) { setPressed('[data-render]', 'render', b.dataset.render); world.setWireframe(b.dataset.render === 'wire'); }
     if (b.dataset.pick) { pick = b.dataset.pick; setPressed('[data-pick]', 'pick', pick); paint(); renderDetails(); }
-    if (b.id === 'valCollapse') {
-      const open = controls.classList.toggle('collapsed') === false;
-      b.setAttribute('aria-expanded', String(open)); b.textContent = open ? '−' : '+';
-      onLayout();
-    }
   });
   $('#valContext').addEventListener('change', (e) => world?.setContext(e.target.checked));
 
@@ -200,7 +216,7 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
 
   /* ---------- chart ---------- */
   function updateChart() {
-    if (!chart || !data) return;
+    if (!chart || !data || panel.hidden) return;
     const z = zoneOf(selected) || zoneOf(hovered);
     const building = scope === 'building' ? (z?.building || 1) : null;
     const pts = building ? data.all.filter((v) => v.building === building) : data.all;
@@ -227,7 +243,12 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
     attach(w, sp) {
       const on = sp.kind === 'development' && !!w?.valuationLayer;
       world = on ? w : null; spec = on ? sp : null; selected = hovered = null;
-      controls.hidden = panel.hidden = !on; labelsEl.hidden = !on;
+      controls.hidden = panel.hidden = true; labelsEl.hidden = !on;
+      $('#valButtons').hidden = !on;
+      $('#valOpen').setAttribute('aria-expanded', 'false');
+      $('#vpOpen').setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('valuations-open', 'trend-open', 'vp-wide');
+      $('#vpExpand').textContent = 'Expand';
       document.body.classList.toggle('has-valuations', on);
       if (!on) { labelsEl.textContent = ''; labelEls = []; data = null; return; }
       base = buildValuations(sp);
@@ -245,8 +266,6 @@ export function createValuationPanel({ onSelect, onFly, onLayout }) {
       world.setWireframe(controls.querySelector('[data-render="wire"]').getAttribute('aria-pressed') === 'true');
       world.setContext($('#valContext').checked);
       controls.dataset.colour = colourBy;
-      chart ??= createTrendChart($('#vpChart'));
-      requestAnimationFrame(() => chart.resize());
       paint(); renderDetails(); updateChart(); buildLabels();
     },
     hover(id) { if (!world || id === hovered) return; hovered = id; paint(); if (!selected) updateChart(); },

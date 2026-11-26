@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dollhouse apartment · 3D Space Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* A navy stage with the lit model in the middle; a small title top-left, room tag follows the pointer, furniture card bottom-left. */
+:root { --ink: #eef1f7; --muted: #a6b0c6; --line: rgba(238,241,247,.16); --panel: rgba(10,18,40,.72); --accent: #ffd166; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 "Geist", system-ui, sans-serif;
+  background: radial-gradient(120% 90% at 50% 40%, #24407c 0%, #142a5a 45%, #0a1734 100%); }
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+header { position: fixed; top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; pointer-events: none; }
+header > * { pointer-events: auto; }
+.brand { display: grid; gap: 4px; }
+.brand small { font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.brand h1 { margin: 0; font: italic 400 38px/1 "Instrument Serif", Georgia, serif; }
+.brand p { margin: 0; color: var(--muted); font-size: 13px; max-width: 46ch; }
+nav { display: flex; gap: 8px; }
+nav a, nav button { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 500 13px "Geist", sans-serif; text-decoration: none; cursor: pointer; backdrop-filter: blur(12px); }
+nav a:hover, nav button:hover { border-color: rgba(238,241,247,.35); }
+#roomTag { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; padding: 10px 13px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(12px); display: grid; gap: 2px; max-width: 280px; }
+#roomTag b { font: italic 400 22px/1.05 "Instrument Serif", serif; }
+#roomTag span { font: 500 12px "Geist Mono", monospace; color: #cfe2ff; }
+#roomTag small { color: var(--muted); font-size: 12px; }
+#card { position: fixed; left: 22px; bottom: 22px; z-index: 3; width: min(360px, calc(100% - 44px)); padding: 16px 18px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(14px); display: grid; gap: 6px; }
+#card .top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+#cardRoom { font: 500 11px "Geist Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+#cardName { margin: 2px 0 0; font: italic 400 28px/1.05 "Instrument Serif", serif; }
+#cardInfo { margin: 0; color: #d6dcea; font-size: 14px; }
+#cardSize { font: 500 12px "Geist Mono", monospace; color: #cfe2ff; }
+#cardSource { color: var(--muted); font-size: 12px; }
+#cardClose { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; flex: none; }
+.hint { position: fixed; right: 22px; bottom: 22px; color: var(--muted); font-size: 12.5px; text-align: right; pointer-events: none; }
+#status { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); font: 500 13px "Geist Mono", monospace; color: var(--muted); }
+#status:empty { display: none; }
+[hidden] { display: none !important; }
+@media (max-width: 700px) { .brand h1 { font-size: 30px; } .brand p, .hint { display: none; } nav a.wide { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D dollhouse apartment. Drag to orbit, scroll to zoom, hover a room, click furniture."></canvas>
+<header>
+  <div class="brand"><small>Dollhouse · baked lighting</small><h1>The Residence</h1><p>A three-bedroom apartment, modelled and lit in Blender (Cycles), explored in real time.</p></div>
+  <nav><button id="reset" type="button">Reset view</button><a class="wide" href="app.html">Space builder</a></nav>
+</header>
+<div id="roomTag" hidden><b></b><span></span><small></small></div>
+<section id="card" hidden aria-live="polite">
+  <div class="top"><div><div id="cardRoom"></div><h2 id="cardName"></h2></div><button id="cardClose" aria-label="Close">×</button></div>
+  <p id="cardInfo"></p><div id="cardSize"></div><div id="cardSource"></div>
+</section>
+<div class="hint">Drag to orbit · right-drag to pan · scroll to zoom<br>Hover a room · click furniture for details</div>
+<div id="status" role="status"></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="src/apartment/main.js"></script>
+</body>
+</html>

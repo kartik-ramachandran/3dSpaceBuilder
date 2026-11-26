@@ -9,3 +9,6 @@ source-assets/
 
 # Previous single-house tour and its earlier versions: kept locally, not checked in.
 legacy/
+
+# Blender bake intermediates (the app uses the JPEGs)
+assets/**/*_raw.exr

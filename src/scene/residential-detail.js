@@ -35,10 +35,11 @@ export function buildResidentialLandscape(layout) {
     crowns.push(box(width + 3, 0.9, depth + 3, x, height + 6, z));
     labels.push({ text: `Building ${String.fromCharCode(65 + layout.buildings + c)} \u00b7 100 storeys`, pos: new THREE.Vector3(x, height + 10, z) });
   }
-  group.add(new THREE.Mesh(merge(stone), surface('stone', '#c9baa4')));
-  group.add(new THREE.Mesh(merge(crowns), surface('stone', '#e4d5bb')));
-  group.add(new THREE.Mesh(merge(bronze), std('#554d40', { metalness: 0.65, roughness: 0.3 })));
-  group.add(new THREE.Mesh(merge(windows), new THREE.MeshPhysicalMaterial({ color: '#739295', roughness: 0.18, metalness: 0.25, clearcoat: 1 })));
+  // the simple tower shell; development.js hides it once the Blender-modelled towers have loaded
+  const shell = group.children.filter((o) => o.isGroup);   // the facade boxes
+  for (const m of [new THREE.Mesh(merge(stone), surface('stone', '#c9baa4')), new THREE.Mesh(merge(crowns), surface('stone', '#e4d5bb')),
+    new THREE.Mesh(merge(bronze), std('#554d40', { metalness: 0.65, roughness: 0.3 })),
+    new THREE.Mesh(merge(windows), new THREE.MeshPhysicalMaterial({ color: '#739295', roughness: 0.18, metalness: 0.25, clearcoat: 1 }))]) { group.add(m); shell.push(m); }
 
   const random = rng(901), trunks = [], leaves = [], treePositions = [], paths = [], beds = [];
   for (let row = 0; row < layout.rows; row++) {
@@ -50,8 +51,8 @@ export function buildResidentialLandscape(layout) {
       for (let x = -layout.siteX / 2 - 3; x <= layout.siteX / 2 + 3; x += 8) treePositions.push(new THREE.Vector3(x, 0.5, oz + side * (DEV.D / 2 + 2.1)));
     }
   }
-  group.add(new THREE.Mesh(merge(paths), surface('stone', '#b8b3a6')));
-  group.add(new THREE.Mesh(merge(beds), surface('stone', '#65734a', { roughness: 1 })));
+  const pathMesh = new THREE.Mesh(merge(paths), surface('stone', '#b8b3a6')), bedMesh = new THREE.Mesh(merge(beds), surface('stone', '#65734a', { roughness: 1 }));
+  group.add(pathMesh, bedMesh);
   for (const p of treePositions) {
     trunks.push(p);
     for (let k = 0; k < 15; k++) {
@@ -59,7 +60,7 @@ export function buildResidentialLandscape(layout) {
       leaves.push(new THREE.Vector3(p.x + Math.cos(a) * radius, 3.5 + random() * 2.4, p.z + Math.sin(a) * radius));
     }
   }
-  group.add(instanced(cyl(0.12, 0.23, 3.7, 0, 1.85, 0, 8), surface('wood', '#66513c'), trunks));
+  const trunkMesh = instanced(cyl(0.12, 0.23, 3.7, 0, 1.85, 0, 8), surface('wood', '#66513c'), trunks); group.add(trunkMesh);
   const foliageMat = std('#426339', { roughness: 0.95 });
   const wind = { value: 0 };
   foliageMat.onBeforeCompile = shader => {
@@ -92,7 +93,9 @@ export function buildResidentialLandscape(layout) {
     const span = Math.max(3, layout.siteX / 2 - 2), speed = 0.9 + random() * 0.55;
     walkers.push({ person, limbs, span, speed, offset: random() * span * 4, z: pathZ + (i % 3 - 1) * 0.48 }); group.add(person);
   }
-  return { group, labels, height: height + 7, update(dt, t) {
+  // for the Blender upgrade (real-surroundings.js)
+  const parts = { trees: { positions: treePositions, meshes: [trunkMesh, canopy] }, walkers, paths: pathMesh, beds: bedMesh };
+  return { group, labels, shell, parts, height: height + 7, update(dt, t) {
     wind.value = t;
     for (const w of walkers) {
       const phase = (w.offset + t * w.speed) % (4 * w.span), dir = phase < 2 * w.span ? 1 : -1;

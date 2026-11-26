@@ -39,6 +39,7 @@ export function buildSiteLayers(layout) {
   const { siteX, siteZ, H } = layout;
   const root = new THREE.Group();
   const groups = {}, tickers = [], labels = [];
+  const parts = { roads: [], kerbs: [], paving: [], oldLamps: [], lampSpots: [], traffic: [], banks: [] };   // for the Blender upgrade (real-surroundings.js)
   const layer = (id) => { const g = new THREE.Group(); g.name = `layer:${id}`; root.add(g); groups[id] = g; return g; };
 
   /* ---------- river ---------- */
@@ -64,15 +65,16 @@ export function buildSiteLayers(layout) {
         normal = normalize(normal + mat3(viewMatrix) * vec3(-dx, 0.0, -dz));`);
     };
     tickers.push((dt, t) => { waterTime.value = t; });
-    g.add(flat(new THREE.Mesh(ribbon((x) => zc(x) - w / 2, (x) => zc(x) + w / 2, 0.05, -LEN, LEN, 4, 1 / 14), water)));
+    const waterMesh = flat(new THREE.Mesh(ribbon((x) => zc(x) - w / 2, (x) => zc(x) + w / 2, 0.05, -LEN, LEN, 4, 1 / 14), water)); g.add(waterMesh);
+    Object.assign(parts, { water, waterMesh, ripple });
     const streaks = canvasTex(512, 128, (x, W, Hh) => {
       const r = rng(11); x.clearRect(0, 0, W, Hh);
       for (let i = 0; i < 46; i++) { const px = r() * W, py = 8 + r() * (Hh - 16), len = 30 + r() * 90; const gr = x.createLinearGradient(px, 0, px + len, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, `rgba(255,255,255,${0.35 + r() * 0.4})`); gr.addColorStop(1, 'rgba(255,255,255,0)'); x.strokeStyle = gr; x.lineWidth = 1.5 + r() * 1.5; x.beginPath(); x.moveTo(px, py); x.lineTo(px + len, py + (r() - 0.5) * 3); x.stroke(); }
     });
     const flow = new THREE.MeshBasicMaterial(overlay({ map: streaks, transparent: true, opacity: 0.16, depthWrite: false }, -4));
-    g.add(flat(new THREE.Mesh(ribbon((x) => zc(x) - w / 2 + 1.5, (x) => zc(x) + w / 2 - 1.5, 0.07, -LEN, LEN, 4, 1 / 40), flow)));
+    parts.flow = flat(new THREE.Mesh(ribbon((x) => zc(x) - w / 2 + 1.5, (x) => zc(x) + w / 2 - 1.5, 0.07, -LEN, LEN, 4, 1 / 40), flow)); g.add(parts.flow);
     const bankMat = new THREE.MeshStandardMaterial(overlay({ color: '#b9ad8f', roughness: 0.95 }, -2));
-    for (const s of [-1, 1]) g.add(flat(new THREE.Mesh(ribbon((x) => zc(x) + s * w / 2, (x) => zc(x) + s * (w / 2 + 3.5), 0.04, -LEN, LEN), bankMat)));
+    for (const s of [-1, 1]) { const bank = flat(new THREE.Mesh(ribbon((x) => zc(x) + s * w / 2, (x) => zc(x) + s * (w / 2 + 3.5), 0.04, -LEN, LEN), bankMat)); g.add(bank); parts.banks.push(bank); }
     tickers.push((dt) => { ripple.offset.x -= dt * 0.05; streaks.offset.x -= dt * 0.16; });   // flows east (+x)
     labels.push({ layer: 'river', text: 'River', pos: new THREE.Vector3(siteX / 2 + 40, 3, zc(siteX / 2 + 40)) });
   }
@@ -92,7 +94,7 @@ export function buildSiteLayers(layout) {
       slabs.push(axis === 'x' ? box(L, 0.47, rw, mid, 0.235, c) : box(rw, 0.47, L, c, 0.235, mid));
       for (let s = a + 2; s < b - 2; s += 7) dashes.push(axis === 'x' ? box(3, 0.02, 0.18, s, 0.48, c) : box(0.18, 0.02, 3, c, 0.48, s));
     }
-    g.add(new THREE.Mesh(merge(slabs), asphalt));
+    parts.roads.push(g.add(new THREE.Mesh(merge(slabs), asphalt)).children.at(-1));
     g.add(flat(new THREE.Mesh(merge(dashes), paint)));
     const kerbs = [], paving = [], posts = [], lamps = [];
     for (const roadZ of [R.front, R.back]) for (const side of [-1, 1]) {
@@ -102,10 +104,13 @@ export function buildSiteLayers(layout) {
       for (let x = -R.side + 9; x < R.side; x += 24) {
         posts.push(box(0.12, 6, 0.12, x, 3.5, edge + side * 2.1), box(0.12, 0.12, 1.8, x, 6.45, edge + side * 1.3));
         lamps.push(box(0.38, 0.10, 0.9, x, 6.38, edge + side * 0.6));
+        parts.lampSpots.push({ x, y: 0.56, z: edge + side * 2.1, side });
       }
     }
-    g.add(new THREE.Mesh(merge(kerbs), std('#cbc6ba')), new THREE.Mesh(merge(paving), surface('stone', '#b0afa5')));
-    g.add(new THREE.Mesh(merge(posts), std('#464d51', { metalness: 0.65 })), new THREE.Mesh(merge(lamps), std('#ffe7b6', { emissive: '#ffe4a1', emissiveIntensity: 1.5 })));
+    const kerbMesh = new THREE.Mesh(merge(kerbs), std('#cbc6ba')), pavingMesh = new THREE.Mesh(merge(paving), surface('stone', '#b0afa5'));
+    g.add(kerbMesh, pavingMesh); parts.kerbs.push(kerbMesh); parts.paving.push(pavingMesh);
+    const postMesh = new THREE.Mesh(merge(posts), std('#464d51', { metalness: 0.65 })), headMesh = new THREE.Mesh(merge(lamps), std('#ffe7b6', { emissive: '#ffe4a1', emissiveIntensity: 1.5 }));
+    g.add(postMesh, headMesh); parts.oldLamps.push(postMesh, headMesh);
     // a few cars on the front and back roads
     const carGeo = merge([box(4.2, 0.9, 1.8, 0, 0.75, 0), box(2.2, 0.7, 1.6, -0.2, 1.5, 0)]);
     const cars = new THREE.InstancedMesh(carGeo, std('#ffffff', { roughness: 0.35, metalness: 0.4 }), 8);
@@ -115,7 +120,7 @@ export function buildSiteLayers(layout) {
       local.push({ x: -R.side - ext + (Math.floor(i % 4 / 2) + 0.5) * (R.side + ext), z: (onFront ? R.front : R.back) + lane * 1.8, dir: lane, speed: 9, span: R.side + ext });
       cars.setColorAt(i, new THREE.Color().setHSL(r(), 0.35, 0.35 + r() * 0.3));
     }
-    g.add(cars); detailTraffic(g, cars);
+    g.add(cars); parts.traffic.push({ group: g, mesh: cars, truck: false, detail: detailTraffic(g, cars) });
     const q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
     tickers.push((dt) => {
       local.forEach((c, i) => { c.x += c.dir * c.speed * dt; if (c.x > c.span) c.x = -c.span; if (c.x < -c.span) c.x = c.span; cars.setMatrixAt(i, m4.compose(p.set(c.x, 0.47, c.z), c.dir > 0 ? q0 : q1, one)); });
@@ -127,7 +132,7 @@ export function buildSiteLayers(layout) {
   /* ---------- motorway ---------- */
   {
     const g = layer('motorway'), mz = F.motorway.z, mw = F.motorway.width, half = mw / 2;
-    g.add(new THREE.Mesh(box(2 * LEN, 0.5, mw, 0, 0.25, mz), asphalt));
+    parts.roads.push(g.add(new THREE.Mesh(box(2 * LEN, 0.5, mw, 0, 0.25, mz), asphalt)).children.at(-1));
     const concrete = std('#b9b5ab', { roughness: 0.9 });
     g.add(new THREE.Mesh(merge([box(2 * LEN, 0.9, 0.6, 0, 0.95, mz), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz - half + 0.2), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz + half - 0.2)]), concrete));
     const lane = (half - 1.2) / 3, dashes = [];
@@ -152,7 +157,8 @@ export function buildSiteLayers(layout) {
       traffic.push({ x: -LEN + (Math.floor(i / 6) + 0.5) * (2 * LEN / 13), z, dir, speed: 24 + ln * 3, truck, i: truck ? i - N : i });
       if (!truck) cars.setColorAt(i, new THREE.Color().setHSL(r(), 0.4, 0.3 + r() * 0.4));
     }
-    g.add(cars, trucks); detailTraffic(g, cars); detailTraffic(g, trucks, true);
+    g.add(cars, trucks);
+    parts.traffic.push({ group: g, mesh: cars, truck: false, detail: detailTraffic(g, cars) }, { group: g, mesh: trucks, truck: true, detail: detailTraffic(g, trucks, true) });
     const q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
     tickers.push((dt) => {
       for (const c of traffic) {
@@ -221,7 +227,7 @@ export function buildSiteLayers(layout) {
 
   const riverZ = [F.river.zAt(0) - 30, F.river.zAt(0) + 30], motorZ = [F.motorway.z - F.motorway.width, F.motorway.z + F.motorway.width];
   return {
-    group: root, labels,
+    group: root, labels, parts, tickers,
     /** z bands to keep free of the generated skyline and trees */
     clearBands: [riverZ, motorZ],
     /** how far the layers reach, for camera framing */

@@ -13,6 +13,7 @@
     "test:stadium": "node tests/stadium.mjs",
     "test:hover": "node tests/hover.mjs",
     "test:development": "node tests/development.mjs",
+    "test:startup": "node tests/startup.mjs",
     "test:valuations": "node tests/valuations.mjs",
     "test:gestures": "node tests/gestures.mjs",
     "test:thane": "node tests/thane.mjs",

@@ -58,7 +58,7 @@ export function disposeTree(o) {
     ms.forEach((m) => { if (m === hitMat) return; materials.add(m); for (const v of Object.values(m)) if (v?.isTexture && v !== PUFF) textures.add(v); });
   });
   geometries.forEach((g) => g.dispose());
-  textures.forEach((t) => t.dispose());
+  textures.forEach((t) => { if (!surfaceTextures.has(t)) t.dispose(); });
   materials.forEach((m) => m.dispose());
 }
 
@@ -70,23 +70,30 @@ export function zoneMats(z, design = {}) {
   return { floor, furn };
 }
 
+// These deterministic maps are shared across materials and scene rebuilds.
+const surfaceMaps = new Map();
+const surfaceTextures = new Set();
 /* Small, deterministic material maps. Texture detail stays subtle at real-world scale. */
 export function surface(kind, color, options = {}) {
-  const size = 256, c = document.createElement('canvas'); c.width = c.height = size;
-  const ctx = c.getContext('2d'), data = ctx.createImageData(size, size), random = rng(83);
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const n = random() - 0.5;
-    let v = 0.5 + n * 0.15;
-    if (kind === 'wood') v = 0.55 + 0.12 * Math.sin(x * 0.48 + Math.sin(y * Math.PI / 128) * 2 + Math.sin(x * 0.08) * 3) + n * 0.07;
-    if (kind === 'fabric' || kind === 'carpet') v = 0.5 + ((x % 4 < 2) !== (y % 4 < 2) ? 0.11 : -0.11) + n * 0.12;
-    if (kind === 'stone') v = 0.55 + n * 0.16 + Math.sin(x * 0.03 + Math.sin(y * 0.02) * 4) * 0.035;
-    if (kind === 'water') v = 0.5 + Math.sin(x * Math.PI / 16 + Math.sin(y * Math.PI / 32) * 3) * 0.16 + Math.sin(y * Math.PI / 8) * 0.07;
-    const i = (y * size + x) * 4;
-    data.data[i] = data.data[i + 1] = data.data[i + 2] = Math.round(v * 255); data.data[i + 3] = 255;
+  let bump = surfaceMaps.get(kind);
+  if (!bump) {
+    const size = 256, c = document.createElement('canvas'); c.width = c.height = size;
+    const ctx = c.getContext('2d'), data = ctx.createImageData(size, size), random = rng(83);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const n = random() - 0.5;
+      let v = 0.5 + n * 0.15;
+      if (kind === 'wood') v = 0.55 + 0.12 * Math.sin(x * 0.48 + Math.sin(y * Math.PI / 128) * 2 + Math.sin(x * 0.08) * 3) + n * 0.07;
+      if (kind === 'fabric' || kind === 'carpet') v = 0.5 + ((x % 4 < 2) !== (y % 4 < 2) ? 0.11 : -0.11) + n * 0.12;
+      if (kind === 'stone') v = 0.55 + n * 0.16 + Math.sin(x * 0.03 + Math.sin(y * 0.02) * 4) * 0.035;
+      if (kind === 'water') v = 0.5 + Math.sin(x * Math.PI / 16 + Math.sin(y * Math.PI / 32) * 3) * 0.16 + Math.sin(y * Math.PI / 8) * 0.07;
+      const i = (y * size + x) * 4;
+      data.data[i] = data.data[i + 1] = data.data[i + 2] = Math.round(v * 255); data.data[i + 3] = 255;
+    }
+    ctx.putImageData(data, 0, 0);
+    bump = new THREE.CanvasTexture(c); bump.wrapS = bump.wrapT = THREE.RepeatWrapping; bump.anisotropy = 8;
+    bump.repeat.set(kind === 'wood' ? 2 : kind === 'carpet' ? 12 : 3, kind === 'wood' ? 1 : kind === 'carpet' ? 12 : 3);
+    surfaceMaps.set(kind, bump); surfaceTextures.add(bump);
   }
-  ctx.putImageData(data, 0, 0);
-  const bump = new THREE.CanvasTexture(c); bump.wrapS = bump.wrapT = THREE.RepeatWrapping; bump.anisotropy = 8;
-  bump.repeat.set(kind === 'wood' ? 2 : kind === 'carpet' ? 12 : 3, kind === 'wood' ? 1 : kind === 'carpet' ? 12 : 3);
   const roughness = { wood: 0.38, fabric: 0.94, carpet: 0.98, stone: 0.7, water: 0.13 }[kind] ?? 0.6;
   return new THREE.MeshPhysicalMaterial({ color, roughness, metalness: 0,
     bumpMap: bump, bumpScale: kind === 'water' ? 0.13 : kind === 'wood' ? 0.012 : 0.018,

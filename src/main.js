@@ -15,6 +15,7 @@ import { buildHotel } from './scene/hotel.js';
 import { buildOffice } from './scene/office.js';
 import { buildStadium } from './scene/stadium.js';
 import { buildDevelopment } from './scene/development.js';
+import { createComposer } from './compose/composer.js';
 import { createNavigation } from './scene/navigation.js';
 import { createReferences } from './references.js';
 import { createMovePad } from './move-pad.js';
@@ -29,7 +30,7 @@ try {
   $('#fallback').hidden = false;
 }
 if (renderer) {
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
@@ -56,8 +57,10 @@ if (controls) {
 const { sky, setAtmosphere, fitShadows } = createAtmosphere(renderer, scene);
 
 /* ---------- world state ---------- */
+let composer = null;  // Compose sidebar (src/compose), created once the renderer exists
 let world = null;   // { kind, group, zones: Map, glassTargets, update(dt,t), overviewDir, fitBox, target }
 let spec = null;
+if (renderer) composer = createComposer({ scene, camera, canvas, controls, renderer, getWorld: () => world, getSpec: () => spec });
 let glass = 1, glassTarget = 1;
 let hovered = null, selected = null;
 let mode = 'overview';  // overview | flying | view
@@ -88,7 +91,7 @@ function measureOcclusion() {
   const vc = $('#valControls');
   occl.left = !phone && vc && !vc.hidden ? vc.getBoundingClientRect().right + 10 : 0;
   if (phone) { occl.bottom = h - Math.min(dock.top, zl.top || dock.top) + 6; occl.right = 0; }
-  else { occl.bottom = h - dock.top + 10; occl.right = w - rc.left + 10; }
+  else { occl.bottom = h - dock.top + 10; occl.right = spec?.kind === 'development' && $('#valPanel').hidden ? 0 : w - rc.left + 10; }
 }
 function applyViewOffset() {
   const w = innerWidth, h = innerHeight;
@@ -153,11 +156,12 @@ function applySpec(sp, statusMsg, statusKind) {
   if (mode !== 'overview') exitView(true);
   lastOverview = null;
   selected = null; setHover(null); canvasPointer = null; showCard(null);
-  if (world) { scene.remove(world.group); disposeTree(world.group); }
+  if (world) { world.dispose?.(); scene.remove(world.group); disposeTree(world.group); }
   setAtmosphere(sp.kind);
   world = { plane: buildPlane, hotel: buildHotel, office: buildOffice, stadium: buildStadium, development: buildDevelopment }[sp.kind](sp);
   scene.add(world.group);
   prepareShadows(world.group);
+  composer?.attach(world, sp);
   fitShadows(world.fitBox);
   zoneLevels.clear();
   seatPickTargets = [];
@@ -179,7 +183,7 @@ function applySpec(sp, statusMsg, statusKind) {
   $('#glassBtn').disabled = world.hasRoof === false;
   const ids = [...world.zones.keys()];
   const flashStep = Math.min(170, 2400 / Math.max(1, ids.length));  // a 96-apartment site still lights up in ~2.4 s
-  setTimeout(() => {
+  if (sp.kind !== 'development') setTimeout(() => {
     if (token !== buildToken) return;
     tween(1500, (k) => { glass = sp.kind === 'development' ? 0 : k; world.applyGlass(glass); }).then(() => {
       ids.forEach((id, i) => setTimeout(() => { if (token === buildToken && zoneLevels.get(id)) zoneLevels.get(id).flash = 1; }, reduceMotion ? 0 : i * flashStep));
@@ -535,10 +539,11 @@ const tmp = new THREE.Vector3();
 let lastHot = null;
 function frame(now) {
   requestAnimationFrame(frame);
-  if (!renderer || !world) return;
+  if (!renderer || !world || document.hidden) return;
   const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
   runTweens(now);
   world.update(dt, t, mode);
+  composer?.update(dt, t);
   if (mode === 'overview') {
     movePad.update(dt);
     const animatingCamera = [...tweens].some((tw) => tw.channel === 'camera');

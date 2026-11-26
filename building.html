@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The building · 3D Space Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Full-bleed daylight scene; title top-left, level tag follows the pointer, level card bottom-left. */
+:root { --ink: #f3f1ec; --muted: #c7cbd2; --line: rgba(243,241,236,.2); --panel: rgba(16,22,34,.66); --accent: #ffd166; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 "Geist", system-ui, sans-serif; background: #b9c7cf; }
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+header { position: fixed; top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; pointer-events: none; }
+header > * { pointer-events: auto; }
+.brand { display: grid; gap: 4px; padding: 12px 16px; border-radius: 14px; background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--line); }
+.brand small { font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.brand h1 { margin: 0; font: italic 400 34px/1 "Instrument Serif", Georgia, serif; }
+.brand p { margin: 0; color: var(--muted); font-size: 13px; max-width: 44ch; }
+nav { display: flex; gap: 8px; }
+nav a, nav button { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 500 13px "Geist", sans-serif; text-decoration: none; cursor: pointer; backdrop-filter: blur(12px); }
+#tag { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; padding: 10px 13px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(12px); display: grid; gap: 2px; max-width: 300px; }
+#tag b { font: italic 400 22px/1.05 "Instrument Serif", serif; }
+#tag span { font: 500 12px "Geist Mono", monospace; color: #ffe1a0; }
+#tag small { color: var(--muted); font-size: 12px; }
+#card { position: fixed; left: 22px; bottom: 22px; z-index: 3; width: min(360px, calc(100% - 44px)); padding: 16px 18px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(14px); display: grid; gap: 10px; }
+#card .top { display: flex; justify-content: space-between; align-items: start; }
+#cardLevel { margin: 0; font: italic 400 30px/1 "Instrument Serif", serif; }
+#cardText { margin: 0; color: #dde1e8; font-size: 14px; }
+#card a { justify-self: start; height: 40px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 10px; background: var(--accent); color: #1c1506; font-weight: 600; text-decoration: none; }
+#cardClose { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.hint { position: fixed; right: 22px; bottom: 22px; color: #22303a; font-size: 12.5px; text-align: right; pointer-events: none; text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+#status { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); font: 500 13px "Geist Mono", monospace; color: #22303a; }
+#status:empty { display: none; }
+[hidden] { display: none !important; }
+@media (max-width: 700px) { .brand p, .hint { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D residential tower. Drag to orbit, scroll to zoom, hover a level, click it to see a typical apartment."></canvas>
+<header>
+  <div class="brand"><small>Exterior · baked daylight</small><h1>The Residence tower</h1><p>24 storeys over a two-storey podium and lobby, in a landscaped plaza. Modelled and lit in Blender (Cycles).</p></div>
+  <nav><button id="reset" type="button">Reset view</button><a href="apartment.html">Inside an apartment</a></nav>
+</header>
+<div id="tag" hidden><b></b><span></span><small></small></div>
+<section id="card" hidden aria-live="polite">
+  <div class="top"><h2 id="cardLevel"></h2><button id="cardClose" aria-label="Close">×</button></div>
+  <p id="cardText"></p>
+  <a href="apartment.html">See a typical apartment inside</a>
+</section>
+<div class="hint">Drag to orbit · right-drag to pan · scroll to zoom<br>Hover a level · click it to look inside</div>
+<div id="status" role="status"></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="src/building/main.js"></script>
+</body>
+</html>
