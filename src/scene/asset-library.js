@@ -29,10 +29,11 @@ export async function loadLibrary(scope = 'all') {
   return { modules, get: name => modules.get(name) || [], size: name => bounds(modules.get(name) || []) };
 }
 
+let sharedLoader = null;   // one Draco decoder for both files (it was being downloaded twice)
 function loadSource(source) {
   if (cache.has(source.glb)) return cache.get(source.glb);
-  const draco = new DRACOLoader().setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/').setWorkerLimit(2);
-  const loader = new GLTFLoader().setDRACOLoader(draco);
+  sharedLoader ??= new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/').setWorkerLimit(2));
+  const loader = sharedLoader;
   const tl = new THREE.TextureLoader();
   const pending = Promise.all([source].map(async ({ glb, ao }) => {
     const [gltf, aoTex] = await Promise.all([loader.loadAsync(glb), tl.loadAsync(ao)]);
@@ -72,7 +73,7 @@ function loadSource(source) {
     }
     // people: every part of one figure shares the pivot of its object, so look it up per part name
     return { modules, get: (name) => modules.get(name) || [], size: (name) => bounds(modules.get(name) || []) };
-  }).catch(error => { cache.delete(source.glb); throw error; }).finally(() => draco.dispose());
+  }).catch(error => { cache.delete(source.glb); throw error; });   // the shared decoder stays alive for the next file
   cache.set(source.glb, pending);
   return pending;
 }
@@ -138,14 +139,16 @@ function dress(m, ao, hasUv1) {
 }
 
 /** One InstancedMesh per part of `parts`, at `matrices`. Optional per-instance colours for tinted parts: an array, or (part) → array. */
-export function instanceParts(parent, parts, matrices, { name = '', colors = null, castShadow = true } = {}) {
+export function instanceParts(parent, parts, matrices, { name = '', colors = null, castShadow = true, moving = false } = {}) {
   return parts.map((p) => {
     const mesh = new THREE.InstancedMesh(p.geometry, p.material, Math.max(1, matrices.length));
     matrices.forEach((m, i) => mesh.setMatrixAt(i, m));
     mesh.count = matrices.length;
     const cols = typeof colors === 'function' ? colors(p) : colors;          // per-part colours: (part) → [Color]
     if (cols && p.tint) cols.forEach((c, i) => mesh.setColorAt(i, c));
-    mesh.instanceMatrix.needsUpdate = true; mesh.frustumCulled = false;
+    // static instances are culled against their own bounds (off-screen ones cost nothing); moving ones are always drawn
+    mesh.instanceMatrix.needsUpdate = true;
+    if (moving) mesh.frustumCulled = false; else mesh.computeBoundingSphere();
     mesh.name = `${name} · ${p.material.name}`;
     mesh.castShadow = castShadow && !p.glass; mesh.receiveShadow = !p.glass; mesh.userData.noShadow = p.glass;
     mesh.userData.exterior = p.exterior; mesh.userData.glass = p.glass; mesh.userData.part = p.part;

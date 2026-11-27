@@ -33,8 +33,11 @@ def tag(objs, module, part=None):
     MODULES.setdefault(module, []).extend(objs)
     return objs
 
-def tex_material(name, diff, nor=None, rough=0.8, tint=None):
+def tex_material(name, diff, nor=None, rough=0.8, tint=None, keep=False):
     m = L.material(name, rough=rough)
+    if L.SMOOTH and not keep:                 # smooth: average colour, no image
+        c = L.mean_colour(diff); m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (*c, 1)
+        return m, None
     nt = m.node_tree; b = nt.nodes['Principled BSDF']
     t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(diff, check_existing=True)
     if tint:
@@ -76,7 +79,7 @@ M = {
     'deck': L.material('Deck', rough=0.7, tex='wood_floor_deck'),
 }
 M['bark'], _ = tex_material('Bark', os.path.join(JT, 'jacaranda_tree_trunk_diff_1k.jpg'), os.path.join(JT, 'jacaranda_tree_trunk_nor_gl_1k.jpg'), 0.9)
-M['leaves'], leaf_tex = tex_material('Leaves', os.path.join(JT, 'jacaranda_tree_leaves_diff_1k.jpg'), os.path.join(JT, 'jacaranda_tree_leaves_nor_gl_1k.jpg'), 0.7)
+M['leaves'], leaf_tex = tex_material('Leaves', os.path.join(JT, 'jacaranda_tree_leaves_diff_1k.jpg'), None if L.SMOOTH else os.path.join(JT, 'jacaranda_tree_leaves_nor_gl_1k.jpg'), 0.7, keep=True)   # the leaf cards need their atlas for shape
 # alpha from the atlas' black background (for the Blender previews; the app uses an alpha test on the same map)
 lm = M['leaves']; nt = lm.node_tree
 ramp = nt.nodes.new('ShaderNodeValToRGB'); ramp.color_ramp.elements[0].position = 0.06; ramp.color_ramp.elements[1].position = 0.12
@@ -265,6 +268,9 @@ def tree(module, seed, height, spread):
         d = Vector((math.cos(a) * spread, math.sin(a) * spread, 1.0)).normalized()
         branch(p, cur, d, height * 0.38, 0.13, 2)
     wood = skin_part('Wood', verts, edges, radii, M['bark'], (0, 0, 0))
+    # keep the wood light: ~2,500 faces per tree (hundreds are drawn; the leaf cards carry the silhouette)
+    if len(wood.data.polygons) > 2500:
+        dec = wood.modifiers.new('Decimate', 'DECIMATE'); dec.ratio = 2500 / len(wood.data.polygons); L.apply_modifiers([wood])
     bm = bmesh.new(); bm.from_mesh(wood.data); L.world_uv(bm, 1.2); bm.to_mesh(wood.data); bm.free()
     # leaf cards clustered round every branch end, normals bent outward from the crown centre for soft shading
     centre = sum((Vector(v) for v in verts[4:]), Vector()) / max(1, len(verts) - 4)

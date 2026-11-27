@@ -95,7 +95,8 @@ export function buildSiteLayers(layout) {
       for (let s = a + 2; s < b - 2; s += 7) dashes.push(axis === 'x' ? box(3, 0.02, 0.18, s, 0.48, c) : box(0.18, 0.02, 3, c, 0.48, s));
     }
     parts.roads.push(g.add(new THREE.Mesh(merge(slabs), asphalt)).children.at(-1));
-    g.add(flat(new THREE.Mesh(merge(dashes), paint)));
+    parts.dashes = flat(new THREE.Mesh(merge(dashes), paint)); g.add(parts.dashes);
+    parts.roadNet = { segs, width: rw, layer: g };
     const kerbs = [], paving = [], posts = [], lamps = [];
     for (const roadZ of [R.front, R.back]) for (const side of [-1, 1]) {
       const edge = roadZ + side * (rw / 2 + 0.18);
@@ -134,7 +135,8 @@ export function buildSiteLayers(layout) {
     const g = layer('motorway'), mz = F.motorway.z, mw = F.motorway.width, half = mw / 2;
     parts.roads.push(g.add(new THREE.Mesh(box(2 * LEN, 0.5, mw, 0, 0.25, mz), asphalt)).children.at(-1));
     const concrete = std('#b9b5ab', { roughness: 0.9 });
-    g.add(new THREE.Mesh(merge([box(2 * LEN, 0.9, 0.6, 0, 0.95, mz), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz - half + 0.2), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz + half - 0.2)]), concrete));
+    parts.motorwayBarriers = new THREE.Mesh(merge([box(2 * LEN, 0.9, 0.6, 0, 0.95, mz), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz - half + 0.2), box(2 * LEN, 1.1, 0.4, 0, 1.05, mz + half - 0.2)]), concrete);
+    g.add(parts.motorwayBarriers); parts.motorway = { z: mz, width: mw, length: 2 * LEN, layer: g };
     const lane = (half - 1.2) / 3, dashes = [];
     for (const s of [-1, 1]) for (const k of [1, 2]) { const z = mz + s * (0.6 + k * lane); for (let x = -LEN; x < LEN; x += 12) dashes.push(box(4, 0.02, 0.2, x, 0.51, z)); }
     for (const s of [-1, 1]) dashes.push(box(2 * LEN, 0.02, 0.2, 0, 0.51, mz + s * (half - 0.9)));
@@ -143,8 +145,9 @@ export function buildSiteLayers(layout) {
     const sign = canvasTex(512, 128, (x, W, Hh) => { x.fillStyle = '#0f6b3a'; x.fillRect(0, 0, W, Hh); x.strokeStyle = '#fff'; x.lineWidth = 6; x.strokeRect(6, 6, W - 12, Hh - 12); x.fillStyle = '#fff'; x.font = 'bold 56px system-ui, sans-serif'; x.fillText('MOTORWAY  ·  CITY ⟶', 28, 86); });
     const steel = std('#8d939a', { metalness: 0.6, roughness: 0.4 });
     g.add(new THREE.Mesh(merge([box(0.5, 8, 0.5, -6, 4, mz - half - 0.5), box(0.5, 8, 0.5, -6, 4, mz + half + 0.5), box(0.5, 0.6, mw + 1.5, -6, 7.8, mz)]), steel));
-    const panel = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), new THREE.MeshBasicMaterial({ map: sign, side: THREE.DoubleSide }));
+    const panel = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), new THREE.MeshBasicMaterial({ map: sign }));   // readable from the approach side only
     panel.position.set(-6.3, 6.4, mz + half / 2); panel.rotation.y = -Math.PI / 2; g.add(panel);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.6, 10.1), steel); back.position.set(-6.24, 6.4, mz + half / 2); g.add(back);
     // traffic: three lanes each way
     const carGeo = merge([box(4.4, 1.0, 1.9, 0, 0.8, 0), box(2.3, 0.75, 1.7, -0.2, 1.65, 0)]);
     const truckGeo = merge([box(10, 3.2, 2.5, 0, 2.1, 0), box(2.4, 2.4, 2.4, 6.3, 1.7, 0)]);
@@ -178,8 +181,8 @@ export function buildSiteLayers(layout) {
   function buildFlood(event) {
     floodGroup.children.slice().forEach((c) => { floodGroup.remove(c); c.geometry?.dispose(); c.material?.map?.dispose(); c.material?.dispose(); });
     const ev = FLOOD_EVENTS[event], X1 = siteX / 2 + 110, edge = (x) => F.flood.edgeAt(x, event);
-    const hatch = canvasTex(64, 64, (x, W) => { x.fillStyle = 'rgba(61,139,255,.55)'; x.fillRect(0, 0, W, W); x.strokeStyle = 'rgba(190,220,255,.95)'; x.lineWidth = 3; for (let k = -W; k < W * 2; k += 16) { x.beginPath(); x.moveTo(k, 0); x.lineTo(k + W, W); x.stroke(); } });
-    floodMat = new THREE.MeshBasicMaterial({ color: '#ffffff', map: hatch, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide });
+    // floodwater: a soft translucent tint at flood level (the dashed line marks its edge)
+    floodMat = new THREE.MeshPhysicalMaterial({ color: '#3f86c9', roughness: 0.15, metalness: 0, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide });
     const sheet = flat(new THREE.Mesh(ribbon(edge, F.river.zAt, ev.level, -X1, X1, 3, 1 / 6), floodMat));
     sheet.renderOrder = 3; floodGroup.add(sheet);
     const pts = []; for (let x = -X1; x <= X1; x += 3) pts.push(new THREE.Vector3(x, ev.level + 0.05, edge(x)));
@@ -189,7 +192,7 @@ export function buildSiteLayers(layout) {
     { const lx = -siteX / 2 - 75; floodLabel.pos.set(lx, ev.level + 3, (edge(lx) + F.river.zAt(lx)) / 2); }   // over the flood band, west of the site
   }
   buildFlood(100);
-  tickers.push((dt, t) => { if (floodMat) floodMat.opacity = 0.62 + 0.1 * Math.sin(t * 1.6); });
+  tickers.push((dt, t) => { if (floodMat) floodMat.opacity = 0.26 + 0.04 * Math.sin(t * 1.2); });
 
   /* ---------- solar: rooftop panels and the winter sun path ---------- */
   {

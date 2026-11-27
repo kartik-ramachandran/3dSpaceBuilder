@@ -24,6 +24,23 @@ def _img(path, non_color=False):
     if non_color: img.colorspace_settings.name = 'Non-Color'
     return img
 
+# Smooth mode (default): textured materials become their texture's average colour and models carry no images.
+# Set BAKE_SMOOTH=0 for full PBR textures.
+SMOOTH = os.environ.get('BAKE_SMOOTH', '1') != '0'
+_means = {}
+def mean_colour(path):
+    """Average colour of an image, in linear RGB (what the shader's base colour expects)."""
+    if path not in _means:
+        img = bpy.data.images.load(path, check_existing=True); px = img.pixels[:]
+        n = len(px) // 4; step = max(1, n // 40000)
+        acc = [0.0, 0.0, 0.0]; k = 0
+        for i in range(0, n, step): acc[0] += px[i * 4]; acc[1] += px[i * 4 + 1]; acc[2] += px[i * 4 + 2]; k += 1
+        lin = lambda v: v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+        srgb = img.colorspace_settings.name.lower().startswith('srgb')
+        _means[path] = tuple((lin(a / k) if srgb else a / k) for a in acc)
+        bpy.data.images.remove(img)
+    return _means[path]
+
 def material(name, color=(0.9, 0.9, 0.9), rough=0.6, metal=0.0, tex=None, tint=None, transmission=0.0, coat=0.0,
              normal_strength=0.6, use_diffuse=True, emission=None, alpha=1.0):
     m = bpy.data.materials.new(name); m.use_nodes = True
@@ -33,6 +50,13 @@ def material(name, color=(0.9, 0.9, 0.9), rough=0.6, metal=0.0, tex=None, tint=N
     if coat: b.inputs['Coat Weight'].default_value = coat
     if emission: b.inputs['Emission Color'].default_value = (*emission[0], 1); b.inputs['Emission Strength'].default_value = emission[1]
     if alpha < 1: b.inputs['Alpha'].default_value = alpha
+    if tex and SMOOTH:                        # smooth: the texture's average colour, no image maps (light, fast to load)
+        folder = os.path.join(SRC, 'tex', tex)
+        diff = next((os.path.join(folder, f) for f in os.listdir(folder) if 'diff' in f), None)
+        if diff and use_diffuse:
+            c = mean_colour(diff); t = tint or (1, 1, 1)
+            b.inputs['Base Color'].default_value = (*(min(1.0, c[i] * t[i]) for i in range(3)), 1)
+        return m
     if tex:
         folder = os.path.join(SRC, 'tex', tex)
         find = lambda key: next((os.path.join(folder, f) for f in os.listdir(folder) if key in f), None)

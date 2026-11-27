@@ -10,12 +10,12 @@
 <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
-<canvas id="stage" tabindex="0" aria-label="3D model. Drag to rotate and change the angle. Right-drag, Shift-drag or use arrow keys to move. Scroll to zoom. Click a zone for its price."></canvas>
+<canvas id="stage" tabindex="0" aria-label="3D model. Drag to rotate and change the angle. W A S D or the joystick to move, Q and E to go down or up, Shift to go faster. Scroll to zoom. Click a zone for its price."></canvas>
 <div id="fallback" hidden>This device can't show the 3D model (WebGL is off). The zones and prices are still listed.</div>
 
 <div class="hud" id="hud">
   <div class="move-control">
-    <button id="movePad" type="button" aria-label="Move view. Drag the thumbstick or hold arrow keys to move up, down, left or right." aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" title="Drag to move. Release to stop.">
+    <button id="movePad" type="button" aria-label="Move. Push the stick up to go forward, sideways to strafe; or use W A S D, Q and E." aria-keyshortcuts="W A S D Q E ArrowUp ArrowDown ArrowLeft ArrowRight" title="Push up to go forward, sideways to strafe (or W A S D · Q / E down / up · Shift faster). Release to stop.">
       <span class="pad-arrow pad-up" aria-hidden="true">↑</span><span class="pad-arrow pad-down" aria-hidden="true">↓</span>
       <span class="pad-arrow pad-left" aria-hidden="true">←</span><span class="pad-arrow pad-right" aria-hidden="true">→</span>
       <span class="move-knob" aria-hidden="true"></span>
@@ -23,7 +23,7 @@
     <span class="move-label">Move view</span>
   </div>
   <div class="titleblock">
-    <div class="eyebrow"><span>Prompt → Space</span><span class="kind" id="kindLabel">Plane</span></div>
+    <div class="eyebrow"><span>Spatial studio</span><span class="kind" id="kindLabel">Plane</span></div>
     <h1 id="spaceName">Long-haul Jet</h1>
     <p id="spaceMeta">AKL → DXB · 6 cabins · 330 seats</p>
   </div>
@@ -40,43 +40,44 @@
     <button class="pill" id="levelBtn" title="Level view: straighten the camera without changing your zoom" aria-label="Level view">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 8h4m6 0h4M8 1v3m0 8v3"/><circle cx="8" cy="8" r="2"/></svg><span class="lbl">Level view</span>
     </button>
+    <button class="pill" id="surroundBtn" aria-pressed="false" title="Show the neighbourhood around the site (houses, apartment blocks, skyline). Off keeps the scene light and fast."><span class="dot"></span><span class="lbl">Surroundings</span></button>
     <button class="pill" id="glassBtn" aria-pressed="true" title="Toggle the glass roof"><span class="dot"></span><span class="lbl" id="glassLbl">Glass roof</span></button>
     <button class="pill icon" id="resetBtn" title="Reset view" aria-label="Reset view">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>
     </button>
   </div>
 
-  <div id="valButtons" hidden role="group" aria-label="Market panels">
-    <button type="button" class="pill" id="valOpen" aria-controls="valControls" aria-expanded="false">Market valuations</button>
-    <button type="button" class="pill" id="vpOpen" aria-controls="valPanel" aria-expanded="false">Market valuation trend</button>
-  </div>
-  <section id="valControls" hidden aria-label="Valuation layer">
-    <header><h2>Market valuations</h2><button type="button" class="x" id="valClose" aria-label="Close market valuations">×</button></header>
-    <div class="val-body">
-      <p id="valLede"></p>
-      <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
-      <div class="vseg" role="group" aria-label="Selection"><button type="button" data-pick="unit" aria-pressed="true">Select unit</button><button type="button" data-pick="floor" aria-pressed="false">Select floor</button></div>
-      <p class="val-hint">Click an apartment to select it. Esc clears.</p>
-      <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (trees, skyline)</label>
-      <div class="val-layers">
-        <div class="vl-head"><span>Site layers</span><select id="valAddLayer" aria-label="Add a site layer"></select></div>
-        <ul id="valLayerList" aria-label="Site layers and their effect on values"></ul>
-        <p class="val-note" id="valLayerNet"></p>
-      </div>
-      <label class="val-field"><span>Colour by</span>
-        <select id="valColour"><option value="valuation">Market valuation</option><option value="zones">Building colours</option></select></label>
-      <div class="val-scale">
-        <div class="val-ramp"></div>
-        <div class="val-range"><span id="valMin"></span><span id="valMax"></span></div>
-        <p class="val-note" id="valUnitNote"></p>
-        <p id="valCount"></p>
-        <ul class="val-legend"><li><i class="lg-none"></i>No market valuation (faded)</li><li><i class="lg-hover"></i>Hover</li><li><i class="lg-sel"></i>Selected</li></ul>
-      </div>
-      <p class="val-note">Demo data: valuations, placement confidence and floor plans are generated for illustration, not market data.</p>
-    </div>
-  </section>
-
   <div id="rightCol">
+    <!-- market panels: buttons and the valuation card at the top of the right column -->
+    <div id="valButtons" hidden role="group" aria-label="Market panels">
+      <button type="button" class="pill" id="valOpen" aria-controls="valControls" aria-expanded="false">Market valuations</button>
+      <button type="button" class="pill" id="vpOpen" aria-controls="valPanel" aria-expanded="false">Market valuation trend</button>
+    </div>
+    <section id="valControls" hidden aria-label="Valuation layer">
+      <header><h2>Market valuations</h2><button type="button" class="x" id="valClose" aria-label="Close market valuations">×</button></header>
+      <div class="val-body">
+        <p id="valLede"></p>
+        <div class="vseg" role="group" aria-label="Rendering"><button type="button" data-render="solid" aria-pressed="true">Rendered</button><button type="button" data-render="wire" aria-pressed="false">Wireframe</button></div>
+        <div class="vseg" role="group" aria-label="Selection"><button type="button" data-pick="unit" aria-pressed="true">Select unit</button><button type="button" data-pick="floor" aria-pressed="false">Select floor</button></div>
+        <p class="val-hint">Click an apartment to select it. Esc clears.</p>
+        <label class="val-check"><input type="checkbox" id="valContext" checked> Show context (trees, skyline)</label>
+        <div class="val-layers">
+          <div class="vl-head"><span>Site layers</span><select id="valAddLayer" aria-label="Add a site layer"></select></div>
+          <ul id="valLayerList" aria-label="Site layers and their effect on values"></ul>
+          <p class="val-note" id="valLayerNet"></p>
+        </div>
+        <label class="val-field"><span>Colour by</span>
+          <select id="valColour"><option value="valuation">Market valuation</option><option value="zones">Building colours</option></select></label>
+        <div class="val-scale">
+          <div class="val-ramp"></div>
+          <div class="val-range"><span id="valMin"></span><span id="valMax"></span></div>
+          <p class="val-note" id="valUnitNote"></p>
+          <p id="valCount"></p>
+          <ul class="val-legend"><li><i class="lg-none"></i>No market valuation (faded)</li><li><i class="lg-hover"></i>Hover</li><li><i class="lg-sel"></i>Selected</li></ul>
+        </div>
+        <p class="val-note">Demo data: valuations, placement confidence and floor plans are generated for illustration, not market data.</p>
+      </div>
+    </section>
   <section id="valPanel" hidden aria-label="Valuation trend and apartment details">
     <div class="vp-head"><div><h3>Market valuation trend</h3><p id="vpSub"></p></div><button type="button" class="vp-btn" id="vpExpand">Expand</button><button type="button" class="x" id="vpClose" aria-label="Close market valuation trend">×</button></div>
     <div class="vp-row">
@@ -111,6 +112,7 @@
 
   <form id="dock" autocomplete="off">
     <ul id="referenceList" aria-label="Attached references" hidden></ul>
+    <div class="dock-heading"><span>Make room for an idea</span><span>Your space, reimagined</span></div>
     <div class="prow">
       <input id="referenceInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx" multiple hidden>
       <button id="attachBtn" type="button" title="Attach images, PDF or Word documents" aria-label="Attach images, PDF or DOCX">
@@ -122,7 +124,7 @@
     </div>
     <p id="referenceHelp">Images, PDF or DOCX · up to 6 files · 10 MB each</p>
     <p id="referenceStatus" role="status" aria-live="polite"></p>
-    <p id="navigationHelp"><span class="mouse-help">Drag to rotate · Joystick, right-drag or Shift-drag to move · Scroll to zoom</span><span class="touch-help">One finger to rotate · Two fingers to move or pinch to zoom</span></p>
+    <p id="navigationHelp"><span class="mouse-help">WASD or joystick to move · Q / E down / up · Shift faster · Drag to look around · Scroll to zoom</span><span class="touch-help">One finger to rotate · Two fingers to move or pinch to zoom</span></p>
     <div class="meta-row">
       <label class="examples">
         <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Build an example</span>

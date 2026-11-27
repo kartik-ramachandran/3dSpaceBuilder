@@ -5,9 +5,12 @@
  * grass and a river with a moving water normal map. The originals stay in the scene (hidden), so every
  * existing animation and layer toggle keeps driving them; this module copies their motion every frame.
  */
-import * as THREE from 'three';
+import * as THREE from 'three';
+import { surroundingsOn } from './focus.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { instanceParts, place } from './asset-library.js';
 import { rng } from '../util.js';
+import { buildStreets, verge } from './streets.js';
 
 const texCache = new Map();
 /** A tiling texture from assets/tex/<name>/<file>.jpg. */
@@ -21,10 +24,10 @@ export function tex(name, file = 'diff', { srgb = file === 'diff', repeat = [1, 
   const t = texCache.get(key).clone(); t.repeat.set(...repeat);
   return t;
 }
-/** Tiling PBR material in world metres (the mesh needs planar uvs, see planarUV). */
-export function pbr(name, { color = '#ffffff', rough = true, normalScale = 1, roughness = 0.9, ...o } = {}) {
-  return new THREE.MeshStandardMaterial({ color, map: tex(name), normalMap: tex(name, 'nor'), normalScale: new THREE.Vector2(normalScale, normalScale),
-    ...(rough ? { roughnessMap: tex(name, 'rough') } : {}), roughness, metalness: 0, ...o });
+/** Smooth (untextured) surfaces: one plain colour per surface type, nothing to download. */
+const SMOOTH = { asphalt_02: '#45484b', pavers: '#bdb7ad' };
+export function pbr(name, { color, rough, normalScale, roughness = 0.9, ...o } = {}) {
+  return new THREE.MeshStandardMaterial({ color: SMOOTH[name] || color || '#999999', roughness, metalness: 0, ...o });
 }
 /** Sets uv = (x, z) / metres per tile from world-space vertex positions (meshes with identity transforms). */
 export function planarUV(geometry, metres) {
@@ -63,6 +66,7 @@ export const FACADES = ['#f3f0ea', '#e7dfd1', '#d6d3cc', '#c9b8a2', '#b77a5f', '
 export const ROOFS = ['#ffffff', '#c98a6a', '#6e6e72', '#8f8a84'].map((c) => new THREE.Color(c));
 
 const LIMB = { leg_l: 0, leg_r: 1, arm_l: 2, arm_r: 3 };
+export const GRASS = '#7a9a52';                // plain smooth grass: nothing to download
 const _m = new THREE.Matrix4(), _p = new THREE.Matrix4(), _r = new THREE.Matrix4(), _q = new THREE.Quaternion(), _one = new THREE.Vector3(1, 1, 1), _up = new THREE.Vector3(0, 1, 0);
 
 /**
@@ -155,7 +159,7 @@ export function upgradeSurroundings({ lib, site, landscape, env }) {
 
   /* ---------- ground, plaza, roads, paths: real textures ---------- */
   const ground = env.userData.ground;
-  if (ground) ground.material = new THREE.MeshStandardMaterial({ color: '#eef5d8', map: tex('grass', 'diff', { repeat: [320, 320] }), normalMap: tex('grass', 'nor', { repeat: [320, 320] }), roughness: 1 });
+  if (ground) ground.material = new THREE.MeshStandardMaterial({ color: GRASS, roughness: 1 });
   const plaza = env.userData.plaza;
   if (plaza) { planarUV(plaza.geometry, 3.2); plaza.material = pbr('pavers', { color: '#e4dfd6', normalScale: 0.8 }); hide(env.userData.joints); }
   const asphalt = pbr('asphalt_02', { color: '#a8a8a8', normalScale: 0.7 });
@@ -163,24 +167,64 @@ export function upgradeSurroundings({ lib, site, landscape, env }) {
   const pavers = pbr('pavers', { color: '#d9d4ca', normalScale: 0.8 });
   for (const m of P.paving) { planarUV(m.geometry, 2.4); m.material = pavers; }
   if (LP.paths) { planarUV(LP.paths.geometry, 2.4); LP.paths.material = pavers; }
-  if (LP.beds) { planarUV(LP.beds.geometry, 3); LP.beds.material = new THREE.MeshStandardMaterial({ color: '#8f9a76', map: tex('grass'), normalMap: tex('grass', 'nor'), roughness: 1 }); }
+  if (LP.beds) LP.beds.material = new THREE.MeshStandardMaterial({ color: '#5d7a42', roughness: 1 });
+
+  /* ---------- local streets: replaced by a detailed network ---------- */
+  let streets = null;
+  if (P.roadNet) {
+    const { segs, width, layer } = P.roadNet, lines = [];
+    for (const [a, b, c, axis] of segs) {                 // merge collinear pieces (the side roads run on to the motorway)
+      const lo = Math.min(a, b), hi = Math.max(a, b);
+      const same = lines.find((l) => l.axis === axis && Math.abs(l.at - c) < 0.01 && lo <= l.to + 0.01 && hi >= l.from - 0.01);
+      if (same) { same.from = Math.min(same.from, lo); same.to = Math.max(same.to, hi); } else lines.push({ axis, at: c, from: lo, to: hi, width });
+    }
+    hide(P.roads[0]); hide(P.dashes); P.kerbs.forEach(hide); P.paving.forEach(hide);
+    const front = Math.max(...lines.filter((l) => l.axis === 'x').map((l) => l.at));
+    streets = buildStreets(lines, { y: 0.47, footpath: 2.8, names: [['Park Street', 'River Road'], ['Park Street', 'Mill Lane'], ['Station Road', 'River Road'], ['Station Road', 'Mill Lane']],
+      busStop: { x: 24, z: front - (width / 2 + 0.3 + 1.6), rot: Math.PI } });
+    layer.add(streets.group); tickers.push((dt, t) => streets.update(dt, t));
+  }
+
+  /* ---------- motorway: concrete median barrier, steel guardrails, twin-arm lighting ---------- */
+  if (P.motorway) {
+    const { z: mz, width: mw, length: L, layer } = P.motorway, top = 0.5;
+    hide(P.motorwayBarriers);
+    const prof = new THREE.Shape(); prof.moveTo(-0.3, 0); prof.lineTo(0.3, 0); prof.lineTo(0.27, 0.08); prof.lineTo(0.12, 0.33); prof.lineTo(0.1, 0.82); prof.lineTo(-0.1, 0.82); prof.lineTo(-0.12, 0.33); prof.lineTo(-0.27, 0.08); prof.closePath();
+    const jersey = new THREE.ExtrudeGeometry(prof, { depth: L, bevelEnabled: false }); jersey.translate(0, 0, -L / 2); jersey.rotateY(Math.PI / 2); jersey.translate(0, top, mz);
+    const barrier = new THREE.Mesh(jersey, new THREE.MeshStandardMaterial({ color: '#c4c0b6', roughness: 0.85 })); barrier.castShadow = barrier.receiveShadow = true; layer.add(barrier);
+    const steel = new THREE.MeshStandardMaterial({ color: '#aab0b4', roughness: 0.35, metalness: 0.75 });
+    const beams = [], posts = [];
+    for (const s of [-1, 1]) {
+      const z = mz + s * (mw / 2 - 0.45);
+      beams.push(new THREE.BoxGeometry(L, 0.32, 0.06).translate(0, top + 0.6, z), new THREE.BoxGeometry(L, 0.05, 0.12).translate(0, top + 0.6, z + s * 0.03));
+      for (let x = -L / 2; x <= L / 2; x += 2.5) posts.push(new THREE.Vector3(x, top + 0.38, z + s * 0.12));
+    }
+    const beamMesh = new THREE.Mesh(mergeGeometries(beams.map((g) => g.toNonIndexed())), steel); beamMesh.castShadow = true; layer.add(beamMesh);
+    const postMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.1, 0.76, 0.1), steel, posts.length);
+    posts.forEach((p, i) => postMesh.setMatrixAt(i, _m.makeTranslation(p.x, p.y, p.z))); postMesh.castShadow = true; layer.add(postMesh);
+    const lights = [];
+    for (let x = -L / 2 + 20; x < L / 2; x += 46) lights.push(place(x, top + 0.82, mz, 0), place(x, top + 0.82, mz, Math.PI));
+    instanceParts(layer, lib.get('lamp'), lights, { name: 'Motorway lighting' });
+    // grassed embankments down from the carriageway edges
+    const banks = [-1, 1].map((s) => verge(-L / 2, mz + s * mw / 2, L / 2, mz + s * mw / 2, 0, s * 3, top));
+    const emb = new THREE.Mesh(mergeGeometries(banks), new THREE.MeshStandardMaterial({ color: GRASS, roughness: 1, side: THREE.DoubleSide })); emb.receiveShadow = true; layer.add(emb);
+  }
 
   /* ---------- river: moving normal-mapped water, grassy banks ---------- */
   if (P.water) {
-    const w = P.water, n1 = tex('water', 'normals', { srgb: false, repeat: [1, 2.2] });
-    Object.assign(w, { bumpMap: null, normalMap: n1, normalScale: new THREE.Vector2(0.55, 0.55), color: new THREE.Color('#2f5a66'), roughness: 0.05, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.3 });
+    const w = P.water;                                   // smooth water: the river's own wave shader still moves it
+    Object.assign(w, { bumpMap: null, color: new THREE.Color('#2f5a66'), roughness: 0.06, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3 });
     w.needsUpdate = true;
     if (P.flow) P.flow.material.opacity = 0.07;
-    tickers.push((dt) => { n1.offset.x -= dt * 0.035; n1.offset.y += dt * 0.006; });
-    const bank = new THREE.MeshStandardMaterial({ color: '#a7ad8a', map: tex('grass'), normalMap: tex('grass', 'nor'), roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
-    for (const b of P.banks) { planarUV(b.geometry, 4); b.material = bank; }
+    const bank = new THREE.MeshStandardMaterial({ color: '#6f8f4e', roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    for (const b of P.banks) b.material = bank;
   }
 
   /* ---------- street lights ---------- */
   if (P.lampSpots.length) {
     P.oldLamps.forEach(hide);
     const layer = P.oldLamps[0].parent;
-    instanceParts(layer, lib.get('lamp'), P.lampSpots.map((s) => place(s.x, s.y, s.z, s.side > 0 ? Math.PI : 0)), { name: 'Street light' });
+    instanceParts(layer, lib.get('lamp'), P.lampSpots.map((s) => place(s.x, streets ? 0.61 : s.y, s.z, s.side > 0 ? Math.PI : 0)), { name: 'Street light' });
   }
 
   /* ---------- traffic: real cars and trucks follow the existing movers ---------- */
@@ -192,7 +236,7 @@ export function upgradeSurroundings({ lib, site, landscape, env }) {
     variants.forEach((ids, v) => {
       if (!ids.length) return;
       const colours = ids.map(() => t.truck ? new THREE.Color().setHSL(r(), 0.5, 0.35) : CAR_COLOURS[Math.floor(r() * CAR_COLOURS.length)]);
-      const meshes = instanceParts(t.group, lib.get(kinds[v]), ids.map(() => new THREE.Matrix4()), { name: kinds[v], colors: colours });
+      const meshes = instanceParts(t.group, lib.get(kinds[v]), ids.map(() => new THREE.Matrix4()), { name: kinds[v], colors: colours, moving: true });
       const shared = meshes[0].instanceMatrix;
       meshes.forEach((m) => { m.instanceMatrix = shared; });
       tickers.push(() => { ids.forEach((i, k) => { t.mesh.getMatrixAt(i, _m); shared.array.set(_m.elements, k * 16); }); shared.needsUpdate = true; });
@@ -212,7 +256,7 @@ export function upgradeSurroundings({ lib, site, landscape, env }) {
   if (span) for (let i = 0; i < 44; i++) {
     const z = footpaths[i % footpaths.length] + (r() - 0.5) * 1.2, speed = 1.1 + r() * 0.5, dir = r() < 0.5 ? 1 : -1, x0 = (r() * 2 - 1) * span, ph = r() * 10;
     people.push({ variant: VARIANTS[i % 3], colours: outfit(r) });
-    const pos = new THREE.Vector3(x0, 0.565, z), swing = [0, 0, 0, 0];
+    const pos = new THREE.Vector3(x0, streets ? 0.61 : 0.565, z), swing = [0, 0, 0, 0];
     poses.push((t) => {
       let x = x0 + dir * speed * t; x = ((x + span) % (2 * span) + 2 * span) % (2 * span) - span; pos.x = x;
       const s = Math.sin(t * speed * 5 + ph);
@@ -232,16 +276,23 @@ export function upgradeSurroundings({ lib, site, landscape, env }) {
   treeKinds.forEach((k, i) => { if (perKind[i].length) instanceParts(env, lib.get(k), perKind[i], { name: k }).forEach((m) => { if (m.material.name === 'Leaves') addWind(m.material); }); });
 
   /* ---------- neighbourhood: houses, townhouses and apartment blocks instead of the box skyline ---------- */
+  // built only when Surroundings is on (focus.js): it is most of the scene's geometry
   const sky = env.userData.skyline;
-  if (sky) {
-    hide(sky.mesh);
-    const out = {};
-    sky.pos.forEach((p, i) => { const [w, h, d] = sky.scl[i]; neighbourhood(out, r, p.x, p.z, w, d, h); });
-    drawNeighbourhood(env, lib, out);
-    // a car on most house driveways
-    const parked = (out.house_a?.m || []).filter(() => r() < 0.8).map((m) => m.clone().multiply(place(7.3, 0, 7.6, Math.PI / 2)));
-    if (parked.length) instanceParts(env, lib.get('car_suv'), parked, { name: 'Parked car', colors: parked.map(() => CAR_COLOURS[Math.floor(r() * CAR_COLOURS.length)]) });
+  let hood = null;
+  if (sky) hide(sky.mesh);
+  function setSurroundings(on) {
+    if (on && !hood && sky) {
+      hood = new THREE.Group(); hood.name = 'Neighbourhood'; hood.userData.surround = true; env.add(hood);
+      const rr = rng(97), out = {};
+      sky.pos.forEach((p, i) => { const [w, h, d] = sky.scl[i]; neighbourhood(out, rr, p.x, p.z, w, d, h); });
+      drawNeighbourhood(hood, lib, out);
+      // a car on most house driveways
+      const parked = (out.house_a?.m || []).filter(() => rr() < 0.8).map((m) => m.clone().multiply(place(7.3, 0, 7.6, Math.PI / 2)));
+      if (parked.length) instanceParts(hood, lib.get('car_suv'), parked, { name: 'Parked car', colors: parked.map(() => CAR_COLOURS[Math.floor(rr() * CAR_COLOURS.length)]) });
+    }
+    if (hood) hood.visible = on;
   }
+  setSurroundings(surroundingsOn());
 
-  return { update(dt, t) { now = t; tickWind(t); for (const f of tickers) f(dt, t); } };
+  return { setSurroundings, update(dt, t) { now = t; tickWind(t); for (const f of tickers) f(dt, t); } };
 }

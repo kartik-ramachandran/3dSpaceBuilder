@@ -8,8 +8,9 @@
  */
 import * as THREE from 'three';
 import { instanceParts, place } from '../scene/asset-library.js';
-import { tex, pbr, planarUV, addWind, createCrowd, outfit, CAR_COLOURS, FACADES, ROOFS } from '../scene/real-surroundings.js';
+import { tex, pbr, planarUV, addWind, createCrowd, outfit, CAR_COLOURS, FACADES, ROOFS, GRASS } from '../scene/real-surroundings.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { buildStreets } from '../scene/streets.js';
 import { rng } from '../util.js';
 
 const hex = (c) => `#${c.getHexString()}`;
@@ -32,7 +33,28 @@ function mod(group, lib, module, matrices, tint = {}) {
   });
 }
 const col = (h) => new THREE.Color(h);
-const money = (v, cur) => `${cur} ${v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'm' : Math.round(v / 1000) + 'k'}`;
+export const money = (v, cur) => `${cur} ${v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'm' : Math.round(v / 1000) + 'k'}`;
+/** Reads a typed figure: "1,250", "250 m²", "8.6 m"; for money also "1.9m", "850k", "NZD 2.1m". NaN when there is no number. */
+export function parseFigure(text, isMoney = false) {
+  const m = String(text).replace(/,/g, '').match(/(\d*\.?\d+)\s*([km])?(?![²a-z])/i);
+  if (!m) return NaN;
+  const n = Number(m[1]), suffix = m[2]?.toLowerCase();
+  if (!isMoney) return n;
+  return n * (suffix === 'k' ? 1e3 : suffix === 'm' || n < 1000 ? 1e6 : 1);   // a bare "2.4" means millions
+}
+/**
+ * Property facts the user can type over (p.facts = { label: number }). A row's `drive(n)` turns a typed
+ * number into a param change, so the model follows (height → storeys); other rows keep the typed figure.
+ * A typed floor area re-prices the estimate at the same rate per m², unless the value was typed too.
+ */
+export function facts(p, ctx, rows, { area, value } = {}) {
+  const f = p.facts || {}, unit = (v) => (String(v).match(/ (m²|m)$/) || ['', ''])[1];
+  const show = (k, v) => (k.startsWith('Est.') ? money(f[k], ctx.currency) : `${f[k].toLocaleString()}${unit(v) ? ' ' + unit(v) : ''}`);
+  const out = rows.map(([k, v, drive]) => [k, f[k] != null ? show(k, v) : v, { drive, edited: f[k] != null }]);
+  const est = out.find((r) => r[0].startsWith('Est.'));
+  if (est && f[est[0]] == null && f['Floor area'] != null && area && value) { est[1] = money(f['Floor area'] * value / area, ctx.currency); est[2].derived = true; }
+  return out;
+}
 let leavesWindy = false;
 function windy(lib) {
   if (leavesWindy) return; leavesWindy = true;
@@ -45,16 +67,14 @@ function materials() {
   mats = {
     asphalt: pbr('asphalt_02', { color: '#a8a8a8', normalScale: 0.7 }),
     pavers: pbr('pavers', { color: '#ddd8ce', normalScale: 0.8 }),
-    grass: new THREE.MeshStandardMaterial({ color: '#eef5d8', map: tex('grass'), normalMap: tex('grass', 'nor'), roughness: 1 }),
+    grass: new THREE.MeshStandardMaterial({ color: GRASS, roughness: 1 }),
     line: new THREE.MeshStandardMaterial({ color: '#f1efe8', roughness: 0.6 }),
     kerb: new THREE.MeshStandardMaterial({ color: '#c9c5bb', roughness: 0.85 }),
   };
-  const n = tex('water', 'normals', { srgb: false, repeat: [1, 1] });
-  mats.water = new THREE.MeshPhysicalMaterial({ color: '#2f5a66', normalMap: n, normalScale: new THREE.Vector2(0.55, 0.55), roughness: 0.05, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.3 });
-  mats.waterNormal = n;
+  mats.water = new THREE.MeshPhysicalMaterial({ color: '#2f5a66', roughness: 0.06, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3 });
   return mats;
 }
-export function tickMaterials(dt) { if (mats) { mats.waterNormal.offset.x -= dt * 0.035; mats.waterNormal.offset.y += dt * 0.006; } }
+export function tickMaterials() { /* smooth materials: nothing to animate */ }
 
 /** A car or truck that parks, or drives back and forth along its own axis over `route` metres. */
 function vehicle(lib, module, colour, { drive = false, speed = 30, route = 120, seed = 1 } = {}) {
@@ -102,7 +122,8 @@ export const TYPES = {
       mod(g, lib, p.style, [new THREE.Matrix4()], { 'House render': col(p.facade), 'Roof tiles': col(p.roof) });
       if (p.car && p.style === 'house_a') { const car = vehicle(lib, 'car_suv', PALETTES.car[(ctx.seed * 3) % PALETTES.car.length]).group; car.position.set(7.3, 0, 7.6); car.rotation.y = Math.PI / 2; g.add(car); }
       const area = { house_a: 190, house_b: 126, house_c: 205 }[p.style], beds = { house_a: 4, house_b: 3, house_c: 4 }[p.style];
-      return { object: g, footprint: [p.style === 'house_b' ? 15 : 15, 12], stats: [['Dwellings', '1'], ['Bedrooms', String(beds)], ['Floor area', `${area} m²`], ['Height', p.style === 'house_b' ? '4.8 m' : p.style === 'house_c' ? '6.3 m' : '8.6 m'], ['Est. value', money(area * ctx.rate * 1.15, ctx.currency)]] };
+      const value = area * ctx.rate * 1.15;
+      return { object: g, footprint: [p.style === 'house_b' ? 15 : 15, 12], stats: facts(p, ctx, [['Dwellings', '1'], ['Bedrooms', String(beds)], ['Floor area', `${area} m²`], ['Height', p.style === 'house_b' ? '4.8 m' : p.style === 'house_c' ? '6.3 m' : '8.6 m'], ['Est. value', money(value, ctx.currency)]], { area, value }) };
     },
   },
   townhouses: {
@@ -113,7 +134,7 @@ export const TYPES = {
       for (let i = 0; i < n; i++) { m.push(place((i - (n - 1) / 2) * 6, 0, 0)); cs.push(p.mixed ? col(PALETTES.facade[Math.floor(r() * PALETTES.facade.length)]) : col(p.facade)); }
       mod(g, lib, p.style, m, { 'House render': cs, 'Roof tiles': m.map(() => col('#ffffff')) });
       const area = p.style === 'townhouse_a' ? 112 : 158;
-      return { object: g, footprint: [n * 6, 11], stats: [['Dwellings', String(n)], ['Storeys', p.style === 'townhouse_a' ? '2' : '3'], ['Floor area', `${n * area} m²`], ['Frontage', `${n * 6} m`], ['Est. value', money(n * area * ctx.rate, ctx.currency)]] };
+      return { object: g, footprint: [n * 6, 11], stats: facts(p, ctx, [['Dwellings', String(n), (v) => ({ units: Math.round(v) })], ['Storeys', p.style === 'townhouse_a' ? '2' : '3', (v) => ({ style: v >= 2.5 ? 'townhouse_b' : 'townhouse_a' })], ['Floor area', `${n * area} m²`], ['Frontage', `${n * 6} m`, (v) => ({ units: Math.round(v / 6) })], ['Est. value', money(n * area * ctx.rate, ctx.currency)]], { area: n * area, value: n * area * ctx.rate }) };
     },
   },
   apartment: {
@@ -124,7 +145,7 @@ export const TYPES = {
       mod(g, lib, 'lowrise_floor', Array.from({ length: p.floors }, (_, f) => place(0, BASE + f * FT - 0.15, 0, 0, sx, 1, 1)), tint);
       mod(g, lib, 'lowrise_roof', [place(0, BASE + p.floors * FT - 0.15, 0, 0, sx, 1, 1)], tint);
       const n = p.floors * p.units;
-      return { object: g, footprint: [p.units * 7.5 + 1, 13], stats: [['Apartments', String(n)], ['Height', `${(BASE + p.floors * FT + 0.8).toFixed(1)} m`], ['Floor area', `${Math.round(n * 7.5 * 11)} m²`], ['Est. value', money(n * 78 * ctx.rate, ctx.currency)]] };
+      return { object: g, footprint: [p.units * 7.5 + 1, 13], stats: facts(p, ctx, [['Apartments', String(n), (v) => ({ floors: Math.round(v / p.units) })], ['Height', `${(BASE + p.floors * FT + 0.8).toFixed(1)} m`, (v) => ({ floors: Math.round((v - BASE - 0.8) / FT) })], ['Floor area', `${Math.round(n * 7.5 * 11)} m²`], ['Est. value', money(n * 78 * ctx.rate, ctx.currency)]], { area: n * 7.5 * 11, value: n * 78 * ctx.rate }) };
     },
   },
   tower: {
@@ -135,7 +156,8 @@ export const TYPES = {
       mod(g, lib, 'tower_floor', Array.from({ length: p.storeys }, (_, f) => place(0, BASE + f * FT, 0, 0, sx, 1, sz)), tint);
       mod(g, lib, 'tower_crown', [place(0, BASE + p.storeys * FT, 0, 0, sx, 1, sz)], tint);
       const per = Math.max(2, Math.round(p.width * p.depth / 95)), n = p.storeys * per;
-      return { object: g, footprint: [p.width + 3, p.depth + 3], stats: [['Apartments', String(n)], ['Height', `${(BASE + p.storeys * FT + 7.8).toFixed(0)} m`], ['Floor area', `${Math.round(p.storeys * p.width * p.depth * 0.82).toLocaleString()} m²`], ['Est. value', money(n * 85 * ctx.rate * 1.25, ctx.currency)]] };
+      const area = p.storeys * p.width * p.depth * 0.82, value = n * 85 * ctx.rate * 1.25;
+      return { object: g, footprint: [p.width + 3, p.depth + 3], stats: facts(p, ctx, [['Apartments', String(n), (v) => ({ storeys: Math.round(v / per) })], ['Height', `${(BASE + p.storeys * FT + 7.8).toFixed(0)} m`, (v) => ({ storeys: Math.round((v - BASE - 7.8) / FT) })], ['Floor area', `${Math.round(area).toLocaleString()} m²`], ['Est. value', money(value, ctx.currency)]], { area, value }) };
     },
   },
   car: {
@@ -213,19 +235,13 @@ export const TYPES = {
     params: [range('length', 'Length', 20, 600, 10, 'm'), choice('lanes', 'Lanes', [[2, 'Two lanes'], [4, 'Four lanes']]), toggle('footpaths', 'Footpaths'), toggle('lamps', 'Street lights'), toggle('trees', 'Street trees'), range('traffic', 'Cars driving', 0, 24), range('walkers', 'People walking', 0, 40)],
     build(p, lib, ctx) {
       const M = materials(), g = new THREE.Group(), L = p.length, lanes = Number(p.lanes), W = lanes * 3.4 + 1, r = rng(ctx.seed + 1);
-      g.add(slab(L, W, 0.1, M.asphalt, 7));
-      const lines = [];
-      const dash = (z) => { for (let x = -L / 2 + 2; x < L / 2 - 3; x += 9) lines.push(new THREE.BoxGeometry(3, 0.02, 0.15).translate(x + 1.5, 0.11, z)); };
-      if (lanes === 2) dash(0); else { lines.push(new THREE.BoxGeometry(L - 2, 0.02, 0.12).translate(0, 0.11, -0.12), new THREE.BoxGeometry(L - 2, 0.02, 0.12).translate(0, 0.11, 0.12)); dash(-3.4); dash(3.4); }
-      for (const s of [-1, 1]) lines.push(new THREE.BoxGeometry(L - 2, 0.02, 0.15).translate(0, 0.11, s * (W / 2 - 0.45)));
-      g.add(new THREE.Mesh(mergeGeometries(lines), M.line));
+      // the same detailed street as the site's: gutters, kerbs, footpaths, centre/edge (and lane) markings, manholes
+      const Y = 0.1, top = Y + 0.14;
+      const street = buildStreets([{ axis: 'x', at: 0, from: -L / 2, to: L / 2, width: W, lanes }], { y: Y, footpath: p.footpaths ? 2.8 : 0.32 });
+      g.add(street.group);
       const side = W / 2;
-      if (p.footpaths) for (const s of [-1, 1]) {
-        const k = new THREE.Mesh(new THREE.BoxGeometry(L, 0.2, 0.3).translate(0, 0.1, s * (side + 0.15)), M.kerb); k.castShadow = k.receiveShadow = true; g.add(k);
-        const f = slab(L, 2.8, 0.18, M.pavers, 2.4); f.position.z = s * (side + 1.7); g.add(f);
-      }
-      const edge = side + (p.footpaths ? 3.3 : 1);
-      if (p.lamps) { const m = []; for (let x = -L / 2 + 10, i = 0; x < L / 2; x += 28, i++) { const s = i % 2 ? 1 : -1; m.push(place(x, p.footpaths ? 0.18 : 0, s * (edge - 0.5), s > 0 ? Math.PI : 0)); } mod(g, lib, 'lamp', m); }
+      const edge = side + (p.footpaths ? 2.8 : 0.4);
+      if (p.lamps) { const m = []; for (let x = -L / 2 + 10, i = 0; x < L / 2; x += 28, i++) { const s = i % 2 ? 1 : -1; m.push(place(x, top, s * (edge - 0.5), s > 0 ? Math.PI : 0)); } mod(g, lib, 'lamp', m); }
       if (p.trees) { windy(lib); const by = { tree_a: [], tree_b: [] }; for (let x = -L / 2 + 6, i = 0; x < L / 2; x += 11, i++) for (const s of [-1, 1]) by[i % 2 ? 'tree_a' : 'tree_b'].push(place(x + (s > 0 ? 5 : 0), 0, s * (edge + 1.4), r() * 6.28, 0.6 + r() * 0.2)); for (const [k, m] of Object.entries(by)) if (m.length) mod(g, lib, k, m); }
       const movers = [];
       for (let i = 0; i < p.traffic; i++) {
@@ -239,7 +255,7 @@ export const TYPES = {
         const people = [];
         for (let i = 0; i < p.walkers; i++) {
           people.push({ variant: ['person_a', 'person_b', 'person_c'][i % 3], colours: outfit(r) });
-          const s = i % 2 ? 1 : -1, z = s * (side + 1.7) + (r() - 0.5) * 1.2, dir = r() < 0.5 ? 1 : -1, sp = 1.1 + r() * 0.5, x0 = r() * L, ph = r() * 9, pos = new THREE.Vector3(0, 0.18, z), swing = [0, 0, 0, 0];
+          const s = i % 2 ? 1 : -1, z = s * (side + 1.7) + (r() - 0.5) * 1.2, dir = r() < 0.5 ? 1 : -1, sp = 1.1 + r() * 0.5, x0 = r() * L, ph = r() * 9, pos = new THREE.Vector3(0, top, z), swing = [0, 0, 0, 0];
           poses.push((t) => { pos.x = ((x0 + dir * sp * t) % L + L) % L - L / 2; const w = Math.sin(t * sp * 5 + ph); swing[0] = w * 0.42; swing[1] = -w * 0.42; swing[2] = -w * 0.3; swing[3] = w * 0.3; return { pos, rotY: dir * Math.PI / 2, swing }; });
         }
         crowd = createCrowd(g, lib, people); crowd.update((i) => poses[i](0));

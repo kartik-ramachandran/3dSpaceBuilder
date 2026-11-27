@@ -2,7 +2,8 @@
  * App shell: renderer and camera, building a world from a layout spec, the HUD (zones, card,
  * price tag), picking, the fly-in window view, the prompt flow to Claude, and the render loop.
  */
-import * as THREE from 'three';
+import * as THREE from 'three';
+import { surroundingsOn, setSurroundingsOn } from './scene/focus.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { $, reduceMotion, clamp, sum, lerp, easeInOut } from './util.js';
 import { TYPE_LABEL, PRESETS, normalize } from './spec/schema.js';
@@ -20,7 +21,10 @@ import { createNavigation } from './scene/navigation.js';
 import { createReferences } from './references.js';
 import { createMovePad } from './move-pad.js';
 import { createSeatHighlight } from './scene/seat-highlight.js';
-import { createValuationPanel } from './valuation-panel.js';
+import { createValuationPanel } from './valuation-panel.js';
+import { createViewMenu } from './view-menu.js';
+
+createViewMenu();   // secondary toolbar controls in one dropdown (switches for on/off)
 
 const canvas = $('#stage');
 let renderer;
@@ -35,10 +39,12 @@ if (renderer) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;  // refreshed every third frame in frame(): plenty for moving cars and people, a third of the cost
 }
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 12000);
 const controls = renderer ? new OrbitControls(camera, canvas) : null;
+if (new URLSearchParams(location.search).has('debug')) window.__app = { camera, controls, scene, renderer };  // test hook (?debug)
 if (controls) {
   controls.enableDamping = false;
   controls.autoRotate = false;
@@ -79,19 +85,28 @@ function setHover(id, seat = null) {
    3. SCENE LIFECYCLE, CAMERA, INTERACTION
    ============================================================ */
 const occl = { top: 0, bottom: 0, right: 0, left: 0 };
+/** Desktop: the title heads the builder sidebar; phones keep it floating at the top. */
+const titleHome = { parent: $('.titleblock').parentNode, next: $('.titleblock').nextSibling };
+function placeTitle() {
+  const t = $('.titleblock'), inDock = innerWidth > 760;
+  if (inDock && t.parentNode !== $('#dock')) { $('#dock').prepend(t); t.classList.add('in-dock'); }
+  else if (!inDock && t.parentNode !== titleHome.parent) { titleHome.parent.insertBefore(t, titleHome.next); t.classList.remove('in-dock'); }
+}
 function measureOcclusion() {
   const w = innerWidth, h = innerHeight;
   const phone = w <= 760;
+  placeTitle();
   const tb = $('.titleblock').getBoundingClientRect();
   const dock = $('#dock').getBoundingClientRect();
   document.documentElement.style.setProperty('--dockH', `${h - dock.top + 8}px`);
   const zl = $('#zonesPanel').getBoundingClientRect();
   const rc = $('#rightCol').getBoundingClientRect();
-  occl.top = tb.bottom + 6;
+  occl.top = $('.titleblock').classList.contains('in-dock') ? 10 : tb.bottom + 6;
   const vc = $('#valControls');
-  occl.left = !phone && vc && !vc.hidden ? vc.getBoundingClientRect().right + 10 : 0;
+  // desktop: the builder is a left sidebar and the market panels sit at the top of the right column
+  occl.left = !phone && getComputedStyle($('#dock')).display !== 'none' ? dock.right + 10 : 0;
   if (phone) { occl.bottom = h - Math.min(dock.top, zl.top || dock.top) + 6; occl.right = 0; }
-  else { occl.bottom = h - dock.top + 10; occl.right = spec?.kind === 'development' && $('#valPanel').hidden ? 0 : w - rc.left + 10; }
+  else { occl.bottom = 10; occl.right = spec?.kind === 'development' && $('#valPanel').hidden && (!vc || vc.hidden) ? 0 : w - rc.left + 10; }
 }
 function applyViewOffset() {
   const w = innerWidth, h = innerHeight;
@@ -136,9 +151,29 @@ function cancelCameraTween() {
   for (const tw of tweens) if (tw.channel === 'camera') { tweens.delete(tw); tw.res(); }
 }
 const navigation = controls ? createNavigation(camera, controls, canvas, cancelCameraTween) : null;
+if (window.__app) window.__app.navigation = navigation;
+// The on-screen stick moves like a game joystick: up = forward, sideways = strafe.
 const movePad = createMovePad($('#movePad'), (x, y, dt) => {
-  if (mode === 'overview') navigation?.move(x, y, dt);
+  if (mode === 'overview') navigation?.walk(y, x, 0, dt, held.has('shift'));
 });
+/* WASD (+ Q/E down/up, Shift faster) anywhere on the page, except while typing */
+const held = new Set();
+const MOVE_KEYS = { w: 1, a: 1, s: 1, d: 1, q: 1, e: 1 };
+const typing = (t) => t && (t.closest?.('input, textarea, select, [contenteditable="true"]'));
+addEventListener('keydown', (e) => {
+  if (e.key === 'Shift') held.add('shift');
+  const k = e.key.toLowerCase();
+  if (!MOVE_KEYS[k] || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+  if (mode !== 'overview') return;
+  held.add(k); e.preventDefault();
+});
+addEventListener('keyup', (e) => { if (e.key === 'Shift') held.delete('shift'); held.delete(e.key.toLowerCase()); });
+addEventListener('blur', () => held.clear());
+function keyboardMove(dt) {
+  if (!navigation || mode !== 'overview') return;
+  const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), u = (held.has('e') ? 1 : 0) - (held.has('q') ? 1 : 0);
+  if (f || r || u) { cancelCameraTween(); navigation.walk(f, r, u, dt, held.has('shift')); }
+}
 function runTweens(now) {
   for (const tw of tweens) {
     const k = clamp((now - tw.t0) / tw.dur, 0, 1);
@@ -424,6 +459,14 @@ const valuation = createValuationPanel({
   onFly: (id) => enterView(id),
   onLayout: () => resize(),
 });
+/* Surroundings: the neighbourhood is off by default for a fast, focused scene (focus.js) */
+$('#surroundBtn').setAttribute('aria-pressed', String(surroundingsOn()));
+$('#surroundBtn').addEventListener('click', () => {
+  const on = !surroundingsOn(); setSurroundingsOn(on);
+  $('#surroundBtn').setAttribute('aria-pressed', String(on));
+  if (world?.setSurroundings) world.setSurroundings(on);
+  else world?.group?.traverse((o) => { if (o.userData.surround) o.visible = on; });
+});
 $('#glassBtn').addEventListener('click', () => {
   if (!world) return;
   glassTarget = glassTarget > 0.5 ? 0 : 1;
@@ -537,15 +580,36 @@ async function backendSample() {
 const clock = new THREE.Clock();
 const tmp = new THREE.Vector3();
 let lastHot = null;
+let shadowFrame = 0;
+/* Adaptive quality: if frames stay slow (under ~40 fps for 1.5 s), step down: lower render resolution,
+   then cheaper shadows, then fewer shadow refreshes. Steps back up after a while of smooth frames. */
+const quality = { level: 0, slow: 0, fast: 0, shadowEvery: 3 };
+function adaptQuality(frameMs) {
+  if (!renderer) return;
+  if (frameMs > 25) { quality.slow += frameMs; quality.fast = 0; } else if (frameMs < 18) { quality.fast += frameMs; quality.slow = Math.max(0, quality.slow - frameMs); }
+  const set = (lvl) => {
+    quality.level = lvl; quality.slow = quality.fast = 0;
+    renderer.setPixelRatio([Math.min(devicePixelRatio, 1.5), 1, 0.85, 0.75][lvl]);
+    renderer.shadowMap.type = lvl >= 2 ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+    quality.shadowEvery = lvl >= 3 ? 6 : 3;
+    resize();
+  };
+  if (quality.slow > 1500 && quality.level < 3) set(quality.level + 1);
+  else if (quality.fast > 20000 && quality.level > 0) set(quality.level - 1);
+}
 function frame(now) {
   requestAnimationFrame(frame);
   if (!renderer || !world || document.hidden) return;
-  const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
+  const raw = clock.getDelta(), dt = Math.min(0.05, raw), t = clock.elapsedTime;
+  if (document.visibilityState === 'visible' && t > 8 && raw < 0.12) adaptQuality(raw * 1000);   // ignore start-up and one-off hitches
   runTweens(now);
   world.update(dt, t, mode);
+  world.lod?.(camera);
   composer?.update(dt, t);
+  if (renderer.shadowMap.enabled && (++shadowFrame % quality.shadowEvery === 0 || shadowFrame < 3)) renderer.shadowMap.needsUpdate = true;
   if (mode === 'overview') {
     movePad.update(dt);
+    keyboardMove(dt);
     const animatingCamera = [...tweens].some((tw) => tw.channel === 'camera');
     if (animatingCamera) { controls.update(dt); navigation.reset(); }
     else navigation.update(dt, true);

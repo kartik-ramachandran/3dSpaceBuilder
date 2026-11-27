@@ -1,5 +1,6 @@
 /* Ground, plaza, water, skyline, hills and trees around the hotel and office buildings. */
 import * as THREE from 'three';
+import { surroundingsOn } from './focus.js';
 import { rng } from '../util.js';
 import { box, cyl, merge, std, surface, m4, instanced, gridTexture } from './helpers.js';
 
@@ -46,6 +47,7 @@ export function buildSurroundings(kind, setting, X, Z, clear = []) {
   const sk = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), skyMat, pos.length);
   const q = new THREE.Quaternion();
   pos.forEach((p, i) => { m4.compose(p, q, new THREE.Vector3(...scl[i])); sk.setMatrixAt(i, m4); });
+  sk.userData.surround = true; sk.visible = surroundingsOn();   // the neighbourhood: hidden unless Surroundings is on (focus.js)
   g.add(sk); g.userData.skyline = { mesh: sk, pos, scl };
   // far shore hills across the water / mountains
   if (water || setting === 'mountain') {

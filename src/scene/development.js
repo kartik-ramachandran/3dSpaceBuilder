@@ -63,6 +63,8 @@ export function buildDevelopment(sp) {
   const materialOwner = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), [towerMats.floor, towerMats.furn]);
   materialOwner.visible = false; group.add(materialOwner);
   const towerHitGeo = new THREE.BoxGeometry(layout.towerWidth / unitsPerFloor, FH, layout.towerDepth + 2.8);
+  // apartment floors and furniture: seen only through the glass up close, so drawn only then (see lod below)
+  const interiors = new THREE.Group(); interiors.name = 'Apartment interiors'; group.add(interiors);
   sp.zones.forEach((z) => {
     if (z.tower) {
       const o = origin(z.building), uw = layout.towerWidth / unitsPerFloor;
@@ -83,10 +85,10 @@ export function buildDevelopment(sp) {
     const y = BASE + (z.floor - 1) * FH + 0.16;
     const ux = o.x - BX / 2 + (z.unit - 0.5) * UW;
     const fz = o.z + D / 2;                                // front (balcony) face
-    group.add(new THREE.Mesh(box(UW - 0.16, 0.06, D - 0.2, ux, y + 0.03, o.z), mats.floor));
+    interiors.add(new THREE.Mesh(box(UW - 0.16, 0.06, D - 0.2, ux, y + 0.03, o.z), mats.floor));
     const furn = [];
-    furn.push(...addFurniture(group, 'bed', [new THREE.Vector3(ux - UW * 0.18, y, o.z - D * 0.22)], mats.furn, palette));
-    furn.push(...addFurniture(group, 'sofa', [new THREE.Vector3(ux + UW * 0.12, y, o.z + D * 0.18)], mats.furn, palette));
+    furn.push(...addFurniture(interiors, 'bed', [new THREE.Vector3(ux - UW * 0.18, y, o.z - D * 0.22)], mats.furn, palette));
+    furn.push(...addFurniture(interiors, 'sofa', [new THREE.Vector3(ux + UW * 0.12, y, o.z + D * 0.18)], mats.furn, palette));
     if (z.unit > 1) walls.push(box(0.12, FH - 0.35, D - 0.4, ux - UW / 2, y + (FH - 0.35) / 2, o.z));
     walls.push(box(UW - 0.3, FH - 0.35, 0.1, ux, y + (FH - 0.35) / 2, o.z - D * 0.02));  // bedroom / living split
     balconies.push(box(UW - 0.6, 0.18, BALCONY, ux, y - 0.07, fz + BALCONY / 2));
@@ -112,6 +114,8 @@ export function buildDevelopment(sp) {
   simpleShell.push(group.add(new THREE.Mesh(merge(rails), railMat)).children.at(-1));
   const glassRail = new THREE.Mesh(merge(panes), balustradeMat); glassRail.userData.noShadow = true; group.add(glassRail); simpleShell.push(glassRail);
 
+  const interiorBox = new THREE.Box3().setFromObject(interiors), interiorCentre = interiorBox.getCenter(new THREE.Vector3());
+  const interiorReach = interiorBox.getSize(new THREE.Vector3()).length() / 2;
   const landscape = buildResidentialLandscape(layout);
   group.add(landscape.group);
 
@@ -206,6 +210,8 @@ export function buildDevelopment(sp) {
       });
     },
     setContext(on) { env.visible = on; },
+    /** Neighbourhood on or off (focus.js): the Blender one once it has loaded, the box skyline before. */
+    setSurroundings(on) { if (realEnv) realEnv.setSurroundings(on); else if (env.userData.skyline) env.userData.skyline.mesh.visible = on; },
     kind: 'development', group: root, zones, glassLabel: 'Glass facades', levels: layout.maxFloors,
     // frame the site plus the river in front and the motorway behind
     fitBox: new THREE.Box3(new THREE.Vector3(-siteX / 2 - 6, 0, site.extent.zMin), new THREE.Vector3(siteX / 2 + 6, landscape.height + 4, site.extent.zMax)),
@@ -214,5 +220,9 @@ export function buildDevelopment(sp) {
     applyGlass(g) { glassNow = g; applyRealGlass(g); showBlocks(); [fSide, fFront].forEach((m) => { m.opacity = lerp(0.97, 0.06, g); m.emissiveIntensity = lerp(0.12, 0.01, g); m.depthWrite = g < 0.02; }); },
     setView(on) { viewNow = on; setRealView(on); facades.forEach((f) => { f.visible = !on && !real.parent; }); },
     update(dt, t) { site.update(dt, t); landscape.update(dt, t); realEnv?.update(dt, t); },
+    /** Interiors only when they can be seen: within ~170 m of the low-rise blocks through glass facades, ~70 m otherwise. */
+    lod(camera) {
+      interiors.visible = camera.position.distanceTo(interiorCentre) < interiorReach + (glassNow > 0.02 ? 170 : 70);
+    },
   };
 }

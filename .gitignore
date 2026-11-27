@@ -12,3 +12,4 @@ legacy/
 
 # Blender bake intermediates (the app uses the JPEGs)
 assets/**/*_raw.exr
+__pycache__/

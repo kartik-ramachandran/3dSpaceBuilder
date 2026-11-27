@@ -14,8 +14,8 @@
 html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 "Geist", system-ui, sans-serif;
   background: radial-gradient(120% 90% at 50% 40%, #24407c 0%, #142a5a 45%, #0a1734 100%); }
 #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-header { position: fixed; top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; pointer-events: none; }
-header > * { pointer-events: auto; }
+body > header { position: fixed; top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; pointer-events: none; }
+body > header > * { pointer-events: auto; }
 .brand { display: grid; gap: 4px; }
 .brand small { font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
 .brand h1 { margin: 0; font: italic 400 38px/1 "Instrument Serif", Georgia, serif; }
@@ -40,20 +40,76 @@ nav a:hover, nav button:hover { border-color: rgba(238,241,247,.35); }
 #status:empty { display: none; }
 [hidden] { display: none !important; }
 @media (max-width: 700px) { .brand h1 { font-size: 30px; } .brand p, .hint { display: none; } nav a.wide { display: none; } }
+nav button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+body.composing #card, body.composing #roomTag, body.composing .hint { display: none !important; }
+body.composing .brand p { display: none; }
+/* Residence presentation */
+:root { --ink: #f4f0e7; --muted: #b5b1a7; --line: rgba(233,223,201,.16); --panel: rgba(27,30,28,.9); --accent: #d5bb87; }
+html, body { background: #252b28; -webkit-font-smoothing: antialiased; }
+body > header { top: 32px; left: 36px; right: 36px; align-items: center; z-index: 4; }
+.brand { gap: 12px; }
+.brand small { font-size: 10px; letter-spacing: .24em; }
+.brand h1 { font-size: clamp(40px, 4.5vw, 64px); font-style: normal; letter-spacing: -.035em; }
+.brand p { font-size: 13px; max-width: 38ch; line-height: 1.7; }
+nav { padding: 6px; gap: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 8px 32px #0002; }
+nav a, nav button { height: 40px; border-radius: 7px; border-color: transparent; background: transparent; font-size: 12px; }
+nav a:hover, nav button:hover { background: #ffffff09; border-color: var(--line); }
+nav #composeBtn { background: var(--accent); color: #27271f; border-color: var(--accent); }
+#card, #roomTag { border-radius: 12px; box-shadow: 0 16px 48px #0003; }
+#card { left: 36px; bottom: 32px; padding: 24px; gap: 10px; }
+#cardName { font-style: normal; font-size: 32px; }
+#cardInfo, #cardSize, #roomTag span { color: #dedbd2; }
+.hint { right: 36px; bottom: 32px; font-size: 11px; line-height: 1.9; }
+.hint-title { color: var(--ink); font-size: 13px; }
+:where(button, a, input, textarea, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (max-width: 760px) {
+  body > header { top: max(20px, env(safe-area-inset-top)); left: 20px; right: 20px; align-items: flex-start; flex-direction: column; gap: 20px; }
+  .brand { gap: 8px; } .brand h1 { font-size: 40px; } .brand p { display: none; }
+  nav { align-self: flex-end; } nav a.wide { display: inline-flex; }
+  nav a, nav button { padding: 0 8px; font-size: 11px; white-space: nowrap; }
+  #card { left: 16px; bottom: 16px; width: calc(100% - 32px); }
+}
+.move-control { position: fixed; z-index: 4; right: 36px; bottom: 130px; display: grid; justify-items: center; gap: 10px; }
+#movePad { position: relative; width: 100px; height: 100px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--ink); box-shadow: 0 12px 32px #0003; touch-action: none; user-select: none; cursor: grab; }
+#movePad.active { border-color: var(--accent); cursor: grabbing; }
+.move-knob { position: absolute; left: calc(50% - 19px); top: calc(50% - 19px); width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(145deg, #747a6a, #3b4439); border: 1px solid #d5bb8766; box-shadow: 0 3px 8px #0005; pointer-events: none; }
+.pad-arrow { position: absolute; font: 15px/1 "Geist", sans-serif; pointer-events: none; color: var(--muted); }
+.pad-up { top: 9px; left: calc(50% - 5px); } .pad-down { bottom: 9px; left: calc(50% - 5px); }
+.pad-left { left: 9px; top: calc(50% - 8px); } .pad-right { right: 9px; top: calc(50% - 8px); }
+.move-label { font: 10px "Geist Mono", monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+@media (max-width: 760px) {
+  .move-control { right: 20px; bottom: max(24px, env(safe-area-inset-bottom)); }
+  #movePad { width: 88px; height: 88px; }
+  body:has(#card:not([hidden])) .move-control, body.composing .move-control { top: 172px; bottom: auto; }
+}
+#cardDelete { justify-self: start; padding: 8px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: transparent; font: inherit; cursor: pointer; }
+#cardDelete:hover { border-color: var(--accent); }
+.delete-help { color: var(--muted); font-size: 11px; }
+/* no title block: the navigation sits alone at the top right */
+body > header { justify-content: flex-end; }
 </style>
+<link rel="stylesheet" href="src/apartment/design-sidebar.css">
 </head>
 <body>
-<canvas id="scene" tabindex="0" aria-label="3D dollhouse apartment. Drag to orbit, scroll to zoom, hover a room, click furniture."></canvas>
+<canvas id="scene" tabindex="0" aria-label="3D dollhouse apartment. Drag to orbit, scroll to zoom. W A S D or the joypad to move, Q and E down and up, Shift faster. Hover a room, click furniture."></canvas>
 <header>
-  <div class="brand"><small>Dollhouse · baked lighting</small><h1>The Residence</h1><p>A three-bedroom apartment, modelled and lit in Blender (Cycles), explored in real time.</p></div>
   <nav><button id="reset" type="button">Reset view</button><a class="wide" href="app.html">Space builder</a></nav>
 </header>
+  <div class="move-control">
+    <button id="movePad" type="button" aria-label="Move. Push the stick up to go forward, sideways to strafe; or use W A S D, Q and E." aria-keyshortcuts="W A S D Q E ArrowUp ArrowDown ArrowLeft ArrowRight" title="Push up to go forward, sideways to strafe (or W A S D · Q / E down / up · Shift faster). Release to stop.">
+      <span class="pad-arrow pad-up" aria-hidden="true">↑</span><span class="pad-arrow pad-down" aria-hidden="true">↓</span>
+      <span class="pad-arrow pad-left" aria-hidden="true">←</span><span class="pad-arrow pad-right" aria-hidden="true">→</span>
+      <span class="move-knob" aria-hidden="true"></span>
+    </button>
+    <span class="move-label">Move view</span>
+  </div>
 <div id="roomTag" hidden><b></b><span></span><small></small></div>
 <section id="card" hidden aria-live="polite">
   <div class="top"><div><div id="cardRoom"></div><h2 id="cardName"></h2></div><button id="cardClose" aria-label="Close">×</button></div>
   <p id="cardInfo"></p><div id="cardSize"></div><div id="cardSource"></div>
+  <button id="cardDelete" type="button">Delete object</button><small class="delete-help">Delete / Backspace to remove · Ctrl / ⌘ Z to undo</small>
 </section>
-<div class="hint">Drag to orbit · right-drag to pan · scroll to zoom<br>Hover a room · click furniture for details</div>
+<div class="hint"><span class="hint-title">Explore every detail</span><br>W A S D or joypad to move &nbsp; · &nbsp; Q / E down / up<br>Shift to move faster &nbsp; · &nbsp; Drag to orbit &nbsp; · &nbsp; Scroll to zoom<br>Select furniture to discover more</div>
 <div id="status" role="status"></div>
 <script type="importmap">
 { "imports": {

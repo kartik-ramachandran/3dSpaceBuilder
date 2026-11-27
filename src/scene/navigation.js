@@ -81,6 +81,26 @@ export function createNavigation(camera, controls, canvas, interruptCamera) {
       shift.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), vertical * amount);
       camera.position.add(shift); controls.target.add(shift);
     },
+    /**
+     * Game-style movement (WASD / joystick): forward along the way the camera faces (kept level), strafe
+     * sideways, rise and sink. Eye and pivot move together, so the view keeps its angle; speed grows with
+     * height above the ground. Collisions are checked in update().
+     */
+    walk(forwardAmt, strafeAmt, riseAmt, dt, fast = false) {
+      if (!controls.enabled) return;
+      if (!active) { remember(); active = true; }
+      stop();
+      camera.getWorldDirection(forward); forward.y = 0;
+      if (forward.lengthSq() < 1e-6) forward.set(0, 0, -1).applyQuaternion(camera.quaternion).setY(0);
+      forward.normalize();
+      const right = new THREE.Vector3(-forward.z, 0, forward.x);
+      const height = Math.max(2, camera.position.y);
+      const speed = THREE.MathUtils.clamp(height * 1.6, 6, 260) * (fast ? 3 : 1) * Math.min(dt, 0.05);
+      const shift = new THREE.Vector3().addScaledVector(forward, forwardAmt * speed).addScaledVector(right, strafeAmt * speed);
+      shift.y = riseAmt * speed * 0.7;
+      if (camera.position.y + shift.y < 1.2) shift.y = 1.2 - camera.position.y;        // stay above the ground
+      camera.position.add(shift); controls.target.add(shift);
+    },
     configure(world, overviewDistance) {
       stop();
       bounds.copy(world.fitBox).expandByScalar(2);
